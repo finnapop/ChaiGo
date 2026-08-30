@@ -1,5 +1,7 @@
 // ============================================================
 // webhook.js
+// 華語娘 LINE Bot
+//
 // LINE 唯一 Webhook 入口
 // ============================================================
 
@@ -33,7 +35,7 @@ export default async function handler(req, res) {
 
 
     // ========================================================
-    // 處理所有 LINE Events
+    // 處理 LINE Events
     // ========================================================
 
     for (const event of body.events || []) {
@@ -75,11 +77,8 @@ export default async function handler(req, res) {
 
 
       // ======================================================
-      // 目前沒有任何遊戲處理這個訊息
+      // 目前沒有任何功能處理這個訊息
       // ======================================================
-
-      // 暫時保留原本的歡迎訊息
-      // 之後加入拼音遊戲時會在這裡繼續分流。
 
       await replyToLine(
         event.replyToken,
@@ -88,7 +87,7 @@ export default async function handler(req, res) {
             type: "text",
             text:
               "💗 歡迎來到華語娘！\n\n" +
-              "輸入「開始」開始聲調挑戰吧！🎧"
+              "請從 Rich Menu 選擇功能喔～"
           }
         ]
       );
@@ -109,11 +108,11 @@ export default async function handler(req, res) {
       error
     );
 
+
     return res
       .status(500)
       .json({
-        error:
-          "Internal Server Error"
+        error: "Internal Server Error"
       });
   }
 }
@@ -121,9 +120,6 @@ export default async function handler(req, res) {
 
 // ============================================================
 // LINE Reply API
-//
-// Webhook.js 目前也需要這個，
-// 因為當沒有遊戲處理訊息時，要回覆 LINE。
 // ============================================================
 
 async function replyToLine(
@@ -158,11 +154,13 @@ async function replyToLine(
     const errorText =
       await response.text();
 
+
     console.error(
       "LINE Reply API Error:",
       response.status,
       errorText
     );
+
 
     throw new Error(
       `LINE Reply API failed: ${response.status}`
