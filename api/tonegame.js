@@ -5,50 +5,128 @@
 
 const games = new Map();
 
-// 你的 GitHub 音檔
+
+// ============================================================
+// GitHub 音檔
+// ============================================================
+
 const AUDIO_BASE_URL =
-  "https://raw.githubusercontent.com/finnapop/ChaiGo/main/ToneGame/audio";
+  "https://raw.githubusercontent.com/finnapop/ChaiGo/main/ToneGame/audio/lv1";
+
 
 // ============================================================
 // 題庫
+//
+// ma / ba / qi
+// 每個音節都有四個聲調
 // ============================================================
 
 const questions = [
+  // -------------------------
+  // ma
+  // -------------------------
+
   {
-    audio: `${AUDIO_BASE_URL}/ma1.mp3`,
+    audio: `${AUDIO_BASE_URL}/ma_01.mp3`,
     answer: 1,
     duration: 1500
   },
   {
-    audio: `${AUDIO_BASE_URL}/ma3.mp3`,
-    answer: 3,
-    duration: 1500
-  },
-  {
-    audio: `${AUDIO_BASE_URL}/ma2.mp3`,
+    audio: `${AUDIO_BASE_URL}/ma_02.mp3`,
     answer: 2,
     duration: 1500
   },
   {
-    audio: `${AUDIO_BASE_URL}/ma4.mp3`,
-    answer: 4,
+    audio: `${AUDIO_BASE_URL}/ma_03.mp3`,
+    answer: 3,
     duration: 1500
   },
   {
-    audio: `${AUDIO_BASE_URL}/ma3.mp3`,
+    audio: `${AUDIO_BASE_URL}/ma_04.mp3`,
+    answer: 4,
+    duration: 1500
+  },
+
+
+  // -------------------------
+  // ba
+  // -------------------------
+
+  {
+    audio: `${AUDIO_BASE_URL}/ba_01.mp3`,
+    answer: 1,
+    duration: 1500
+  },
+  {
+    audio: `${AUDIO_BASE_URL}/ba_02.mp3`,
+    answer: 2,
+    duration: 1500
+  },
+  {
+    audio: `${AUDIO_BASE_URL}/ba_03.mp3`,
     answer: 3,
+    duration: 1500
+  },
+  {
+    audio: `${AUDIO_BASE_URL}/ba_04.mp3`,
+    answer: 4,
+    duration: 1500
+  },
+
+
+  // -------------------------
+  // qi
+  // -------------------------
+
+  {
+    audio: `${AUDIO_BASE_URL}/qi_01.mp3`,
+    answer: 1,
+    duration: 1500
+  },
+  {
+    audio: `${AUDIO_BASE_URL}/qi_02.mp3`,
+    answer: 2,
+    duration: 1500
+  },
+  {
+    audio: `${AUDIO_BASE_URL}/qi_03.mp3`,
+    answer: 3,
+    duration: 1500
+  },
+  {
+    audio: `${AUDIO_BASE_URL}/qi_04.mp3`,
+    answer: 4,
     duration: 1500
   }
 ];
 
 
 // ============================================================
-// 聲調遊戲 Handler
+// 隨機抽 3 題
 // ============================================================
 
-export async function handleToneGame(event, message) {
+function getRandomQuestions() {
 
-  const userId = event.source.userId;
+  const shuffled = [...questions].sort(
+    () => Math.random() - 0.5
+  );
+
+  return shuffled.slice(0, 3);
+}
+
+
+// ============================================================
+// 聲調遊戲
+// ============================================================
+
+export async function handleToneGame(
+  event,
+  message
+) {
+
+  const userId =
+    event.source.userId;
+
 
   // ==========================================================
   // 開始遊戲
@@ -59,15 +137,23 @@ export async function handleToneGame(event, message) {
     message.toLowerCase() === "start"
   ) {
 
+    const selectedQuestions =
+      getRandomQuestions();
+
+
     games.set(userId, {
       questionIndex: 0,
-      score: 0
+      score: 0,
+      questions: selectedQuestions
     });
 
-    const game = games.get(userId);
+
+    const game =
+      games.get(userId);
+
 
     const question =
-      questions[game.questionIndex];
+      game.questions[0];
 
 
     await replyToLine(
@@ -76,9 +162,9 @@ export async function handleToneGame(event, message) {
         {
           type: "text",
           text:
-            "🎧 聲調挑戰開始！\n\n" +
-            "一共 5 題，準備好了嗎？💗\n\n" +
-            "第 1 / 5 題\n" +
+            "🎧 聲調挑戰開始！💗\n\n" +
+            "一輪 3 題，準備好了嗎？\n\n" +
+            "第 1 / 3 題\n" +
             "請聽聲音，猜猜是哪一個聲調！"
         },
         {
@@ -100,12 +186,13 @@ export async function handleToneGame(event, message) {
       ]
     );
 
+
     return true;
   }
 
 
   // ==========================================================
-  // 不是正在玩聲調遊戲
+  // 沒有正在玩聲調遊戲
   // ==========================================================
 
   if (!games.has(userId)) {
@@ -114,13 +201,20 @@ export async function handleToneGame(event, message) {
 
 
   // ==========================================================
-  // 取得遊戲
+  // 取得目前遊戲
   // ==========================================================
 
-  const game = games.get(userId);
+  const game =
+    games.get(userId);
 
+
+  // ==========================================================
   // 只接受 1 / 2 / 3 / 4
-  if (!["1", "2", "3", "4"].includes(message)) {
+  // ==========================================================
+
+  if (
+    !["1", "2", "3", "4"].includes(message)
+  ) {
 
     await replyToLine(
       event.replyToken,
@@ -140,8 +234,9 @@ export async function handleToneGame(event, message) {
   const selectedAnswer =
     Number(message);
 
+
   const question =
-    questions[game.questionIndex];
+    game.questions[game.questionIndex];
 
 
   // ==========================================================
@@ -150,6 +245,7 @@ export async function handleToneGame(event, message) {
 
   const isCorrect =
     selectedAnswer === question.answer;
+
 
   if (isCorrect) {
     game.score++;
@@ -161,42 +257,33 @@ export async function handleToneGame(event, message) {
 
 
   // ==========================================================
-  // 第 5 題完成
+  // 第 3 題完成
   // ==========================================================
 
-  if (
-    currentQuestion === questions.length
-  ) {
+  if (currentQuestion === 3) {
 
     const finalScore =
       game.score;
 
+
     const percentage =
       Math.round(
-        (finalScore / questions.length) * 100
+        (finalScore / 3) * 100
       );
 
 
-    // --------------------------------------------------------
-    // 評語
-    // --------------------------------------------------------
-
     let resultMessage = "";
+
 
     if (percentage === 100) {
 
       resultMessage =
         "🏆 全部答對！太厲害了！";
 
-    } else if (percentage >= 80) {
+    } else if (percentage >= 66) {
 
       resultMessage =
-        "🎉 很棒！聲調掌握得很好！";
-
-    } else if (percentage >= 60) {
-
-      resultMessage =
-        "😊 不錯喔！再練習一下會更好！";
+        "🎉 很棒！再練一下就滿分了！";
 
     } else {
 
@@ -218,14 +305,12 @@ export async function handleToneGame(event, message) {
         {
           type: "text",
           text:
-            (
-              isCorrect
-                ? "🎉 答對了！\n\n"
-                : `❌ 答錯了！\n正確答案是：${question.answer}聲\n\n`
-            ) +
-            `第 ${currentQuestion} / 5 題\n\n` +
+            isCorrect
+              ? "🎉 答對了！\n\n"
+              : `❌ 答錯了！\n正確答案是：${question.answer}聲\n\n` +
+            `第 ${currentQuestion} / 3 題\n\n` +
             "🎊 挑戰完成！\n\n" +
-            `你的成績：${finalScore} / 5\n` +
+            `你的成績：${finalScore} / 3\n` +
             `正答率：${percentage}%\n\n` +
             resultMessage +
             "\n\n" +
@@ -234,6 +319,7 @@ export async function handleToneGame(event, message) {
         }
       ]
     );
+
 
     return true;
   }
@@ -245,47 +331,48 @@ export async function handleToneGame(event, message) {
 
   game.questionIndex++;
 
+
   const nextQuestion =
-    questions[game.questionIndex];
-
-
-  const messages = [
-    {
-      type: "text",
-      text:
-        isCorrect
-          ? `🎉 答對了！\n\n目前得分：${game.score} / ${currentQuestion}`
-          : `❌ 答錯了！\n正確答案是：${question.answer}聲\n\n目前得分：${game.score} / ${currentQuestion}`
-    },
-    {
-      type: "text",
-      text:
-        `🎧 第 ${game.questionIndex + 1} / 5 題\n\n` +
-        "再聽聽看！"
-    },
-    {
-      type: "audio",
-      originalContentUrl:
-        nextQuestion.audio,
-      duration:
-        nextQuestion.duration
-    },
-    {
-      type: "text",
-      text:
-        "請回答：\n\n" +
-        "1️⃣ 一聲\n" +
-        "2️⃣ 二聲\n" +
-        "3️⃣ 三聲\n" +
-        "4️⃣ 四聲"
-    }
-  ];
+    game.questions[
+      game.questionIndex
+    ];
 
 
   await replyToLine(
     event.replyToken,
-    messages
+    [
+      {
+        type: "text",
+        text:
+          isCorrect
+            ? `🎉 答對了！\n\n目前得分：${game.score} / ${currentQuestion}`
+            : `❌ 答錯了！\n正確答案是：${question.answer}聲\n\n目前得分：${game.score} / ${currentQuestion}`
+      },
+      {
+        type: "text",
+        text:
+          `🎧 第 ${game.questionIndex + 1} / 3 題\n\n` +
+          "再聽聽看！"
+      },
+      {
+        type: "audio",
+        originalContentUrl:
+          nextQuestion.audio,
+        duration:
+          nextQuestion.duration
+      },
+      {
+        type: "text",
+        text:
+          "請回答：\n\n" +
+          "1️⃣ 一聲\n" +
+          "2️⃣ 二聲\n" +
+          "3️⃣ 三聲\n" +
+          "4️⃣ 四聲"
+      }
+    ]
   );
+
 
   return true;
 }
@@ -327,11 +414,13 @@ async function replyToLine(
     const errorText =
       await response.text();
 
+
     console.error(
       "LINE Reply API Error:",
       response.status,
       errorText
     );
+
 
     throw new Error(
       `LINE Reply API failed: ${response.status}`
