@@ -9,12 +9,11 @@ const games = new Map();
 // ============================================================
 // LV1 題庫
 //
-// LV1：一個漢字 → 輸入拼音
+// LV1：漢字 → 拼音
 //
-// 聲調不列入主要判斷：
-// ma  ✅
-// ma1 ✅
-// mā  ✅
+// ma   ✅
+// ma1  ✅
+// mā   ✅
 // ============================================================
 
 const lv1Questions = [
@@ -66,27 +65,26 @@ const lv1Questions = [
 // ============================================================
 
 function getRandomQuestions() {
-  const shuffled = [...lv1Questions].sort(
-    () => Math.random() - 0.5
-  );
+
+  const shuffled =
+    [...lv1Questions].sort(
+      () => Math.random() - 0.5
+    );
 
   return shuffled.slice(0, 3);
 }
 
 
 // ============================================================
-// 把拼音標準化
+// 拼音標準化
 //
-// 支援：
-// ma
-// ma1
-// mā
-//
-// 最後都會變成：
-// ma
+// ma   → ma
+// ma1  → ma
+// mā   → ma
 // ============================================================
 
 function normalizePinyin(text) {
+
   return text
     .trim()
     .toLowerCase()
@@ -106,7 +104,9 @@ function normalizePinyin(text) {
 // 顯示 Level 選擇
 // ============================================================
 
-async function showLevelSelection(replyToken) {
+async function showLevelSelection(
+  replyToken
+) {
 
   await replyToLine(
     replyToken,
@@ -129,27 +129,37 @@ async function showLevelSelection(replyToken) {
 
 
 // ============================================================
-// 顯示 LV1 第一題
+// 開始 LV1
 // ============================================================
 
 async function startLevel1(event) {
 
-  const userId = event.source.userId;
+  const userId =
+    event.source.userId;
+
 
   const selectedQuestions =
     getRandomQuestions();
 
-  games.set(userId, {
-    level: 1,
-    questionIndex: 0,
-    score: 0,
-    questions: selectedQuestions
-  });
 
-  const game = games.get(userId);
+  games.set(
+    userId,
+    {
+      level: 1,
+      questionIndex: 0,
+      score: 0,
+      questions: selectedQuestions
+    }
+  );
+
+
+  const game =
+    games.get(userId);
+
 
   const question =
     game.questions[0];
+
 
   await replyToLine(
     event.replyToken,
@@ -175,10 +185,7 @@ async function startLevel1(event) {
 
 
 // ============================================================
-// 處理拼音遊戲
-//
-// return true  = 已處理
-// return false = 不是拼音遊戲訊息
+// 拼音遊戲 Handler
 // ============================================================
 
 export async function handlePinyinGame(
@@ -194,14 +201,13 @@ export async function handlePinyinGame(
 
 
   // ==========================================================
-  // 「開始拼音」
+  // 開始拼音
   //
-  // Rich Menu「拼音遊戲」
-  // → 自動送出「開始拼音」
+  // Rich Menu → 「開始拼音」
   // ==========================================================
 
   if (
-    normalizedMessage === "開始拼音"
+    message === "開始拼音"
   ) {
 
     await showLevelSelection(
@@ -306,7 +312,7 @@ export async function handlePinyinGame(
 
 
   // ==========================================================
-  // 沒有正在進行拼音遊戲
+  // 沒有正在玩拼音遊戲
   // ==========================================================
 
   if (!games.has(userId)) {
@@ -355,7 +361,7 @@ export async function handlePinyinGame(
           text:
             "❌ 再試一次！\n\n" +
             `【${question.char}】\n\n` +
-            "💡 提示：請輸入這個漢字的拼音喔～"
+            "💡 再想想看這個字的拼音喔～"
         }
       ]
     );
@@ -378,7 +384,9 @@ export async function handlePinyinGame(
   // 第 3 題完成
   // ==========================================================
 
-  if (currentQuestion === 3) {
+  if (
+    currentQuestion === 3
+  ) {
 
     const finalScore =
       game.score;
@@ -390,6 +398,7 @@ export async function handlePinyinGame(
 
 
     let resultMessage = "";
+
 
     if (percentage === 100) {
 
@@ -435,6 +444,7 @@ export async function handlePinyinGame(
       ]
     );
 
+
     return true;
   }
 
@@ -444,6 +454,7 @@ export async function handlePinyinGame(
   // ==========================================================
 
   game.questionIndex++;
+
 
   const nextQuestion =
     game.questions[

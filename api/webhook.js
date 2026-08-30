@@ -3,10 +3,28 @@
 // 華語娘 LINE Bot
 //
 // LINE 唯一 Webhook 入口
+// 負責：
+// 1. 接收 LINE 訊息
+// 2. 判斷使用者正在玩哪個遊戲
+// 3. 將訊息交給 tonegame / pinyingame
 // ============================================================
 
 import { handleToneGame } from "./tonegame.js";
 import { handlePinyinGame } from "./pinyingame.js";
+
+
+// ============================================================
+// 使用者目前選擇的遊戲
+//
+// userId → "tone" / "pinyin"
+//
+// 例如：
+//
+// userA → tone
+// userB → pinyin
+// ============================================================
+
+const userModes = new Map();
 
 
 // ============================================================
@@ -53,51 +71,135 @@ export default async function handler(req, res) {
       }
 
 
+      const userId =
+        event.source.userId;
+
       const message =
         event.message.text.trim();
 
+      const normalizedMessage =
+        message.toLowerCase();
+
 
       // ======================================================
-      // 交給聲調遊戲
+      // 🎧 聲調遊戲入口
+      //
+      // Rich Menu：
+      // 「聲調遊戲」
+      // ↓
+      // 自動送出「開始」
+      //
+      // 「開始」在這裡代表：
+      // 我要進入聲調遊戲
       // ======================================================
 
-      const handled =
-        await handleToneGame(
-          event,
-          message
+      if (
+        message === "開始" ||
+        normalizedMessage === "start"
+      ) {
+
+        userModes.set(
+          userId,
+          "tone"
         );
 
 
-      // ======================================================
-      // 聲調遊戲已處理
-      // ======================================================
+        const handled =
+          await handleToneGame(
+            event,
+            message
+          );
 
-      if (handled) {
-        continue;
+
+        if (handled) {
+          continue;
+        }
       }
 
-// ======================================================
-// 交給拼音遊戲
-// ======================================================
 
-const pinyinHandled =
-  await handlePinyinGame(
-    event,
-    message
-  );
+      // ======================================================
+      // 🔤 拼音遊戲入口
+      //
+      // Rich Menu：
+      // 「拼音遊戲」
+      // ↓
+      // 自動送出「開始拼音」
+      //
+      // 「開始拼音」代表：
+      // 我要進入拼音遊戲
+      // ======================================================
+
+      if (
+        message === "開始拼音"
+      ) {
+
+        userModes.set(
+          userId,
+          "pinyin"
+        );
 
 
-// ======================================================
-// 拼音遊戲已處理
-// ======================================================
+        const handled =
+          await handlePinyinGame(
+            event,
+            message
+          );
 
-if (pinyinHandled) {
-  continue;
-}
+
+        if (handled) {
+          continue;
+        }
+      }
 
 
       // ======================================================
-      // 目前沒有任何功能處理這個訊息
+      // 取得使用者目前遊戲
+      // ======================================================
+
+      const mode =
+        userModes.get(userId);
+
+
+      // ======================================================
+      // 🎧 使用者正在玩聲調遊戲
+      // ======================================================
+
+      if (mode === "tone") {
+
+        const handled =
+          await handleToneGame(
+            event,
+            message
+          );
+
+
+        if (handled) {
+          continue;
+        }
+      }
+
+
+      // ======================================================
+      // 🔤 使用者正在玩拼音遊戲
+      // ======================================================
+
+      if (mode === "pinyin") {
+
+        const handled =
+          await handlePinyinGame(
+            event,
+            message
+          );
+
+
+        if (handled) {
+          continue;
+        }
+      }
+
+
+      // ======================================================
+      // 沒有任何功能處理這個訊息
       // ======================================================
 
       await replyToLine(

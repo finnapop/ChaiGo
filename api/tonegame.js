@@ -1,20 +1,6 @@
 // ============================================================
-// toneGame.js
+// tonegame.js
 // 華語娘｜聲調遊戲
-// ============================================================
-
-
-// ============================================================
-// 玩家遊戲狀態
-//
-// userId → 遊戲資料
-//
-// {
-//   level: 1,
-//   questionIndex: 0,
-//   score: 0,
-//   questions: [...]
-// }
 // ============================================================
 
 const games = new Map();
@@ -22,13 +8,6 @@ const games = new Map();
 
 // ============================================================
 // GitHub 音檔
-//
-// ToneGame/
-// └── audio/
-//     ├── lv1/
-//     ├── lv2/
-//     ├── lv3/
-//     └── lv4/
 // ============================================================
 
 const AUDIO_BASE_URL =
@@ -38,22 +17,13 @@ const AUDIO_BASE_URL =
 // ============================================================
 // LV1 題庫
 //
-// 每個音節 × 四個聲調
-//
-// ma_01 → 一聲
-// ma_02 → 二聲
-// ma_03 → 三聲
-// ma_04 → 四聲
-//
-// ba / qi 同樣
+// ma / ba / qi
+// 每個音節都有四個聲調
 // ============================================================
 
 const lv1Questions = [
 
-  // ----------------------------------------------------------
   // ma
-  // ----------------------------------------------------------
-
   {
     audio: `${AUDIO_BASE_URL}/lv1/ma_01.mp3`,
     answer: 1,
@@ -76,10 +46,7 @@ const lv1Questions = [
   },
 
 
-  // ----------------------------------------------------------
   // ba
-  // ----------------------------------------------------------
-
   {
     audio: `${AUDIO_BASE_URL}/lv1/ba_01.mp3`,
     answer: 1,
@@ -102,10 +69,7 @@ const lv1Questions = [
   },
 
 
-  // ----------------------------------------------------------
   // qi
-  // ----------------------------------------------------------
-
   {
     audio: `${AUDIO_BASE_URL}/lv1/qi_01.mp3`,
     answer: 1,
@@ -130,31 +94,15 @@ const lv1Questions = [
 
 
 // ============================================================
-// 目前開放的 Level
-//
-// 目前只有 LV1
-// LV2～LV4 先顯示，但尚未開放
-// ============================================================
-
-const availableLevels = {
-  1: true,
-  2: false,
-  3: false,
-  4: false
-};
-
-
-// ============================================================
 // 隨機抽 3 題
 // ============================================================
 
-function getRandomQuestions(questionPool) {
+function getRandomQuestions() {
 
   const shuffled =
-    [...questionPool].sort(
+    [...lv1Questions].sort(
       () => Math.random() - 0.5
     );
-
 
   return shuffled.slice(0, 3);
 }
@@ -192,18 +140,14 @@ async function showLevelSelection(
 // 開始 LV1
 // ============================================================
 
-async function startLevel1(
-  event
-) {
+async function startLevel1(event) {
 
   const userId =
     event.source.userId;
 
 
   const selectedQuestions =
-    getRandomQuestions(
-      lv1Questions
-    );
+    getRandomQuestions();
 
 
   games.set(
@@ -258,10 +202,7 @@ async function startLevel1(
 
 
 // ============================================================
-// 處理聲調遊戲
-//
-// return true  = 已經處理這個訊息
-// return false = 不是聲調遊戲的訊息
+// 聲調遊戲 Handler
 // ============================================================
 
 export async function handleToneGame(
@@ -272,22 +213,16 @@ export async function handleToneGame(
   const userId =
     event.source.userId;
 
-
   const normalizedMessage =
     message.trim().toLowerCase();
 
 
   // ==========================================================
-  // 「開始」
-  //
-  // Rich Menu 點擊「聲調遊戲」
-  // LINE 自動送出「開始」
-  //
-  // → 顯示 LV 選擇
+  // 開始 → 顯示 Level 選擇
   // ==========================================================
 
   if (
-    normalizedMessage === "開始" ||
+    message === "開始" ||
     normalizedMessage === "start"
   ) {
 
@@ -307,23 +242,6 @@ export async function handleToneGame(
     normalizedMessage === "lv1" ||
     normalizedMessage === "level1"
   ) {
-
-    if (!availableLevels[1]) {
-
-      await replyToLine(
-        event.replyToken,
-        [
-          {
-            type: "text",
-            text:
-              "🚧 LV1 目前尚未開放喔～"
-          }
-        ]
-      );
-
-      return true;
-    }
-
 
     await startLevel1(event);
 
@@ -410,10 +328,7 @@ export async function handleToneGame(
 
 
   // ==========================================================
-  // 如果玩家沒有正在玩遊戲
-  //
-  // 不是聲調遊戲相關訊息
-  // → 交回 webhook.js
+  // 不是聲調遊戲
   // ==========================================================
 
   if (!games.has(userId)) {
@@ -422,12 +337,11 @@ export async function handleToneGame(
 
 
   // ==========================================================
-  // 取得目前遊戲
+  // 取得遊戲
   // ==========================================================
 
   const game =
     games.get(userId);
-
 
   const question =
     game.questions[
@@ -436,7 +350,7 @@ export async function handleToneGame(
 
 
   // ==========================================================
-  // 玩家輸入不是 1～4
+  // 只接受 1～4
   // ==========================================================
 
   if (
@@ -467,7 +381,6 @@ export async function handleToneGame(
   const selectedAnswer =
     Number(normalizedMessage);
 
-
   const isCorrect =
     selectedAnswer === question.answer;
 
@@ -485,23 +398,16 @@ export async function handleToneGame(
   // 第 3 題完成
   // ==========================================================
 
-  if (
-    currentQuestion === 3
-  ) {
+  if (currentQuestion === 3) {
 
     const finalScore =
       game.score;
-
 
     const percentage =
       Math.round(
         (finalScore / 3) * 100
       );
 
-
-    // --------------------------------------------------------
-    // 評語
-    // --------------------------------------------------------
 
     let resultMessage = "";
 
@@ -514,7 +420,7 @@ export async function handleToneGame(
     } else if (percentage >= 66) {
 
       resultMessage =
-        "🎉 很棒！聲調掌握得很好！";
+        "🎉 很棒！再練一下就滿分了！";
 
     } else {
 
@@ -523,16 +429,8 @@ export async function handleToneGame(
     }
 
 
-    // --------------------------------------------------------
-    // 清除遊戲
-    // --------------------------------------------------------
-
     games.delete(userId);
 
-
-    // --------------------------------------------------------
-    // 最終結果
-    // --------------------------------------------------------
 
     const resultText =
       isCorrect
@@ -566,7 +464,7 @@ export async function handleToneGame(
 
 
   // ==========================================================
-  // 還有下一題
+  // 下一題
   // ==========================================================
 
   game.questionIndex++;
@@ -658,13 +556,11 @@ async function replyToLine(
     const errorText =
       await response.text();
 
-
     console.error(
       "LINE Reply API Error:",
       response.status,
       errorText
     );
-
 
     throw new Error(
       `LINE Reply API failed: ${response.status}`
