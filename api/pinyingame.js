@@ -1,67 +1,73 @@
 // ============================================================
 // pinyingame.js
 // 華語娘｜拼音遊戲
+//
+// LV1：
+// 漢字 → 輸入「拼音＋聲調」
+//
+// ma1  ✅
+// mā   ✅
+// ma   ❌
+//
+// 一輪 3 題
+// 可以輸入「聽音」播放提示音檔
+//
+// 音檔共用 ToneGame/audio/lv1/
 // ============================================================
 
 const games = new Map();
 
 
 // ============================================================
+// GitHub 音檔
+//
+// 與 tonegame.js 共用同一套音檔
+// ============================================================
+
+const AUDIO_BASE_URL =
+  "https://raw.githubusercontent.com/finnapop/ChaiGo/main/ToneGame/audio";
+
+
+// ============================================================
 // LV1 題庫
 //
-// LV1：漢字 → 拼音
+// ma / ba / qi
 //
-// ma   ✅
-// ma1  ✅
-// mā   ✅
+// _01 = 一聲
+// _02 = 二聲
+// _03 = 三聲
+// _04 = 四聲
 // ============================================================
 
 const lv1Questions = [
   {
     char: "媽",
-    pinyin: "ma"
+    pinyin: "ma1",
+    audio: `${AUDIO_BASE_URL}/lv1/ma_01.mp3`,
+    duration: 1500
   },
   {
-    char: "爸",
-    pinyin: "ba"
+    char: "八",
+    pinyin: "ba1",
+    audio: `${AUDIO_BASE_URL}/lv1/ba_01.mp3`,
+    duration: 1500
   },
   {
-    char: "你",
-    pinyin: "ni"
-  },
-  {
-    char: "我",
-    pinyin: "wo"
-  },
-  {
-    char: "好",
-    pinyin: "hao"
-  },
-  {
-    char: "大",
-    pinyin: "da"
-  },
-  {
-    char: "小",
-    pinyin: "xiao"
-  },
-  {
-    char: "人",
-    pinyin: "ren"
-  },
-  {
-    char: "家",
-    pinyin: "jia"
-  },
-  {
-    char: "吃",
-    pinyin: "chi"
+    char: "七",
+    pinyin: "qi1",
+    audio: `${AUDIO_BASE_URL}/lv1/qi_01.mp3`,
+    duration: 1500
   }
 ];
 
 
 // ============================================================
 // 隨機抽 3 題
+//
+// 目前剛好 3 題，所以每輪會出現：
+// 媽 / 八 / 七
+//
+// 題目順序會隨機
 // ============================================================
 
 function getRandomQuestions() {
@@ -76,27 +82,292 @@ function getRandomQuestions() {
 
 
 // ============================================================
-// 拼音標準化
+// 聲調符號 → 聲調數字
 //
-// ma   → ma
-// ma1  → ma
-// mā   → ma
+// mā → ma1
+// má → ma2
+// mǎ → ma3
+// mà → ma4
 // ============================================================
 
 function normalizePinyin(text) {
 
-  return text
-    .trim()
-    .toLowerCase()
-    .normalize("NFC")
-    .replace(/\s+/g, "")
-    .replace(/[1-5]$/, "")
-    .replace(/[āáǎà]/g, "a")
-    .replace(/[ēéěè]/g, "e")
-    .replace(/[īíǐì]/g, "i")
-    .replace(/[ōóǒò]/g, "o")
-    .replace(/[ūúǔù]/g, "u")
-    .replace(/[ǖǘǚǜ]/g, "ü");
+  let value =
+    text
+      .trim()
+      .toLowerCase()
+      .normalize("NFC")
+      .replace(/\s+/g, "");
+
+
+  // ----------------------------------------------------------
+  // 聲調符號
+  // ----------------------------------------------------------
+
+  const toneMap = {
+    "ā": ["a", "1"],
+    "á": ["a", "2"],
+    "ǎ": ["a", "3"],
+    "à": ["a", "4"],
+
+    "ē": ["e", "1"],
+    "é": ["e", "2"],
+    "ě": ["e", "3"],
+    "è": ["e", "4"],
+
+    "ī": ["i", "1"],
+    "í": ["i", "2"],
+    "ǐ": ["i", "3"],
+    "ì": ["i", "4"],
+
+    "ō": ["o", "1"],
+    "ó": ["o", "2"],
+    "ǒ": ["o", "3"],
+    "ò": ["o", "4"],
+
+    "ū": ["u", "1"],
+    "ú": ["u", "2"],
+    "ǔ": ["u", "3"],
+    "ù": ["u", "4"],
+
+    "ǖ": ["ü", "1"],
+    "ǘ": ["ü", "2"],
+    "ǚ": ["ü", "3"],
+    "ǜ": ["ü", "4"]
+  };
+
+
+  let detectedTone = null;
+
+
+  for (
+    const [mark, data]
+    of Object.entries(toneMap)
+  ) {
+
+    if (value.includes(mark)) {
+
+      value =
+        value.replace(
+          mark,
+          data[0]
+        );
+
+      detectedTone =
+        data[1];
+
+      break;
+    }
+  }
+
+
+  // ----------------------------------------------------------
+  // 數字聲調
+  // ----------------------------------------------------------
+
+  const numberMatch =
+    value.match(/([1-4])$/);
+
+
+  if (numberMatch) {
+
+    detectedTone =
+      numberMatch[1];
+
+    value =
+      value.replace(
+        /[1-4]$/,
+        ""
+      );
+  }
+
+
+  return {
+    base: value,
+    tone: detectedTone
+  };
+}
+
+
+// ============================================================
+// 判斷答案
+//
+// 必須同時符合：
+// 1. 拼音正確
+// 2. 聲調正確
+//
+// ma1 → ✅
+// mā  → ✅
+//
+// ma  → ❌
+// ma2 → ❌
+// ============================================================
+
+function isCorrectPinyin(
+  userInput,
+  correctPinyin
+) {
+
+  const user =
+    normalizePinyin(
+      userInput
+    );
+
+  const correct =
+    normalizePinyin(
+      correctPinyin
+    );
+
+
+  return (
+    user.base === correct.base &&
+    user.tone === correct.tone
+  );
+}
+
+
+// ============================================================
+// 聲調數字 → 聲調符號
+//
+// ma1 → mā
+// ba1 → bā
+// qi1 → qī
+// ============================================================
+
+function numberToToneMark(
+  pinyin
+) {
+
+  const match =
+    pinyin.match(
+      /^(.+)([1-4])$/
+    );
+
+
+  if (!match) {
+    return pinyin;
+  }
+
+
+  const base =
+    match[1];
+
+  const tone =
+    Number(match[2]);
+
+
+  const toneMarks = {
+    a: ["ā", "á", "ǎ", "à"],
+    e: ["ē", "é", "ě", "è"],
+    i: ["ī", "í", "ǐ", "ì"],
+    o: ["ō", "ó", "ǒ", "ò"],
+    u: ["ū", "ú", "ǔ", "ù"],
+    "ü": ["ǖ", "ǘ", "ǚ", "ǜ"]
+  };
+
+
+  let vowelIndex = -1;
+
+
+  // ----------------------------------------------------------
+  // a / e 優先
+  // ----------------------------------------------------------
+
+  for (
+    const vowel of ["a", "e"]
+  ) {
+
+    const index =
+      base.indexOf(vowel);
+
+    if (index !== -1) {
+
+      vowelIndex =
+        index;
+
+      break;
+    }
+  }
+
+
+  // ----------------------------------------------------------
+  // ou → o
+  // ----------------------------------------------------------
+
+  if (
+    vowelIndex === -1
+  ) {
+
+    const ouIndex =
+      base.indexOf("ou");
+
+    if (
+      ouIndex !== -1
+    ) {
+
+      vowelIndex =
+        ouIndex;
+
+    } else {
+
+      // ------------------------------------------------------
+      // 否則找最後一個母音
+      // ------------------------------------------------------
+
+      for (
+        let i = base.length - 1;
+        i >= 0;
+        i--
+      ) {
+
+        if (
+          toneMarks[base[i]]
+        ) {
+
+          vowelIndex =
+            i;
+
+          break;
+        }
+      }
+    }
+  }
+
+
+  if (
+    vowelIndex === -1
+  ) {
+
+    return pinyin;
+  }
+
+
+  const vowel =
+    base[vowelIndex];
+
+
+  const markedVowel =
+    toneMarks[vowel]?.[tone - 1];
+
+
+  if (
+    !markedVowel
+  ) {
+
+    return pinyin;
+  }
+
+
+  return (
+    base.slice(
+      0,
+      vowelIndex
+    ) +
+    markedVowel +
+    base.slice(
+      vowelIndex + 1
+    )
+  );
 }
 
 
@@ -132,7 +403,9 @@ async function showLevelSelection(
 // 開始 LV1
 // ============================================================
 
-async function startLevel1(event) {
+async function startLevel1(
+  event
+) {
 
   const userId =
     event.source.userId;
@@ -169,7 +442,7 @@ async function startLevel1(event) {
         text:
           "🔤 LV1 拼音挑戰開始！💗\n\n" +
           "一輪 3 題\n" +
-          "看漢字，輸入拼音！\n\n" +
+          "看漢字，輸入拼音＋聲調！\n\n" +
           "第 1 / 3 題\n\n" +
           `【${question.char}】`
       },
@@ -177,7 +450,45 @@ async function startLevel1(event) {
         type: "text",
         text:
           "請輸入拼音：\n\n" +
-          "例如：ma"
+          "例如：ma1 或 mā\n\n" +
+          "🔊 不確定？輸入「聽音」"
+      }
+    ]
+  );
+}
+
+
+// ============================================================
+// 聽音提示
+// ============================================================
+
+async function playHint(
+  event,
+  game
+) {
+
+  const question =
+    game.questions[
+      game.questionIndex
+    ];
+
+
+  await replyToLine(
+    event.replyToken,
+    [
+      {
+        type: "audio",
+        originalContentUrl:
+          question.audio,
+        duration:
+          question.duration
+      },
+      {
+        type: "text",
+        text:
+          "🔊 聽音提示\n\n" +
+          `【${question.char}】\n\n` +
+          "再想想看它的拼音＋聲調喔～"
       }
     ]
   );
@@ -196,14 +507,15 @@ export async function handlePinyinGame(
   const userId =
     event.source.userId;
 
+
   const normalizedMessage =
-    message.trim().toLowerCase();
+    message
+      .trim()
+      .toLowerCase();
 
 
   // ==========================================================
   // 開始拼音
-  //
-  // Rich Menu → 「開始拼音」
   // ==========================================================
 
   if (
@@ -227,7 +539,9 @@ export async function handlePinyinGame(
     normalizedMessage === "level1"
   ) {
 
-    await startLevel1(event);
+    await startLevel1(
+      event
+    );
 
     return true;
   }
@@ -312,10 +626,13 @@ export async function handlePinyinGame(
 
 
   // ==========================================================
-  // 沒有正在玩拼音遊戲
+  // 沒有正在進行拼音遊戲
   // ==========================================================
 
-  if (!games.has(userId)) {
+  if (
+    !games.has(userId)
+  ) {
+
     return false;
   }
 
@@ -327,6 +644,7 @@ export async function handlePinyinGame(
   const game =
     games.get(userId);
 
+
   const question =
     game.questions[
       game.questionIndex
@@ -334,17 +652,33 @@ export async function handlePinyinGame(
 
 
   // ==========================================================
+  // 🔊 聽音提示
+  // ==========================================================
+
+  if (
+    normalizedMessage === "聽音" ||
+    normalizedMessage === "听音" ||
+    normalizedMessage === "audio"
+  ) {
+
+    await playHint(
+      event,
+      game
+    );
+
+    return true;
+  }
+
+
+  // ==========================================================
   // 判斷答案
   // ==========================================================
 
-  const userAnswer =
-    normalizePinyin(message);
-
-  const correctAnswer =
-    normalizePinyin(question.pinyin);
-
   const isCorrect =
-    userAnswer === correctAnswer;
+    isCorrectPinyin(
+      message,
+      question.pinyin
+    );
 
 
   // ==========================================================
@@ -353,18 +687,59 @@ export async function handlePinyinGame(
 
   if (!isCorrect) {
 
-    await replyToLine(
-      event.replyToken,
-      [
-        {
-          type: "text",
-          text:
-            "❌ 再試一次！\n\n" +
-            `【${question.char}】\n\n` +
-            "💡 再想想看這個字的拼音喔～"
-        }
-      ]
-    );
+    const userPinyin =
+      normalizePinyin(
+        message
+      );
+
+    const correctPinyin =
+      normalizePinyin(
+        question.pinyin
+      );
+
+
+    // --------------------------------------------------------
+    // 拼音正確，但聲調錯
+    // --------------------------------------------------------
+
+    if (
+      userPinyin.base ===
+        correctPinyin.base &&
+      userPinyin.tone !==
+        correctPinyin.tone
+    ) {
+
+      await replyToLine(
+        event.replyToken,
+        [
+          {
+            type: "text",
+            text:
+              "❌ 拼音對了，但聲調不對喔！\n\n" +
+              `【${question.char}】\n\n` +
+              "🔊 輸入「聽音」再聽一次"
+          }
+        ]
+      );
+
+    } else {
+
+      await replyToLine(
+        event.replyToken,
+        [
+          {
+            type: "text",
+            text:
+              "❌ 再試一次！\n\n" +
+              `【${question.char}】\n\n` +
+              "💡 記得要輸入「拼音＋聲調」喔！\n\n" +
+              "例如：ma1 或 mā\n\n" +
+              "🔊 不確定可以輸入「聽音」"
+          }
+        ]
+      );
+    }
+
 
     return true;
   }
@@ -376,8 +751,15 @@ export async function handlePinyinGame(
 
   game.score++;
 
+
   const currentQuestion =
     game.questionIndex + 1;
+
+
+  const toneMarked =
+    numberToToneMark(
+      question.pinyin
+    );
 
 
   // ==========================================================
@@ -391,6 +773,7 @@ export async function handlePinyinGame(
     const finalScore =
       game.score;
 
+
     const percentage =
       Math.round(
         (finalScore / 3) * 100
@@ -400,12 +783,16 @@ export async function handlePinyinGame(
     let resultMessage = "";
 
 
-    if (percentage === 100) {
+    if (
+      percentage === 100
+    ) {
 
       resultMessage =
         "🏆 全部答對！太厲害了！";
 
-    } else if (percentage >= 66) {
+    } else if (
+      percentage >= 66
+    ) {
 
       resultMessage =
         "🎉 很棒！再練一下就滿分了！";
@@ -417,7 +804,9 @@ export async function handlePinyinGame(
     }
 
 
-    games.delete(userId);
+    games.delete(
+      userId
+    );
 
 
     await replyToLine(
@@ -427,7 +816,7 @@ export async function handlePinyinGame(
           type: "text",
           text:
             "🎉 答對了！\n\n" +
-            `【${question.char}】 → ${question.pinyin}\n\n` +
+            `【${question.char}】 → ${toneMarked}\n\n` +
             `第 ${currentQuestion} / 3 題`
         },
         {
@@ -469,7 +858,7 @@ export async function handlePinyinGame(
         type: "text",
         text:
           "🎉 答對了！\n\n" +
-          `【${question.char}】 → ${question.pinyin}\n\n` +
+          `【${question.char}】 → ${toneMarked}\n\n` +
           `⭐ 目前得分：${game.score} / ${currentQuestion}`
       },
       {
@@ -477,7 +866,9 @@ export async function handlePinyinGame(
         text:
           `🔤 第 ${game.questionIndex + 1} / 3 題\n\n` +
           `【${nextQuestion.char}】\n\n` +
-          "請輸入拼音："
+          "請輸入拼音＋聲調\n\n" +
+          "💡 例如：ma1 或 mā\n" +
+          "🔊 不確定？輸入「聽音」"
       }
     ]
   );
@@ -523,11 +914,13 @@ async function replyToLine(
     const errorText =
       await response.text();
 
+
     console.error(
       "LINE Reply API Error:",
       response.status,
       errorText
     );
+
 
     throw new Error(
       `LINE Reply API failed: ${response.status}`
