@@ -3,25 +3,32 @@
 // 華語娘 LINE Bot
 //
 // LINE 唯一 Webhook 入口
+//
 // 負責：
 // 1. 接收 LINE 訊息
-// 2. 判斷使用者正在玩哪個遊戲
-// 3. 將訊息交給 tonegame / pinyingame
+// 2. 判斷使用者目前模式
+// 3. 將訊息交給 tonegame / pinyingame / chat
+//
+// 模式：
+// "tone"   → 聲調遊戲
+// "pinyin" → 拼音遊戲
+// "chat"   → AI 聊天
 // ============================================================
 
 import { handleToneGame } from "./tonegame.js";
 import { handlePinyinGame } from "./pinyingame.js";
+import { handleChat } from "./chat.js";
 
 
 // ============================================================
-// 使用者目前選擇的遊戲
+// 使用者目前模式
 //
-// userId → "tone" / "pinyin"
+// userId → "tone" / "pinyin" / "chat"
 //
 // 例如：
-//
 // userA → tone
 // userB → pinyin
+// userC → chat
 // ============================================================
 
 const userModes = new Map();
@@ -89,7 +96,7 @@ export default async function handler(req, res) {
       // ↓
       // 自動送出「開始」
       //
-      // 「開始」在這裡代表：
+      // 「開始」代表：
       // 我要進入聲調遊戲
       // ======================================================
 
@@ -153,7 +160,46 @@ export default async function handler(req, res) {
 
 
       // ======================================================
-      // 取得使用者目前遊戲
+      // 💗 AI 聊天入口
+      //
+      // Rich Menu：
+      // 「AI聊天」
+      // ↓
+      // 自動送出「開始聊天」
+      //
+      // 「開始聊天」代表：
+      // 我要進入 AI 聊天模式
+      // ======================================================
+
+      if (
+        message === "開始聊天"
+      ) {
+
+        userModes.set(
+          userId,
+          "chat"
+        );
+
+
+        await replyToLine(
+          event.replyToken,
+          [
+            {
+              type: "text",
+              text:
+                "💗 好呀～來跟華語娘聊天吧！\n\n" +
+                "今天想聊什麼？"
+            }
+          ]
+        );
+
+
+        continue;
+      }
+
+
+      // ======================================================
+      // 取得使用者目前模式
       // ======================================================
 
       const mode =
@@ -164,7 +210,9 @@ export default async function handler(req, res) {
       // 🎧 使用者正在玩聲調遊戲
       // ======================================================
 
-      if (mode === "tone") {
+      if (
+        mode === "tone"
+      ) {
 
         const handled =
           await handleToneGame(
@@ -183,7 +231,9 @@ export default async function handler(req, res) {
       // 🔤 使用者正在玩拼音遊戲
       // ======================================================
 
-      if (mode === "pinyin") {
+      if (
+        mode === "pinyin"
+      ) {
 
         const handled =
           await handlePinyinGame(
@@ -195,6 +245,36 @@ export default async function handler(req, res) {
         if (handled) {
           continue;
         }
+      }
+
+
+      // ======================================================
+      // 💗 使用者正在 AI 聊天模式
+      // ======================================================
+
+      if (
+        mode === "chat"
+      ) {
+
+        const reply =
+          await handleChat(
+            event,
+            message
+          );
+
+
+        await replyToLine(
+          event.replyToken,
+          [
+            {
+              type: "text",
+              text: reply
+            }
+          ]
+        );
+
+
+        continue;
       }
 
 
@@ -213,6 +293,7 @@ export default async function handler(req, res) {
           }
         ]
       );
+
     }
 
 
