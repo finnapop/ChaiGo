@@ -102,7 +102,7 @@ export default async function handler(req, res) {
       // ======================================================
 
       if (
-        message === "開始" ||
+        message === "声調チャレンジ開始" ||
         normalizedMessage === "start"
       ) {
 

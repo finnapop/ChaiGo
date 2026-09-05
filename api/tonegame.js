@@ -1,6 +1,6 @@
 // ============================================================
 // tonegame.js
-// 華語娘｜聲調遊戲
+// 華語娘｜声調チャレンジ
 // ============================================================
 
 const games = new Map();
@@ -122,14 +122,14 @@ async function showLevelSelection(
       {
         type: "text",
         text:
-          "🎧 聲調挑戰\n\n" +
-          "選擇你的 Level 💗\n\n" +
-          "🟢 LV1　基礎聲調\n" +
-          "🔵 LV2　進階聲調\n" +
-          "🟣 LV3　挑戰聲調\n" +
-          "🔴 LV4　高手挑戰\n\n" +
-          "目前開放：LV1\n\n" +
-          "👉 請輸入「LV1」開始"
+          "🎧 声調チャレンジ\n\n" +
+          "Levelを選んでね 💗\n\n" +
+          "🟢 LV1　基礎声調\n" +
+          "🔵 LV2　応用声調\n" +
+          "🟣 LV3　チャレンジ声調\n" +
+          "🔴 LV4　上級チャレンジ\n\n" +
+          "現在プレイできるのは：LV1\n\n" +
+          "👉 「LV1」と入力してスタート！"
       }
     ]
   );
@@ -175,10 +175,10 @@ async function startLevel1(event) {
       {
         type: "text",
         text:
-          "🎧 LV1 聲調挑戰開始！💗\n\n" +
-          "一輪 3 題\n" +
-          "請聽聲音，猜猜是哪一個聲調！\n\n" +
-          "第 1 / 3 題"
+          "🎧 LV1 声調チャレンジ開始！💗\n\n" +
+          "全3問\n" +
+          "音声を聞いて、何声か当てよう！\n\n" +
+          "第 1 / 3 問"
       },
       {
         type: "audio",
@@ -190,11 +190,11 @@ async function startLevel1(event) {
       {
         type: "text",
         text:
-          "請回答：\n\n" +
-          "1️⃣ 一聲\n" +
-          "2️⃣ 二聲\n" +
-          "3️⃣ 三聲\n" +
-          "4️⃣ 四聲"
+          "答えを選んでね：\n\n" +
+          "1️⃣ 一声\n" +
+          "2️⃣ 二声\n" +
+          "3️⃣ 三声\n" +
+          "4️⃣ 四声"
       }
     ]
   );
@@ -202,7 +202,7 @@ async function startLevel1(event) {
 
 
 // ============================================================
-// 聲調遊戲 Handler
+// 声調チャレンジ Handler
 // ============================================================
 
 export async function handleToneGame(
@@ -215,23 +215,6 @@ export async function handleToneGame(
 
   const normalizedMessage =
     message.trim().toLowerCase();
-
-
-  // ==========================================================
-  // 開始 → 顯示 Level 選擇
-  // ==========================================================
-
-  if (
-    message === "開始" ||
-    normalizedMessage === "start"
-  ) {
-
-    await showLevelSelection(
-      event.replyToken
-    );
-
-    return true;
-  }
 
 
   // ==========================================================
@@ -265,8 +248,8 @@ export async function handleToneGame(
           type: "text",
           text:
             "🔵 LV2\n\n" +
-            "🚧 還在準備中喔～\n\n" +
-            "先來挑戰 LV1 吧！💗"
+            "🚧 ただいま準備中です～\n\n" +
+            "まずは LV1 にチャレンジしてね！💗"
         }
       ]
     );
@@ -291,8 +274,8 @@ export async function handleToneGame(
           type: "text",
           text:
             "🟣 LV3\n\n" +
-            "🚧 還在準備中喔～\n\n" +
-            "先來挑戰 LV1 吧！💗"
+            "🚧 ただいま準備中です～\n\n" +
+            "まずは LV1 にチャレンジしてね！💗"
         }
       ]
     );
@@ -317,8 +300,8 @@ export async function handleToneGame(
           type: "text",
           text:
             "🔴 LV4\n\n" +
-            "🚧 還在準備中喔～\n\n" +
-            "先來挑戰 LV1 吧！💗"
+            "🚧 ただいま準備中です～\n\n" +
+            "まずは LV1 にチャレンジしてね！💗"
         }
       ]
     );
@@ -365,7 +348,7 @@ export async function handleToneGame(
         {
           type: "text",
           text:
-            "請回答 1、2、3 或 4 喔！😊"
+            "1、2、3、4 のどれかで答えてね！😊"
         }
       ]
     );
@@ -415,17 +398,17 @@ export async function handleToneGame(
     if (percentage === 100) {
 
       resultMessage =
-        "🏆 全部答對！太厲害了！";
+        "🏆 全問正解！すごい！";
 
     } else if (percentage >= 66) {
 
       resultMessage =
-        "🎉 很棒！再練一下就滿分了！";
+        "🎉 すごい！あと少しで満点だよ！";
 
     } else {
 
       resultMessage =
-        "💪 沒關係，再挑戰一次吧！";
+        "💪 大丈夫！もう一度チャレンジしてみよう！";
     }
 
 
@@ -434,9 +417,9 @@ export async function handleToneGame(
 
     const resultText =
       isCorrect
-        ? "🎉 答對了！\n\n"
-        : "❌ 答錯了！\n" +
-          `正確答案是：${question.answer}聲\n\n`;
+        ? "🎉 正解！\n\n"
+        : "❌ 不正解！\n" +
+          `正解は：${question.answer}声\n\n`;
 
 
     await replyToLine(
@@ -446,14 +429,14 @@ export async function handleToneGame(
           type: "text",
           text:
             resultText +
-            `第 ${currentQuestion} / 3 題\n\n` +
-            "🎊 LV1 挑戰完成！\n\n" +
-            `你的成績：${finalScore} / 3\n` +
+            `第 ${currentQuestion} / 3 問\n\n` +
+            "🎊 LV1 チャレンジ完了！\n\n" +
+            `スコア：${finalScore} / 3\n` +
             `正答率：${percentage}%\n\n` +
             resultMessage +
             "\n\n" +
-            "想再挑戰一次嗎？\n" +
-            "輸入「LV1」即可！💗"
+            "もう一度チャレンジする？\n" +
+            "「LV1」と入力してね！💗"
         }
       ]
     );
@@ -478,8 +461,8 @@ export async function handleToneGame(
 
   const resultText =
     isCorrect
-      ? `🎉 答對了！\n\n目前得分：${game.score} / ${currentQuestion}`
-      : `❌ 答錯了！\n正確答案是：${question.answer}聲\n\n目前得分：${game.score} / ${currentQuestion}`;
+      ? `🎉 正解！\n\n現在のスコア：${game.score} / ${currentQuestion}`
+      : `❌ 不正解！\n正解は：${question.answer}声\n\n現在のスコア：${game.score} / ${currentQuestion}`;
 
 
   await replyToLine(
@@ -493,8 +476,8 @@ export async function handleToneGame(
       {
         type: "text",
         text:
-          `🎧 第 ${game.questionIndex + 1} / 3 題\n\n` +
-          "再聽聽看！"
+          `🎧 第 ${game.questionIndex + 1} / 3 問\n\n` +
+          "もう一度聞いてみよう！"
       },
       {
         type: "audio",
@@ -506,11 +489,11 @@ export async function handleToneGame(
       {
         type: "text",
         text:
-          "請回答：\n\n" +
-          "1️⃣ 一聲\n" +
-          "2️⃣ 二聲\n" +
-          "3️⃣ 三聲\n" +
-          "4️⃣ 四聲"
+          "答えを選んでね：\n\n" +
+          "1️⃣ 一声\n" +
+          "2️⃣ 二声\n" +
+          "3️⃣ 三声\n" +
+          "4️⃣ 四声"
       }
     ]
   );
