@@ -1,1121 +1,644 @@
-// ============================================================
-// pinyingame.js
-// 華語娘｜拼音遊戲
-//
-// LV1 規則：
-// 1. 一個漢字一題
-// 2. 每輪隨機 3 題
-// 3. 必須輸入「拼音＋聲調」
-// 4. ma1 / mā 都算正確
-// 5. 第一次答錯 → 可以聽一次音
-// 6. 聽音不算回答次數
-// 7. 第二次答錯 → 算錯並進入下一題
-//
-// 音檔共用：
-// ToneGame/audio/lv1/
-// ============================================================
+import fetch from "node-fetch";
+
+// ================================
+// Pinyin Game
+// ================================
 
 const games = new Map();
-
-
-// ============================================================
-// GitHub 音檔
-// ============================================================
 
 const AUDIO_BASE_URL =
   "https://raw.githubusercontent.com/finnapop/ChaiGo/main/ToneGame/audio";
 
-
-// ============================================================
-// LV1 題庫
-//
-// _01 = 一聲
-// _02 = 二聲
-// _03 = 三聲
-// _04 = 四聲
-// ============================================================
+// ================================
+// LV1：單漢字拼音＋聲調
+// ================================
 
 const lv1Questions = [
-
-  // ----------------------------------------------------------
   // ma
-  // ----------------------------------------------------------
-
   {
     char: "媽",
-    pinyin: "ma1",
+    pinyin: "ma",
+    tone: 1,
+    answer: "mā",
     audio: `${AUDIO_BASE_URL}/lv1/ma_01.mp3`,
-    duration: 1500
   },
   {
     char: "麻",
-    pinyin: "ma2",
+    pinyin: "ma",
+    tone: 2,
+    answer: "má",
     audio: `${AUDIO_BASE_URL}/lv1/ma_02.mp3`,
-    duration: 1500
   },
   {
     char: "馬",
-    pinyin: "ma3",
+    pinyin: "ma",
+    tone: 3,
+    answer: "mǎ",
     audio: `${AUDIO_BASE_URL}/lv1/ma_03.mp3`,
-    duration: 1500
   },
   {
     char: "罵",
-    pinyin: "ma4",
+    pinyin: "ma",
+    tone: 4,
+    answer: "mà",
     audio: `${AUDIO_BASE_URL}/lv1/ma_04.mp3`,
-    duration: 1500
   },
 
-
-  // ----------------------------------------------------------
   // ba
-  // ----------------------------------------------------------
-
   {
     char: "八",
-    pinyin: "ba1",
+    pinyin: "ba",
+    tone: 1,
+    answer: "bā",
     audio: `${AUDIO_BASE_URL}/lv1/ba_01.mp3`,
-    duration: 1500
   },
   {
     char: "拔",
-    pinyin: "ba2",
+    pinyin: "ba",
+    tone: 2,
+    answer: "bá",
     audio: `${AUDIO_BASE_URL}/lv1/ba_02.mp3`,
-    duration: 1500
   },
   {
     char: "把",
-    pinyin: "ba3",
+    pinyin: "ba",
+    tone: 3,
+    answer: "bǎ",
     audio: `${AUDIO_BASE_URL}/lv1/ba_03.mp3`,
-    duration: 1500
   },
   {
     char: "爸",
-    pinyin: "ba4",
+    pinyin: "ba",
+    tone: 4,
+    answer: "bà",
     audio: `${AUDIO_BASE_URL}/lv1/ba_04.mp3`,
-    duration: 1500
   },
 
-
-  // ----------------------------------------------------------
   // qi
-  // ----------------------------------------------------------
-
   {
     char: "七",
-    pinyin: "qi1",
+    pinyin: "qi",
+    tone: 1,
+    answer: "qī",
     audio: `${AUDIO_BASE_URL}/lv1/qi_01.mp3`,
-    duration: 1500
   },
   {
     char: "旗",
-    pinyin: "qi2",
+    pinyin: "qi",
+    tone: 2,
+    answer: "qí",
     audio: `${AUDIO_BASE_URL}/lv1/qi_02.mp3`,
-    duration: 1500
   },
   {
     char: "起",
-    pinyin: "qi3",
+    pinyin: "qi",
+    tone: 3,
+    answer: "qǐ",
     audio: `${AUDIO_BASE_URL}/lv1/qi_03.mp3`,
-    duration: 1500
   },
   {
     char: "氣",
-    pinyin: "qi4",
+    pinyin: "qi",
+    tone: 4,
+    answer: "qì",
     audio: `${AUDIO_BASE_URL}/lv1/qi_04.mp3`,
-    duration: 1500
-  }
+  },
 ];
 
+// ================================
+// LINE Reply
+// ================================
 
-// ============================================================
-// 隨機抽 3 題
-// ============================================================
+async function replyMessage(replyToken, messages) {
+  await fetch("https://api.line.me/v2/bot/message/reply", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
+    },
+    body: JSON.stringify({
+      replyToken,
+      messages,
+    }),
+  });
+}
+
+// ================================
+// 隨機選 3 題
+// ================================
 
 function getRandomQuestions() {
-
-  const shuffled =
-    [...lv1Questions].sort(
-      () => Math.random() - 0.5
-    );
-
+  const shuffled = [...lv1Questions].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, 3);
 }
 
+// ================================
+// 拼音正規化
+// ================================
 
-// ============================================================
-// 拼音標準化
-//
-// ma1 → { base: "ma", tone: "1" }
-// mā  → { base: "ma", tone: "1" }
-//
-// ma  → { base: "ma", tone: null }
-// ============================================================
+function normalizePinyin(input) {
+  let text = input
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "");
 
-function normalizePinyin(text) {
+  // ----------------
+  // 數字聲調
+  // ----------------
 
-  let value =
-    text
-      .trim()
-      .toLowerCase()
-      .normalize("NFC")
-      .replace(/\s+/g, "");
+  let tone = null;
 
+  const toneMatch = text.match(/([1-4])$/);
 
-  // ----------------------------------------------------------
+  if (toneMatch) {
+    tone = Number(toneMatch[1]);
+    text = text.slice(0, -1);
+  }
+
+  // ----------------
   // 聲調符號
-  // ----------------------------------------------------------
+  // ----------------
 
   const toneMap = {
-    "ā": ["a", "1"],
-    "á": ["a", "2"],
-    "ǎ": ["a", "3"],
-    "à": ["a", "4"],
+    ā: ["a", 1],
+    á: ["a", 2],
+    ǎ: ["a", 3],
+    à: ["a", 4],
 
-    "ē": ["e", "1"],
-    "é": ["e", "2"],
-    "ě": ["e", "3"],
-    "è": ["e", "4"],
+    ē: ["e", 1],
+    é: ["e", 2],
+    ě: ["e", 3],
+    è: ["e", 4],
 
-    "ī": ["i", "1"],
-    "í": ["i", "2"],
-    "ǐ": ["i", "3"],
-    "ì": ["i", "4"],
+    ī: ["i", 1],
+    í: ["i", 2],
+    ǐ: ["i", 3],
+    ì: ["i", 4],
 
-    "ō": ["o", "1"],
-    "ó": ["o", "2"],
-    "ǒ": ["o", "3"],
-    "ò": ["o", "4"],
+    ō: ["o", 1],
+    ó: ["o", 2],
+    ǒ: ["o", 3],
+    ò: ["o", 4],
 
-    "ū": ["u", "1"],
-    "ú": ["u", "2"],
-    "ǔ": ["u", "3"],
-    "ù": ["u", "4"],
+    ū: ["u", 1],
+    ú: ["u", 2],
+    ǔ: ["u", 3],
+    ù: ["u", 4],
 
-    "ǖ": ["ü", "1"],
-    "ǘ": ["ü", "2"],
-    "ǚ": ["ü", "3"],
-    "ǜ": ["ü", "4"]
+    ǖ: ["ü", 1],
+    ǘ: ["ü", 2],
+    ǚ: ["ü", 3],
+    ǜ: ["ü", 4],
   };
 
+  for (const [mark, [base, markTone]] of Object.entries(toneMap)) {
+    if (text.includes(mark)) {
+      text = text.replace(mark, base);
 
-  let detectedTone = null;
-
-
-  for (
-    const [mark, data]
-    of Object.entries(toneMap)
-  ) {
-
-    if (value.includes(mark)) {
-
-      value =
-        value.replace(
-          mark,
-          data[0]
-        );
-
-      detectedTone =
-        data[1];
-
-      break;
+      if (!tone) {
+        tone = markTone;
+      }
     }
   }
 
-
-  // ----------------------------------------------------------
-  // 數字聲調
-  // ----------------------------------------------------------
-
-  const numberMatch =
-    value.match(/([1-4])$/);
-
-
-  if (numberMatch) {
-
-    detectedTone =
-      numberMatch[1];
-
-    value =
-      value.replace(
-        /[1-4]$/,
-        ""
-      );
-  }
-
-
   return {
-    base: value,
-    tone: detectedTone
+    pinyin: text,
+    tone,
   };
 }
 
-
-// ============================================================
+// ================================
 // 判斷答案
-// ============================================================
+// ================================
 
-function isCorrectPinyin(
-  userInput,
-  correctPinyin
-) {
-
-  const user =
-    normalizePinyin(
-      userInput
-    );
-
-  const correct =
-    normalizePinyin(
-      correctPinyin
-    );
-
+function isCorrectPinyin(input, question) {
+  const normalized = normalizePinyin(input);
 
   return (
-    user.base === correct.base &&
-    user.tone === correct.tone
+    normalized.pinyin === question.pinyin &&
+    normalized.tone === question.tone
   );
 }
 
+// ================================
+// 拼音 → 聲調符號
+// ================================
 
-// ============================================================
-// 聲調數字 → 聲調符號
-//
-// ma1 → mā
-// ma2 → má
-// ma3 → mǎ
-// ma4 → mà
-// ============================================================
-
-function numberToToneMark(
-  pinyin
-) {
-
-  const match =
-    pinyin.match(
-      /^(.+)([1-4])$/
-    );
-
-
-  if (!match) {
-    return pinyin;
-  }
-
-
-  const base =
-    match[1];
-
-  const tone =
-    Number(match[2]);
-
-
-  const toneMarks = {
+function numberToToneMark(pinyin, tone) {
+  const toneMap = {
     a: ["ā", "á", "ǎ", "à"],
     e: ["ē", "é", "ě", "è"],
     i: ["ī", "í", "ǐ", "ì"],
     o: ["ō", "ó", "ǒ", "ò"],
     u: ["ū", "ú", "ǔ", "ù"],
-    "ü": ["ǖ", "ǘ", "ǚ", "ǜ"]
+    ü: ["ǖ", "ǘ", "ǚ", "ǜ"],
   };
 
-
-  let vowelIndex = -1;
-
-
-  // ----------------------------------------------------------
-  // a / e 優先
-  // ----------------------------------------------------------
-
-  for (
-    const vowel of ["a", "e"]
-  ) {
-
-    const index =
-      base.indexOf(vowel);
-
-    if (index !== -1) {
-
-      vowelIndex =
-        index;
-
-      break;
-    }
+  if (!tone || tone < 1 || tone > 4) {
+    return pinyin;
   }
 
+  // 優先順序：a > e > o > 最後一個母音
+  let target = null;
 
-  // ----------------------------------------------------------
-  // ou → o
-  // ----------------------------------------------------------
+  if (pinyin.includes("a")) {
+    target = "a";
+  } else if (pinyin.includes("e")) {
+    target = "e";
+  } else if (pinyin.includes("o")) {
+    target = "o";
+  } else {
+    const vowels = ["i", "u", "ü"];
 
-  if (
-    vowelIndex === -1
-  ) {
-
-    const ouIndex =
-      base.indexOf("ou");
-
-    if (
-      ouIndex !== -1
-    ) {
-
-      vowelIndex =
-        ouIndex;
-
-    } else {
-
-      // ------------------------------------------------------
-      // 否則找最後一個母音
-      // ------------------------------------------------------
-
-      for (
-        let i = base.length - 1;
-        i >= 0;
-        i--
-      ) {
-
-        if (
-          toneMarks[base[i]]
-        ) {
-
-          vowelIndex =
-            i;
-
-          break;
-        }
+    for (let i = pinyin.length - 1; i >= 0; i--) {
+      if (vowels.includes(pinyin[i])) {
+        target = pinyin[i];
+        break;
       }
     }
   }
 
-
-  if (
-    vowelIndex === -1
-  ) {
-
+  if (!target) {
     return pinyin;
   }
 
-
-  const vowel =
-    base[vowelIndex];
-
-
-  const markedVowel =
-    toneMarks[vowel]?.[
-      tone - 1
-    ];
-
-
-  if (
-    !markedVowel
-  ) {
-
-    return pinyin;
-  }
-
-
-  return (
-    base.slice(
-      0,
-      vowelIndex
-    ) +
-    markedVowel +
-    base.slice(
-      vowelIndex + 1
-    )
+  return pinyin.replace(
+    target,
+    toneMap[target][tone - 1]
   );
 }
 
-
-// ============================================================
-// 顯示 Level 選擇
-// ============================================================
-
-async function showLevelSelection(
-  replyToken
-) {
-
-  await replyToLine(
-    replyToken,
-    [
-      {
-        type: "text",
-        text:
-          "🔤 拼音挑戰\n\n" +
-          "選擇你的 Level 💗\n\n" +
-          "🟢 LV1　單字拼音\n" +
-          "🔵 LV2　進階拼音\n" +
-          "🟣 LV3　詞語拼音\n" +
-          "🔴 LV4　高手挑戰\n\n" +
-          "目前開放：LV1\n\n" +
-          "👉 請輸入「LV1」開始"
-      }
-    ]
-  );
-}
-
-
-// ============================================================
+// ================================
 // 顯示題目
-// ============================================================
+// ================================
 
-async function sendQuestion(
-  event,
-  game,
-  introText
-) {
+async function sendQuestion(replyToken, game) {
+  const question = game.questions[game.current];
 
-  const question =
-    game.questions[
-      game.questionIndex
-    ];
+  const message = `
+🔤 LV1 ピンインチャレンジ開始！💗
 
+全3問
+漢字を見て、ピンイン＋声調を入力してね！
 
-  await replyToLine(
-    event.replyToken,
-    [
-      {
-        type: "text",
-        text:
-          introText +
-          `\n\n第 ${game.questionIndex + 1} / 3 題\n\n` +
-          `【${question.char}】`
-      },
-      {
-        type: "text",
-        text:
-          "請輸入拼音＋聲調\n\n" +
-          "例如：ma1 或 mā\n\n" +
-          "🔊 第一次答錯後可以聽音"
-      }
-    ]
-  );
-}
+第${game.current + 1} / 3問
 
+【${question.char}】
 
-// ============================================================
-// 開始 LV1
-// ============================================================
+ピンイン＋声調を入力してください。
 
-async function startLevel1(
-  event
-) {
+例：ma1 または mā
 
-  const userId =
-    event.source.userId;
+🔊 1回目に間違えた後、音声ヒントを1回だけ聞けます。
+`.trim();
 
-
-  const selectedQuestions =
-    getRandomQuestions();
-
-
-  games.set(
-    userId,
+  await replyMessage(replyToken, [
     {
-      level: 1,
-
-      questionIndex: 0,
-
-      score: 0,
-
-      questions:
-        selectedQuestions,
-
-      // --------------------------------------------------------
-      // 本題是否已經回答過一次
-      // --------------------------------------------------------
-
-      attempts: 0,
-
-      // --------------------------------------------------------
-      // 本題是否已經使用聽音提示
-      // --------------------------------------------------------
-
-      hintUsed: false
-    }
-  );
-
-
-  const game =
-    games.get(userId);
-
-
-  await sendQuestion(
-    event,
-    game,
-    "🔤 LV1 拼音挑戰開始！💗\n\n" +
-    "一輪 3 題\n" +
-    "看漢字，輸入拼音＋聲調！"
-  );
+      type: "text",
+      text: message,
+    },
+  ]);
 }
 
+// ================================
+// LV 選択
+// ================================
 
-// ============================================================
-// 聽音提示
-// ============================================================
+async function showLevelMenu(replyToken) {
+  const message = `
+🔤 ピンインチャレンジ 💗
 
-async function playHint(
-  event,
-  game
-) {
+レベルを選んでね！
 
-  const question =
-    game.questions[
-      game.questionIndex
-    ];
+🟢 LV1　単漢字ピンイン
+🔵 LV2　ステップアップ
+🟣 LV3　単語ピンイン
+🔴 LV4　上級チャレンジ
 
+現在プレイできるのは：LV1
 
-  await replyToLine(
-    event.replyToken,
-    [
-      {
-        type: "audio",
+👉 「LV1」と入力してスタート！
+`.trim();
 
-        originalContentUrl:
-          question.audio,
+  await replyMessage(replyToken, [
+    {
+      type: "text",
+      text: message,
+    },
+  ]);
+}
 
-        duration:
-          question.duration
-      },
+// ================================
+// LV1 開始
+// ================================
+
+async function startLevel1(replyToken, userId) {
+  const questions = getRandomQuestions();
+
+  games.set(userId, {
+    level: 1,
+    questions,
+    current: 0,
+    score: 0,
+
+    // 每題錯誤次數
+    attempts: 0,
+
+    // 是否已經使用音聲提示
+    hintUsed: false,
+  });
+
+  const game = games.get(userId);
+
+  await sendQuestion(replyToken, game);
+}
+
+// ================================
+// 音聲提示
+// ================================
+
+async function playHint(replyToken, game) {
+  const question = game.questions[game.current];
+
+  if (game.attempts < 1) {
+    await replyMessage(replyToken, [
       {
         type: "text",
+        text: "まだ1回目の間違い前だよ！\nまず答えてみてね 😊",
+      },
+    ]);
 
-        text:
-          "🔊 聽音提示\n\n" +
-          `【${question.char}】\n\n` +
-          "再想想看它的拼音＋聲調喔～"
-      }
-    ]
-  );
+    return;
+  }
+
+  if (game.hintUsed) {
+    await replyMessage(replyToken, [
+      {
+        type: "text",
+        text: "この問題の音声ヒントは、もう使ったよ！\nもう一度答えてみてね 💗",
+      },
+    ]);
+
+    return;
+  }
+
+  game.hintUsed = true;
+
+  await replyMessage(replyToken, [
+    {
+      type: "audio",
+      originalContentUrl: question.audio,
+      duration: 1500,
+    },
+  ]);
 }
 
+// ================================
+// 下一題
+// ================================
 
-// ============================================================
-// 進入下一題
-// ============================================================
+async function nextQuestion(replyToken, userId) {
+  const game = games.get(userId);
 
-async function nextQuestion(
-  event,
-  game,
-  resultText
-) {
+  if (!game) {
+    return;
+  }
 
-  game.questionIndex++;
+  game.current++;
+
+  // ----------------
+  // 3 題結束
+  // ----------------
+
+  if (game.current >= game.questions.length) {
+    const score = game.score;
+
+    games.delete(userId);
+
+    const message = `
+🎉 ピンインチャレンジ終了！
+
+結果：${score} / 3 問正解！
+
+${score === 3
+  ? "✨ パーフェクト！すごい！"
+  : score === 2
+  ? "👏 いい感じ！"
+  : score === 1
+  ? "💪 もう一回チャレンジしてみよう！"
+  : "🌱 大丈夫！もう一度練習してみよう！"}
+
+また遊びたいときは
+「LV1」と入力してね 💗
+`.trim();
+
+    await replyMessage(replyToken, [
+      {
+        type: "text",
+        text: message,
+      },
+    ]);
+
+    return;
+  }
+
+  // ----------------
+  // 新しい問題
+  // ----------------
 
   game.attempts = 0;
-
   game.hintUsed = false;
 
-
-  // ----------------------------------------------------------
-  // 還有下一題
-  // ----------------------------------------------------------
-
-  if (
-    game.questionIndex < 3
-  ) {
-
-    const nextQuestion =
-      game.questions[
-        game.questionIndex
-      ];
-
-
-    await replyToLine(
-      event.replyToken,
-      [
-        {
-          type: "text",
-          text:
-            resultText +
-            "\n\n" +
-            `🔤 第 ${game.questionIndex + 1} / 3 題\n\n` +
-            `【${nextQuestion.char}】\n\n` +
-            "請輸入拼音＋聲調\n\n" +
-            "🔊 第一次答錯後可以聽音"
-        }
-      ]
-    );
-
-
-    return true;
-  }
-
-
-  // ----------------------------------------------------------
-  // 3 題全部完成
-  // ----------------------------------------------------------
-
-  const finalScore =
-    game.score;
-
-
-  const percentage =
-    Math.round(
-      (finalScore / 3) * 100
-    );
-
-
-  let resultMessage = "";
-
-
-  if (
-    percentage === 100
-  ) {
-
-    resultMessage =
-      "🏆 全部答對！太厲害了！";
-
-  } else if (
-    percentage >= 66
-  ) {
-
-    resultMessage =
-      "🎉 很棒！再練一下就滿分了！";
-
-  } else {
-
-    resultMessage =
-      "💪 沒關係，再挑戰一次吧！";
-  }
-
-
-  games.delete(
-    event.source.userId
-  );
-
-
-  await replyToLine(
-    event.replyToken,
-    [
-      {
-        type: "text",
-        text:
-          resultText +
-          "\n\n" +
-          "🎊 LV1 挑戰完成！\n\n" +
-          `你的成績：${finalScore} / 3\n` +
-          `正答率：${percentage}%\n\n` +
-          resultMessage +
-          "\n\n" +
-          "想再挑戰一次嗎？\n" +
-          "輸入「LV1」即可！💗"
-      }
-    ]
-  );
-
-
-  return true;
+  await sendQuestion(replyToken, game);
 }
 
+// ================================
+// Main Handler
+// ================================
 
-// ============================================================
-// 拼音遊戲 Handler
-// ============================================================
+export async function handlePinyinGame(event) {
+  const userId = event.source?.userId;
+  const replyToken = event.replyToken;
 
-export async function handlePinyinGame(
-  event,
-  message
-) {
-
-  const userId =
-    event.source.userId;
-
-
-  const normalizedMessage =
-    message
-      .trim()
-      .toLowerCase();
-
-
-  // ==========================================================
-  // 開始拼音
-  // ==========================================================
-
-  if (
-    message === "開始拼音"
-  ) {
-
-    await showLevelSelection(
-      event.replyToken
-    );
-
-    return true;
+  if (!userId || !replyToken) {
+    return;
   }
 
+  const message = event.message;
 
-  // ==========================================================
-  // LV1
-  // ==========================================================
-
-  if (
-    normalizedMessage === "lv1" ||
-    normalizedMessage === "level1"
-  ) {
-
-    await startLevel1(
-      event
-    );
-
-    return true;
+  if (!message || message.type !== "text") {
+    return;
   }
 
+  const userMessage = message.text.trim();
 
-  // ==========================================================
-  // LV2
-  // ==========================================================
+  // =====================================
+  // ピンインチャレンジ開始
+  // =====================================
 
   if (
-    normalizedMessage === "lv2" ||
-    normalizedMessage === "level2"
+    userMessage === "ピンインチャレンジ開始" ||
+    userMessage === "開始拼音"
   ) {
-
-    await replyToLine(
-      event.replyToken,
-      [
-        {
-          type: "text",
-          text:
-            "🔵 LV2\n\n" +
-            "🚧 還在準備中喔～\n\n" +
-            "先來挑戰 LV1 吧！💗"
-        }
-      ]
-    );
-
-    return true;
+    await showLevelMenu(replyToken);
+    return;
   }
 
+  // =====================================
+  // LV 選擇
+  // =====================================
 
-  // ==========================================================
-  // LV3
-  // ==========================================================
-
-  if (
-    normalizedMessage === "lv3" ||
-    normalizedMessage === "level3"
-  ) {
-
-    await replyToLine(
-      event.replyToken,
-      [
-        {
-          type: "text",
-          text:
-            "🟣 LV3\n\n" +
-            "🚧 還在準備中喔～\n\n" +
-            "先來挑戰 LV1 吧！💗"
-        }
-      ]
-    );
-
-    return true;
+  if (userMessage === "LV1" || userMessage === "lv1") {
+    await startLevel1(replyToken, userId);
+    return;
   }
 
-
-  // ==========================================================
-  // LV4
-  // ==========================================================
-
   if (
-    normalizedMessage === "lv4" ||
-    normalizedMessage === "level4"
+    userMessage === "LV2" ||
+    userMessage === "lv2" ||
+    userMessage === "LV3" ||
+    userMessage === "lv3" ||
+    userMessage === "LV4" ||
+    userMessage === "lv4"
   ) {
+    await replyMessage(replyToken, [
+      {
+        type: "text",
+        text: `
+🚧 このレベルは現在準備中です。
 
-    await replyToLine(
-      event.replyToken,
-      [
-        {
-          type: "text",
-          text:
-            "🔴 LV4\n\n" +
-            "🚧 還在準備中喔～\n\n" +
-            "先來挑戰 LV1 吧！💗"
-        }
-      ]
-    );
+今プレイできるのは LV1 です！
 
-    return true;
+👉 「LV1」と入力してね 💗
+`.trim(),
+      },
+    ]);
+
+    return;
   }
 
+  // =====================================
+  // 遊戲進行中
+  // =====================================
 
-  // ==========================================================
-  // 沒有正在進行拼音遊戲
-  // ==========================================================
+  const game = games.get(userId);
 
-  if (
-    !games.has(userId)
-  ) {
-
-    return false;
+  if (!game) {
+    return;
   }
 
+  const normalizedMessage = userMessage.toLowerCase();
 
-  // ==========================================================
-  // 取得目前遊戲
-  // ==========================================================
-
-  const game =
-    games.get(userId);
-
-
-  const question =
-    game.questions[
-      game.questionIndex
-    ];
-
-
-  // ==========================================================
-  // 🔊 聽音
-  //
-  // 只能在第一次答錯後使用
-  // ==========================================================
+  // =====================================
+  // 音聲
+  // =====================================
 
   if (
+    normalizedMessage === "音声" ||
+    normalizedMessage === "おんせい" ||
     normalizedMessage === "聽音" ||
     normalizedMessage === "听音" ||
     normalizedMessage === "audio"
   ) {
-
-    // --------------------------------------------------------
-    // 還沒有答錯
-    // --------------------------------------------------------
-
-    if (
-      game.attempts === 0
-    ) {
-
-      await replyToLine(
-        event.replyToken,
-        [
-          {
-            type: "text",
-            text:
-              "💡 先試著回答一次喔！\n\n" +
-              "答錯後就可以使用 🔊 聽音提示。"
-          }
-        ]
-      );
-
-      return true;
-    }
-
-
-    // --------------------------------------------------------
-    // 已經使用過提示
-    // --------------------------------------------------------
-
-    if (
-      game.hintUsed
-    ) {
-
-      await replyToLine(
-        event.replyToken,
-        [
-          {
-            type: "text",
-            text:
-              "🔊 這一題的聽音提示已經使用過囉！"
-          }
-        ]
-      );
-
-      return true;
-    }
-
-
-    game.hintUsed =
-      true;
-
-
-    await playHint(
-      event,
-      game
-    );
-
-    return true;
+    await playHint(replyToken, game);
+    return;
   }
 
+  // =====================================
+  // 判斷答案
+  // =====================================
 
-  // ==========================================================
-  // 第一次 / 第二次回答
-  // ==========================================================
+  const question = game.questions[game.current];
 
-  game.attempts++;
+  const normalized = normalizePinyin(userMessage);
 
+  const correct = isCorrectPinyin(userMessage, question);
 
-  const isCorrect =
-    isCorrectPinyin(
-      message,
-      question.pinyin
-    );
-
-
-  // ==========================================================
+  // =====================================
   // 答對
-  // ==========================================================
+  // =====================================
 
-  if (
-    isCorrect
-  ) {
-
+  if (correct) {
     game.score++;
 
+    await replyMessage(replyToken, [
+      {
+        type: "text",
+        text: `
+⭕ 正解！
 
-    const toneMarked =
-      numberToToneMark(
-        question.pinyin
-      );
+【${question.char}】＝ ${question.answer}
 
+すごい！🎉
+`.trim(),
+      },
+    ]);
 
-    await nextQuestion(
-      event,
-      game,
-      "🎉 答對了！\n\n" +
-      `【${question.char}】 → ${toneMarked}\n` +
-      `⭐ 目前得分：${game.score} / ${game.questionIndex + 1}`
-    );
+    await nextQuestion(replyToken, userId);
 
-
-    return true;
+    return;
   }
 
-
-  // ==========================================================
+  // =====================================
   // 第一次答錯
-  //
-  // 還可以聽音
-  // ==========================================================
+  // =====================================
 
-  if (
-    game.attempts === 1
-  ) {
+  if (game.attempts === 0) {
+    game.attempts = 1;
 
-    const userPinyin =
-      normalizePinyin(
-        message
-      );
-
-    const correctPinyin =
-      normalizePinyin(
-        question.pinyin
-      );
-
-
-    let errorMessage =
-      "";
-
-
+    // 拼音正確，但是聲調錯
     if (
-      userPinyin.base ===
-        correctPinyin.base &&
-      userPinyin.tone !==
-        correctPinyin.tone
+      normalized.pinyin === question.pinyin &&
+      normalized.tone !== question.tone
     ) {
-
-      errorMessage =
-        "❌ 拼音對了，但聲調不對喔！";
-
-    } else {
-
-      errorMessage =
-        "❌ 再試一次！";
-    }
-
-
-    await replyToLine(
-      event.replyToken,
-      [
+      await replyMessage(replyToken, [
         {
           type: "text",
-          text:
-            errorMessage +
-            "\n\n" +
-            `【${question.char}】\n\n` +
-            "🔊 可以輸入「聽音」聽一次提示！\n\n" +
-            "然後再回答一次。"
-        }
-      ]
-    );
+          text: `
+❌ ピンインは合っているけど、声調が違うよ！
 
+【${question.char}】
 
-    return true;
-  }
+🔊 「音声」と入力すると、1回だけ音声を聞けます。
 
-
-  // ==========================================================
-  // 第二次答錯
-  //
-  // 正式算錯
-  // 直接進下一題
-  // ==========================================================
-
-  const correctToneMarked =
-    numberToToneMark(
-      question.pinyin
-    );
-
-
-  await nextQuestion(
-    event,
-    game,
-    "❌ 答錯了！\n\n" +
-    `正確答案：${correctToneMarked}`
-  );
-
-
-  return true;
-}
-
-
-// ============================================================
-// LINE Reply API
-// ============================================================
-
-async function replyToLine(
-  replyToken,
-  messages
-) {
-
-  const response =
-    await fetch(
-      "https://api.line.me/v2/bot/message/reply",
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type":
-            "application/json",
-
-          "Authorization":
-            `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`
+もう一度答えてみてね！
+`.trim(),
         },
+      ]);
+    } else {
+      await replyMessage(replyToken, [
+        {
+          type: "text",
+          text: `
+❌ 残念！
 
-        body: JSON.stringify({
-          replyToken,
-          messages
-        })
-      }
-    );
+【${question.char}】
 
+🔊 「音声」と入力すると、1回だけ音声を聞けます。
 
-  if (!response.ok) {
+もう一度答えてみてね！
+`.trim(),
+        },
+      ]);
+    }
 
-    const errorText =
-      await response.text();
-
-
-    console.error(
-      "LINE Reply API Error:",
-      response.status,
-      errorText
-    );
-
-
-    throw new Error(
-      `LINE Reply API failed: ${response.status}`
-    );
+    return;
   }
 
+  // =====================================
+  // 第二次答錯 → 算錯，直接下一題
+  // =====================================
 
-  return response.json();
+  await replyMessage(replyToken, [
+    {
+      type: "text",
+      text: `
+❌ 残念！
+
+正解：${question.answer}
+`.trim(),
+    },
+  ]);
+
+  await nextQuestion(replyToken, userId);
 }

@@ -137,7 +137,7 @@ export default async function handler(req, res) {
       // ======================================================
 
       if (
-        message === "開始拼音"
+        message === "ピンインチャレンジ開始"
       ) {
 
         userModes.set(
