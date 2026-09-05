@@ -72,6 +72,7 @@ export default async function handler(req, res) {
 
       if (
         event.type !== "message" ||
+        !event.message ||
         event.message.type !== "text"
       ) {
         continue;
@@ -111,16 +112,15 @@ export default async function handler(req, res) {
         );
 
 
-        const handled =
-          await handleToneGame(
-            event,
-            message
-          );
+        await handleToneGame(
+          event,
+          message
+        );
 
 
-        if (handled) {
-          continue;
-        }
+        // 入口處理完畢
+        // 不要再往下面執行
+        continue;
       }
 
 
@@ -128,11 +128,11 @@ export default async function handler(req, res) {
       // 🔤 拼音遊戲入口
       //
       // Rich Menu：
-      // 「拼音遊戲」
+      // 「ピンインチャレンジ」
       // ↓
-      // 自動送出「開始拼音」
+      // 自動送出「ピンインチャレンジ開始」
       //
-      // 「開始拼音」代表：
+      // 「ピンインチャレンジ開始」代表：
       // 我要進入拼音遊戲
       // ======================================================
 
@@ -146,16 +146,16 @@ export default async function handler(req, res) {
         );
 
 
-        const handled =
-          await handlePinyinGame(
-            event,
-            message
-          );
+        await handlePinyinGame(
+          event,
+          message
+        );
 
 
-        if (handled) {
-          continue;
-        }
+        // ⭐ 非常重要
+        // 入口處理完畢後直接結束這個 event
+        // 避免同一個 replyToken 被處理兩次
+        continue;
       }
 
 
