@@ -172,7 +172,7 @@ export default async function handler(req, res) {
       // ======================================================
 
       if (
-        message === "開始聊天"
+        message === "チャット START！"
       ) {
 
         userModes.set(
