@@ -13,10 +13,6 @@
 // "tone"   → 聲調遊戲
 // "pinyin" → 拼音遊戲
 // "chat"   → AI 聊天
-//
-// Chat 模式支援：
-// 📝 文字 → Dify
-// 🎤 語音 → OpenAI STT
 // ============================================================
 
 import { handleToneGame } from "./tonegame.js";
@@ -24,11 +20,15 @@ import { handlePinyinGame } from "./pinyingame.js";
 import { handleChat } from "./chat.js";
 import { handleSTT } from "./chat_stt.js";
 
-
 // ============================================================
 // 使用者目前模式
 //
 // userId → "tone" / "pinyin" / "chat"
+//
+// 例如：
+// userA → tone
+// userB → pinyin
+// userC → chat
 // ============================================================
 
 const userModes = new Map();
@@ -67,15 +67,13 @@ export default async function handler(req, res) {
     for (const event of body.events || []) {
 
       // ------------------------------------------------------
-      // 只確認是不是 message event
-      //
-      // ⚠️ 這裡不能限制 text
-      // 因為 audio 也要處理
+      // 目前只處理文字訊息
       // ------------------------------------------------------
 
       if (
         event.type !== "message" ||
-        !event.message
+        !event.message ||
+        event.message.type !== "text"
       ) {
         continue;
       }
@@ -84,120 +82,8 @@ export default async function handler(req, res) {
       const userId =
         event.source.userId;
 
-
-      const messageType =
-        event.message.type;
-
-
-      // ======================================================
-      // 🎤 語音訊息
-      //
-      // 只有 chat 模式才處理
-      // ======================================================
-
-      if (
-        messageType === "audio"
-      ) {
-
-        const mode =
-          userModes.get(userId);
-
-
-        // ----------------------------------------------------
-        // 如果目前不是聊天模式
-        // ----------------------------------------------------
-
-        if (mode !== "chat") {
-
-          await replyToLine(
-            event.replyToken,
-            [
-              {
-                type: "text",
-                text:
-                  "💗 先點選「AI聊天」開始聊天喔～"
-              }
-            ]
-          );
-
-          continue;
-        }
-
-
-        // ----------------------------------------------------
-        // Chat 模式 → STT
-        // ----------------------------------------------------
-
-        try {
-
-          const text =
-            await handleSTT(event);
-
-
-          // --------------------------------------------------
-          // 回傳 STT 辨識結果
-          // --------------------------------------------------
-
-          await replyToLine(
-            event.replyToken,
-            [
-              {
-                type: "text",
-                text:
-                  `🎤 ${text}`
-              }
-            ]
-          );
-
-
-        } catch (error) {
-
-          console.error(
-            "STT Error:",
-            error
-          );
-
-
-          await replyToLine(
-            event.replyToken,
-            [
-              {
-                type: "text",
-                text:
-                  "ごめんね💦 音声をうまく聞き取れなかったみたい…"
-              }
-            ]
-          );
-        }
-
-
-        continue;
-      }
-
-
-      // ======================================================
-      // 不是文字訊息
-      //
-      // 例如：
-      // sticker / image / video / location
-      //
-      // 目前不處理
-      // ======================================================
-
-      if (
-        messageType !== "text"
-      ) {
-        continue;
-      }
-
-
-      // ======================================================
-      // 取得文字
-      // ======================================================
-
       const message =
         event.message.text.trim();
-
 
       const normalizedMessage =
         message.toLowerCase();
@@ -206,7 +92,13 @@ export default async function handler(req, res) {
       // ======================================================
       // 🎧 聲調遊戲入口
       //
-      // 「声調チャレンジ開始」
+      // Rich Menu：
+      // 「聲調遊戲」
+      // ↓
+      // 自動送出「開始」
+      //
+      // 「開始」代表：
+      // 我要進入聲調遊戲
       // ======================================================
 
       if (
@@ -226,6 +118,8 @@ export default async function handler(req, res) {
         );
 
 
+        // 入口處理完畢
+        // 不要再往下面執行
         continue;
       }
 
@@ -233,7 +127,13 @@ export default async function handler(req, res) {
       // ======================================================
       // 🔤 拼音遊戲入口
       //
-      // 「ピンインチャレンジ開始」
+      // Rich Menu：
+      // 「ピンインチャレンジ」
+      // ↓
+      // 自動送出「ピンインチャレンジ開始」
+      //
+      // 「ピンインチャレンジ開始」代表：
+      // 我要進入拼音遊戲
       // ======================================================
 
       if (
@@ -252,6 +152,9 @@ export default async function handler(req, res) {
         );
 
 
+        // ⭐ 非常重要
+        // 入口處理完畢後直接結束這個 event
+        // 避免同一個 replyToken 被處理兩次
         continue;
       }
 
@@ -259,7 +162,13 @@ export default async function handler(req, res) {
       // ======================================================
       // 💗 AI 聊天入口
       //
-      // 「チャット START！」
+      // Rich Menu：
+      // 「AI聊天」
+      // ↓
+      // 自動送出「開始聊天」
+      //
+      // 「開始聊天」代表：
+      // 我要進入 AI 聊天模式
       // ======================================================
 
       if (
@@ -341,53 +250,28 @@ export default async function handler(req, res) {
 
       // ======================================================
       // 💗 使用者正在 AI 聊天模式
-      //
-      // 📝 文字 → Dify
       // ======================================================
 
       if (
         mode === "chat"
       ) {
 
-        try {
-
-          const reply =
-            await handleChat(
-              event,
-              message
-            );
-
-
-          await replyToLine(
-            event.replyToken,
-            [
-              {
-                type: "text",
-                text: reply
-              }
-            ]
+        const reply =
+          await handleChat(
+            event,
+            message
           );
 
 
-        } catch (error) {
-
-          console.error(
-            "Chat Error:",
-            error
-          );
-
-
-          await replyToLine(
-            event.replyToken,
-            [
-              {
-                type: "text",
-                text:
-                  "ごめんね💦 ちょっと調子が悪いみたい…"
-              }
-            ]
-          );
-        }
+        await replyToLine(
+          event.replyToken,
+          [
+            {
+              type: "text",
+              text: reply
+            }
+          ]
+        );
 
 
         continue;
@@ -412,10 +296,6 @@ export default async function handler(req, res) {
 
     }
 
-
-    // ========================================================
-    // Webhook 成功
-    // ========================================================
 
     return res
       .status(200)
