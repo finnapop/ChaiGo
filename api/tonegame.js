@@ -123,10 +123,10 @@ async function showLevelSelection(
         type: "text",
         text:
           "🎧 声調チャレンジ\n\n" +
-          "Levelを選んでね 💗\n\n" +
-          "🟢 LV1　基礎声調\n" +
-          "🔵 LV2　応用声調\n" +
-          "🟣 LV3　チャレンジ声調\n" +
+          "レベルを選んでね 💗\n\n" +
+          "🟢 LV1　基本の声調\n" +
+          "🔵 LV2　ステップアップ\n" +
+          "🟣 LV3　声調チャレンジ\n" +
           "🔴 LV4　上級チャレンジ\n\n" +
           "現在プレイできるのは：LV1\n\n" +
           "👉 「LV1」と入力してスタート！"
@@ -176,8 +176,8 @@ async function startLevel1(event) {
         type: "text",
         text:
           "🎧 LV1 声調チャレンジ開始！💗\n\n" +
-          "全3問\n" +
-          "音声を聞いて、何声か当てよう！\n\n" +
+          "1ラウンド 3問\n" +
+          "音声を聞いて、どの声調か当ててね！\n\n" +
           "第 1 / 3 問"
       },
       {
@@ -190,11 +190,11 @@ async function startLevel1(event) {
       {
         type: "text",
         text:
-          "答えを選んでね：\n\n" +
-          "1️⃣ 一声\n" +
-          "2️⃣ 二声\n" +
-          "3️⃣ 三声\n" +
-          "4️⃣ 四声"
+          "答えてね：\n\n" +
+          "1️⃣ 第一声\n" +
+          "2️⃣ 第二声\n" +
+          "3️⃣ 第三声\n" +
+          "4️⃣ 第四声"
       }
     ]
   );
@@ -215,6 +215,22 @@ export async function handleToneGame(
 
   const normalizedMessage =
     message.trim().toLowerCase();
+
+
+  // ==========================================================
+  // 声調チャレンジ開始 → Level 選択
+  // ==========================================================
+
+  if (
+    message === "声調チャレンジ開始"
+  ) {
+
+    await showLevelSelection(
+      event.replyToken
+    );
+
+    return true;
+  }
 
 
   // ==========================================================
@@ -248,8 +264,8 @@ export async function handleToneGame(
           type: "text",
           text:
             "🔵 LV2\n\n" +
-            "🚧 ただいま準備中です～\n\n" +
-            "まずは LV1 にチャレンジしてね！💗"
+            "🚧 まだ準備中です～\n\n" +
+            "まずは LV1 に挑戦してみてね！💗"
         }
       ]
     );
@@ -274,8 +290,8 @@ export async function handleToneGame(
           type: "text",
           text:
             "🟣 LV3\n\n" +
-            "🚧 ただいま準備中です～\n\n" +
-            "まずは LV1 にチャレンジしてね！💗"
+            "🚧 まだ準備中です～\n\n" +
+            "まずは LV1 に挑戦してみてね！💗"
         }
       ]
     );
@@ -300,8 +316,8 @@ export async function handleToneGame(
           type: "text",
           text:
             "🔴 LV4\n\n" +
-            "🚧 ただいま準備中です～\n\n" +
-            "まずは LV1 にチャレンジしてね！💗"
+            "🚧 まだ準備中です～\n\n" +
+            "まずは LV1 に挑戦してみてね！💗"
         }
       ]
     );
@@ -403,7 +419,7 @@ export async function handleToneGame(
     } else if (percentage >= 66) {
 
       resultMessage =
-        "🎉 すごい！あと少しで満点だよ！";
+        "🎉 いい感じ！あと少しで満点！";
 
     } else {
 
@@ -431,11 +447,11 @@ export async function handleToneGame(
             resultText +
             `第 ${currentQuestion} / 3 問\n\n` +
             "🎊 LV1 チャレンジ完了！\n\n" +
-            `スコア：${finalScore} / 3\n` +
+            `成績：${finalScore} / 3\n` +
             `正答率：${percentage}%\n\n` +
             resultMessage +
             "\n\n" +
-            "もう一度チャレンジする？\n" +
+            "もう一度挑戦する？\n" +
             "「LV1」と入力してね！💗"
         }
       ]
@@ -477,7 +493,7 @@ export async function handleToneGame(
         type: "text",
         text:
           `🎧 第 ${game.questionIndex + 1} / 3 問\n\n` +
-          "もう一度聞いてみよう！"
+          "もう一度聞いてみてね！"
       },
       {
         type: "audio",
@@ -489,11 +505,11 @@ export async function handleToneGame(
       {
         type: "text",
         text:
-          "答えを選んでね：\n\n" +
-          "1️⃣ 一声\n" +
-          "2️⃣ 二声\n" +
-          "3️⃣ 三声\n" +
-          "4️⃣ 四声"
+          "答えてね：\n\n" +
+          "1️⃣ 第一声\n" +
+          "2️⃣ 第二声\n" +
+          "3️⃣ 第三声\n" +
+          "4️⃣ 第四声"
       }
     ]
   );
