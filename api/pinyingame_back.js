@@ -1,6 +1,6 @@
 // ============================================================
 // pinyingame.js
-// 華語娘｜ピンインチャレンジ
+// 華語娘｜拼音遊戲
 //
 // LV1 規則：
 // 1. 一個漢字一題
@@ -167,7 +167,6 @@ function normalizePinyin(text) {
   // ----------------------------------------------------------
 
   const toneMap = {
-
     "ā": ["a", "1"],
     "á": ["a", "2"],
     "ǎ": ["a", "3"],
@@ -311,7 +310,6 @@ function numberToToneMark(
 
 
   const toneMarks = {
-
     a: ["ā", "á", "ǎ", "à"],
     e: ["ē", "é", "ě", "è"],
     i: ["ī", "í", "ǐ", "ì"],
@@ -355,7 +353,6 @@ function numberToToneMark(
 
     const ouIndex =
       base.indexOf("ou");
-
 
     if (
       ouIndex !== -1
@@ -421,9 +418,7 @@ function numberToToneMark(
       0,
       vowelIndex
     ) +
-
     markedVowel +
-
     base.slice(
       vowelIndex + 1
     )
@@ -445,14 +440,14 @@ async function showLevelSelection(
       {
         type: "text",
         text:
-          "🔤 ピンインチャレンジ\n\n" +
-          "レベルを選んでね 💗\n\n" +
-          "🟢 LV1　単漢字ピンイン\n" +
-          "🔵 LV2　ステップアップ\n" +
-          "🟣 LV3　単語ピンイン\n" +
-          "🔴 LV4　上級チャレンジ\n\n" +
-          "現在プレイできるのは：LV1\n\n" +
-          "👉 「LV1」と入力してスタート！"
+          "🔤 拼音挑戰\n\n" +
+          "選擇你的 Level 💗\n\n" +
+          "🟢 LV1　單字拼音\n" +
+          "🔵 LV2　進階拼音\n" +
+          "🟣 LV3　詞語拼音\n" +
+          "🔴 LV4　高手挑戰\n\n" +
+          "目前開放：LV1\n\n" +
+          "👉 請輸入「LV1」開始"
       }
     ]
   );
@@ -482,15 +477,15 @@ async function sendQuestion(
         type: "text",
         text:
           introText +
-          `\n\n第 ${game.questionIndex + 1} / 3 問\n\n` +
+          `\n\n第 ${game.questionIndex + 1} / 3 題\n\n` +
           `【${question.char}】`
       },
       {
         type: "text",
         text:
-          "ピンイン＋声調を入力してください。\n\n" +
-          "例：ma1 または mā\n\n" +
-          "🔊 1回目に間違えた後、音声ヒントを聞けます"
+          "請輸入拼音＋聲調\n\n" +
+          "例如：ma1 或 mā\n\n" +
+          "🔊 第一次答錯後可以聽音"
       }
     ]
   );
@@ -547,9 +542,9 @@ async function startLevel1(
   await sendQuestion(
     event,
     game,
-    "🔤 LV1 ピンインチャレンジ開始！💗\n\n" +
-    "1ラウンド 3問\n" +
-    "漢字を見て、ピンイン＋声調を入力してね！"
+    "🔤 LV1 拼音挑戰開始！💗\n\n" +
+    "一輪 3 題\n" +
+    "看漢字，輸入拼音＋聲調！"
   );
 }
 
@@ -585,9 +580,9 @@ async function playHint(
         type: "text",
 
         text:
-          "🔊 音声ヒント\n\n" +
+          "🔊 聽音提示\n\n" +
           `【${question.char}】\n\n` +
-          "もう一度、ピンイン＋声調を考えてみてね！"
+          "再想想看它的拼音＋聲調喔～"
       }
     ]
   );
@@ -633,10 +628,10 @@ async function nextQuestion(
           text:
             resultText +
             "\n\n" +
-            `🔤 第 ${game.questionIndex + 1} / 3 問\n\n` +
+            `🔤 第 ${game.questionIndex + 1} / 3 題\n\n` +
             `【${nextQuestion.char}】\n\n` +
-            "ピンイン＋声調を入力してください。\n\n" +
-            "🔊 1回目に間違えた後、音声ヒントを聞けます"
+            "請輸入拼音＋聲調\n\n" +
+            "🔊 第一次答錯後可以聽音"
         }
       ]
     );
@@ -668,19 +663,19 @@ async function nextQuestion(
   ) {
 
     resultMessage =
-      "🏆 全問正解！すごい！";
+      "🏆 全部答對！太厲害了！";
 
   } else if (
     percentage >= 66
   ) {
 
     resultMessage =
-      "🎉 いい感じ！あと少しで満点！";
+      "🎉 很棒！再練一下就滿分了！";
 
   } else {
 
     resultMessage =
-      "💪 大丈夫！もう一度チャレンジしてみよう！";
+      "💪 沒關係，再挑戰一次吧！";
   }
 
 
@@ -697,13 +692,13 @@ async function nextQuestion(
         text:
           resultText +
           "\n\n" +
-          "🎊 LV1 チャレンジ完了！\n\n" +
-          `成績：${finalScore} / 3\n` +
+          "🎊 LV1 挑戰完成！\n\n" +
+          `你的成績：${finalScore} / 3\n` +
           `正答率：${percentage}%\n\n` +
           resultMessage +
           "\n\n" +
-          "もう一度チャレンジする？\n" +
-          "「LV1」と入力してね！💗"
+          "想再挑戰一次嗎？\n" +
+          "輸入「LV1」即可！💗"
       }
     ]
   );
@@ -733,11 +728,10 @@ export async function handlePinyinGame(
 
 
   // ==========================================================
-  // ピンインチャレンジ開始
+  // 開始拼音
   // ==========================================================
 
   if (
-    message === "ピンインチャレンジ開始" ||
     message === "開始拼音"
   ) {
 
@@ -782,12 +776,11 @@ export async function handlePinyinGame(
           type: "text",
           text:
             "🔵 LV2\n\n" +
-            "🚧 現在準備中です。\n\n" +
-            "まずは LV1 に挑戦してみてね！💗"
+            "🚧 還在準備中喔～\n\n" +
+            "先來挑戰 LV1 吧！💗"
         }
       ]
     );
-
 
     return true;
   }
@@ -809,12 +802,11 @@ export async function handlePinyinGame(
           type: "text",
           text:
             "🟣 LV3\n\n" +
-            "🚧 現在準備中です。\n\n" +
-            "まずは LV1 に挑戦してみてね！💗"
+            "🚧 還在準備中喔～\n\n" +
+            "先來挑戰 LV1 吧！💗"
         }
       ]
     );
-
 
     return true;
   }
@@ -836,12 +828,11 @@ export async function handlePinyinGame(
           type: "text",
           text:
             "🔴 LV4\n\n" +
-            "🚧 現在準備中です。\n\n" +
-            "まずは LV1 に挑戦してみてね！💗"
+            "🚧 還在準備中喔～\n\n" +
+            "先來挑戰 LV1 吧！💗"
         }
       ]
     );
-
 
     return true;
   }
@@ -874,14 +865,12 @@ export async function handlePinyinGame(
 
 
   // ==========================================================
-  // 🔊 音声
+  // 🔊 聽音
   //
   // 只能在第一次答錯後使用
   // ==========================================================
 
   if (
-    normalizedMessage === "音声" ||
-    normalizedMessage === "おんせい" ||
     normalizedMessage === "聽音" ||
     normalizedMessage === "听音" ||
     normalizedMessage === "audio"
@@ -901,12 +890,11 @@ export async function handlePinyinGame(
           {
             type: "text",
             text:
-              "💡 まず一度答えてみてね！\n\n" +
-              "間違えた後に 🔊 音声ヒントを使えます。"
+              "💡 先試著回答一次喔！\n\n" +
+              "答錯後就可以使用 🔊 聽音提示。"
           }
         ]
       );
-
 
       return true;
     }
@@ -926,11 +914,10 @@ export async function handlePinyinGame(
           {
             type: "text",
             text:
-              "🔊 この問題の音声ヒントは、もう使ったよ！"
+              "🔊 這一題的聽音提示已經使用過囉！"
           }
         ]
       );
-
 
       return true;
     }
@@ -944,7 +931,6 @@ export async function handlePinyinGame(
       event,
       game
     );
-
 
     return true;
   }
@@ -984,9 +970,9 @@ export async function handlePinyinGame(
     await nextQuestion(
       event,
       game,
-      "🎉 正解！\n\n" +
+      "🎉 答對了！\n\n" +
       `【${question.char}】 → ${toneMarked}\n` +
-      `⭐ 現在のスコア：${game.score} / ${game.questionIndex + 1}`
+      `⭐ 目前得分：${game.score} / ${game.questionIndex + 1}`
     );
 
 
@@ -1009,7 +995,6 @@ export async function handlePinyinGame(
         message
       );
 
-
     const correctPinyin =
       normalizePinyin(
         question.pinyin
@@ -1028,12 +1013,12 @@ export async function handlePinyinGame(
     ) {
 
       errorMessage =
-        "❌ ピンインは合っているけど、声調が違うよ！";
+        "❌ 拼音對了，但聲調不對喔！";
 
     } else {
 
       errorMessage =
-        "❌ もう一度チャレンジしてみてね！";
+        "❌ 再試一次！";
     }
 
 
@@ -1046,8 +1031,8 @@ export async function handlePinyinGame(
             errorMessage +
             "\n\n" +
             `【${question.char}】\n\n` +
-            "🔊 「音声」と入力すると、1回だけヒントを聞けます！\n\n" +
-            "もう一度答えてみてね！"
+            "🔊 可以輸入「聽音」聽一次提示！\n\n" +
+            "然後再回答一次。"
         }
       ]
     );
@@ -1073,8 +1058,8 @@ export async function handlePinyinGame(
   await nextQuestion(
     event,
     game,
-    "❌ 残念！\n\n" +
-    `正解：${correctToneMarked}`
+    "❌ 答錯了！\n\n" +
+    `正確答案：${correctToneMarked}`
   );
 
 
