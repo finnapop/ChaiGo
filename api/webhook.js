@@ -108,6 +108,28 @@ export default async function handler(req, res) {
             text
           );
 
+
+const MAX_INPUT_LENGTH = 100;
+
+if (text.length > MAX_INPUT_LENGTH) {
+
+  await replyToLine(
+    event.replyToken,
+    [
+      {
+        type: "text",
+        text:
+          "ちょっと長かったみたい💦\n" +
+          "もう少し短く話してみてね～！"
+      }
+    ]
+  );
+
+  continue;
+}
+
+
+
           // --------------------------------------------------
           // 🤖 STT → Dify
           // --------------------------------------------------
