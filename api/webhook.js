@@ -4,53 +4,33 @@
 //
 // LINE 唯一 Webhook 入口
 //
-// 負責：
-// 1. 接收 LINE 訊息
-// 2. 判斷使用者目前模式
-// 3. 將訊息交給 tonegame / pinyingame / chat
-//
 // 模式：
 // "tone"   → 聲調遊戲
 // "pinyin" → 拼音遊戲
 // "chat"   → AI 聊天
 //
 // Chat 模式支援：
-// 📝 文字 → Dify
-// 🎤 語音 → OpenAI STT
+// 📝 文字 → Dify → 文字
+// 🎤 語音 → STT → Dify → TTS → LINE Audio
 // ============================================================
 
 import { handleToneGame } from "./tonegame.js";
 import { handlePinyinGame } from "./pinyingame.js";
 import { handleChat } from "./chat.js";
 import { handleSTT } from "./chat_stt.js";
-
-
-// ============================================================
-// 使用者目前模式
-//
-// userId → "tone" / "pinyin" / "chat"
-// ============================================================
+import { handleTTS } from "./chat_tts.js";
+import { uploadTTS } from "./chat_tts_blob.js";
+import { getAudioDuration } from "./chat_audio.js";
 
 const userModes = new Map();
 
-
-// ============================================================
-// LINE Webhook
-// ============================================================
-
 export default async function handler(req, res) {
 
-  // ==========================================================
-  // LINE Verify / 瀏覽器測試
-  // ==========================================================
-
   if (req.method !== "POST") {
-
     return res
       .status(200)
       .send("ChaiGo LINE Bot is running!");
   }
-
 
   try {
 
@@ -59,19 +39,7 @@ export default async function handler(req, res) {
         ? JSON.parse(req.body)
         : req.body;
 
-
-    // ========================================================
-    // 處理 LINE Events
-    // ========================================================
-
     for (const event of body.events || []) {
-
-      // ------------------------------------------------------
-      // 只確認是不是 message event
-      //
-      // ⚠️ 這裡不能限制 text
-      // 因為 audio 也要處理
-      // ------------------------------------------------------
 
       if (
         event.type !== "message" ||
@@ -80,19 +48,27 @@ export default async function handler(req, res) {
         continue;
       }
 
-
       const userId =
         event.source.userId;
-
 
       const messageType =
         event.message.type;
 
-
       // ======================================================
       // 🎤 語音訊息
       //
-      // 只有 chat 模式才處理
+      // Chat 模式：
+      // LINE Audio
+      // ↓
+      // STT
+      // ↓
+      // Dify
+      // ↓
+      // TTS
+      // ↓
+      // Blob
+      // ↓
+      // LINE Audio
       // ======================================================
 
       if (
@@ -101,11 +77,6 @@ export default async function handler(req, res) {
 
         const mode =
           userModes.get(userId);
-
-
-        // ----------------------------------------------------
-        // 如果目前不是聊天模式
-        // ----------------------------------------------------
 
         if (mode !== "chat") {
 
@@ -123,50 +94,87 @@ export default async function handler(req, res) {
           continue;
         }
 
-
-        // ----------------------------------------------------
-        // Chat 模式 → STT
-        // ----------------------------------------------------
-
         try {
 
-const text =
-  await handleSTT(event);
+          // --------------------------------------------------
+          // 🎤 LINE Audio → STT
+          // --------------------------------------------------
 
+          const text =
+            await handleSTT(event);
 
-// --------------------------------------------------
-// STT → Dify
-// --------------------------------------------------
+          console.log(
+            "STT text:",
+            text
+          );
 
-const reply =
-  await handleChat(
-    event,
-    text
-  );
+          // --------------------------------------------------
+          // 🤖 STT → Dify
+          // --------------------------------------------------
 
+          const reply =
+            await handleChat(
+              event,
+              text
+            );
 
-// --------------------------------------------------
-// 回覆 Dify 結果
-// --------------------------------------------------
+          console.log(
+            "Dify reply:",
+            reply
+          );
 
-await replyToLine(
-  event.replyToken,
-  [
-    {
-      type: "text",
-      text: reply
-    }
-  ]
-);
+          // --------------------------------------------------
+          // 🔊 Dify → TTS
+          // --------------------------------------------------
 
+          const audioBuffer =
+            await handleTTS(reply);
+
+          // --------------------------------------------------
+          // ☁️ TTS MP3 → Vercel Blob
+          // --------------------------------------------------
+
+          const audioUrl =
+            await uploadTTS(
+              audioBuffer
+            );
+
+          // --------------------------------------------------
+          // ⏱ 取得音檔長度
+          // --------------------------------------------------
+
+          const duration =
+            await getAudioDuration(
+              audioBuffer
+            );
+
+          // --------------------------------------------------
+          // 🔊 LINE Audio Reply
+          // --------------------------------------------------
+
+          await replyToLine(
+            event.replyToken,
+            [
+              {
+                type: "audio",
+                originalContentUrl:
+                  audioUrl,
+                duration:
+                  duration
+              }
+            ]
+          );
 
         } catch (error) {
 
           console.error(
-            "STT Error:",
+            "Voice Chat Error:",
             error
           );
 
+          // --------------------------------------------------
+          // 發生錯誤時，至少回傳文字
+          // --------------------------------------------------
 
           await replyToLine(
             event.replyToken,
@@ -174,24 +182,17 @@ await replyToLine(
               {
                 type: "text",
                 text:
-                  "ごめんね💦 音声をうまく聞き取れなかったみたい…"
+                  "ごめんね💦 音声の返信をうまく作れなかったみたい…"
               }
             ]
           );
         }
 
-
         continue;
       }
 
-
       // ======================================================
       // 不是文字訊息
-      //
-      // 例如：
-      // sticker / image / video / location
-      //
-      // 目前不處理
       // ======================================================
 
       if (
@@ -200,23 +201,14 @@ await replyToLine(
         continue;
       }
 
-
-      // ======================================================
-      // 取得文字
-      // ======================================================
-
       const message =
         event.message.text.trim();
-
 
       const normalizedMessage =
         message.toLowerCase();
 
-
       // ======================================================
       // 🎧 聲調遊戲入口
-      //
-      // 「声調チャレンジ開始」
       // ======================================================
 
       if (
@@ -229,21 +221,16 @@ await replyToLine(
           "tone"
         );
 
-
         await handleToneGame(
           event,
           message
         );
 
-
         continue;
       }
 
-
       // ======================================================
       // 🔤 拼音遊戲入口
-      //
-      // 「ピンインチャレンジ開始」
       // ======================================================
 
       if (
@@ -255,16 +242,13 @@ await replyToLine(
           "pinyin"
         );
 
-
         await handlePinyinGame(
           event,
           message
         );
 
-
         continue;
       }
-
 
       // ======================================================
       // 💗 AI 聊天入口
@@ -281,7 +265,6 @@ await replyToLine(
           "chat"
         );
 
-
         await replyToLine(
           event.replyToken,
           [
@@ -294,18 +277,11 @@ await replyToLine(
           ]
         );
 
-
         continue;
       }
 
-
-      // ======================================================
-      // 取得使用者目前模式
-      // ======================================================
-
       const mode =
         userModes.get(userId);
-
 
       // ======================================================
       // 🎧 使用者正在玩聲調遊戲
@@ -321,12 +297,10 @@ await replyToLine(
             message
           );
 
-
         if (handled) {
           continue;
         }
       }
-
 
       // ======================================================
       // 🔤 使用者正在玩拼音遊戲
@@ -342,17 +316,15 @@ await replyToLine(
             message
           );
 
-
         if (handled) {
           continue;
         }
       }
 
-
       // ======================================================
       // 💗 使用者正在 AI 聊天模式
       //
-      // 📝 文字 → Dify
+      // 📝 文字 → Dify → 文字
       // ======================================================
 
       if (
@@ -367,7 +339,6 @@ await replyToLine(
               message
             );
 
-
           await replyToLine(
             event.replyToken,
             [
@@ -378,14 +349,12 @@ await replyToLine(
             ]
           );
 
-
         } catch (error) {
 
           console.error(
             "Chat Error:",
             error
           );
-
 
           await replyToLine(
             event.replyToken,
@@ -399,13 +368,11 @@ await replyToLine(
           );
         }
 
-
         continue;
       }
 
-
       // ======================================================
-      // 沒有任何功能處理這個訊息
+      // 💗 沒有模式
       // ======================================================
 
       await replyToLine(
@@ -419,20 +386,13 @@ await replyToLine(
           }
         ]
       );
-
     }
-
-
-    // ========================================================
-    // Webhook 成功
-    // ========================================================
 
     return res
       .status(200)
       .json({
         ok: true
       });
-
 
   } catch (error) {
 
@@ -441,11 +401,11 @@ await replyToLine(
       error
     );
 
-
     return res
       .status(500)
       .json({
-        error: "Internal Server Error"
+        error:
+          "Internal Server Error"
       });
   }
 }
@@ -481,12 +441,10 @@ async function replyToLine(
       }
     );
 
-
   if (!response.ok) {
 
     const errorText =
       await response.text();
-
 
     console.error(
       "LINE Reply API Error:",
@@ -494,12 +452,10 @@ async function replyToLine(
       errorText
     );
 
-
     throw new Error(
       `LINE Reply API failed: ${response.status}`
     );
   }
-
 
   return response.json();
 }
