@@ -130,24 +130,34 @@ export default async function handler(req, res) {
 
         try {
 
-          const text =
-            await handleSTT(event);
+const text =
+  await handleSTT(event);
 
 
-          // --------------------------------------------------
-          // 回傳 STT 辨識結果
-          // --------------------------------------------------
+// --------------------------------------------------
+// STT → Dify
+// --------------------------------------------------
 
-          await replyToLine(
-            event.replyToken,
-            [
-              {
-                type: "text",
-                text:
-                  `🎤 ${text}`
-              }
-            ]
-          );
+const reply =
+  await handleChat(
+    event,
+    text
+  );
+
+
+// --------------------------------------------------
+// 回覆 Dify 結果
+// --------------------------------------------------
+
+await replyToLine(
+  event.replyToken,
+  [
+    {
+      type: "text",
+      text: reply
+    }
+  ]
+);
 
 
         } catch (error) {
