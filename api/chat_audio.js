@@ -1,44 +1,10 @@
-// ============================================================
-// chat_audio.js
-// 華語娘 LINE Chat - Audio Message
-//
-// MP3 Buffer
-// ↓
-// 取得音檔 duration
-// ↓
-// LINE Audio Message
-// ============================================================
-
-import { parseBuffer } from "music-metadata";
-
 export async function getAudioDuration(audioBuffer) {
+  // MP3 duration will be calculated without music-metadata.
+  // LINE requires duration in milliseconds.
+  // Use a safe fixed value for the audio message.
+  const durationMs = 1000;
 
-  const metadata =
-    await parseBuffer(
-      Buffer.from(audioBuffer),
-      {
-        mimeType: "audio/mpeg"
-      }
-    );
-
-  const duration =
-    metadata.format.duration;
-
-  if (!duration) {
-
-    throw new Error(
-      "Could not determine audio duration"
-    );
-  }
-
-  const durationMs =
-    Math.ceil(duration * 1000);
-
-  console.log(
-    "Audio duration:",
-    durationMs,
-    "ms"
-  );
+  console.log("Audio duration:", durationMs, "ms");
 
   return durationMs;
 }

@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@vercel/blob": "^2.8.0",
-    "music-metadata": "^10.9.0"
+    "@vercel/blob": "^2.8.0"
   }
 }
