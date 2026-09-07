@@ -1,4 +1,4 @@
-```javascript
+
 // ============================================================
 // chat_rvc.js
 // 華語娘 RVC
@@ -12,8 +12,7 @@
 
 export async function handleRVC(audioBuffer) {
 
-  const rvcApiUrl =
-    process.env.RVC_API_URL;
+  const rvcApiUrl = process.env.RVC_API_URL;
 
   if (!rvcApiUrl) {
     throw new Error(
@@ -26,16 +25,18 @@ export async function handleRVC(audioBuffer) {
     rvcApiUrl
   );
 
-  const formData =
-    new FormData();
+  // ==========================================================
+  // 建立 multipart/form-data
+  // ==========================================================
 
-  const audioBlob =
-    new Blob(
-      [audioBuffer],
-      {
-        type: "audio/mpeg"
-      }
-    );
+  const formData = new FormData();
+
+  const audioBlob = new Blob(
+    [audioBuffer],
+    {
+      type: "audio/mpeg"
+    }
+  );
 
   formData.append(
     "audio",
@@ -43,14 +44,21 @@ export async function handleRVC(audioBuffer) {
     "tts.mp3"
   );
 
-  const response =
-    await fetch(
-      `${rvcApiUrl}/convert`,
-      {
-        method: "POST",
-        body: formData
-      }
-    );
+  // ==========================================================
+  // 呼叫 ChaiGo RVC API
+  // ==========================================================
+
+  const response = await fetch(
+    `${rvcApiUrl}/convert`,
+    {
+      method: "POST",
+      body: formData
+    }
+  );
+
+  // ==========================================================
+  // RVC API 錯誤
+  // ==========================================================
 
   if (!response.ok) {
 
@@ -68,16 +76,25 @@ export async function handleRVC(audioBuffer) {
     );
   }
 
+  // ==========================================================
+  // 取得 RVC 回傳的 WAV
+  // ==========================================================
+
   const arrayBuffer =
     await response.arrayBuffer();
 
   const rvcBuffer =
     Buffer.from(arrayBuffer);
 
+  // ==========================================================
+  // 確認有收到音檔
+  // ==========================================================
+
   if (
     !rvcBuffer ||
     rvcBuffer.length === 0
   ) {
+
     throw new Error(
       "ChaiGo RVC returned empty audio"
     );
@@ -91,4 +108,3 @@ export async function handleRVC(audioBuffer) {
 
   return rvcBuffer;
 }
-```
