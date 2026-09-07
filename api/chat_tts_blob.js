@@ -1,10 +1,14 @@
 // ============================================================
 // chat_tts_blob.js
-// 華語娘 LINE Chat - Upload TTS Audio
+// 華語娘 LINE Chat - Upload RVC Audio
 //
 // OpenAI TTS
 // ↓
 // MP3 Buffer
+// ↓
+// ChaiGo RVC
+// ↓
+// WAV Buffer
 // ↓
 // Vercel Blob
 // ↓
@@ -16,7 +20,7 @@ import { put } from "@vercel/blob";
 export async function uploadTTS(audioBuffer) {
 
   const filename =
-    `audio/chaigo-${Date.now()}.mp3`;
+    `audio/chaigo-${Date.now()}.wav`;
 
   const blob =
     await put(
@@ -24,7 +28,7 @@ export async function uploadTTS(audioBuffer) {
       audioBuffer,
       {
         access: "public",
-        contentType: "audio/mpeg"
+        contentType: "audio/wav"
       }
     );
 
