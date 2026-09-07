@@ -11,7 +11,7 @@
 //
 // Chat 模式支援：
 // 📝 文字 → Dify → 文字
-// 🎤 語音 → STT → Dify → TTS → LINE Audio
+// 🎤 語音 → STT → Dify → TTS → RVC → LINE Audio
 // ============================================================
 
 import { handleToneGame } from "./tonegame.js";
@@ -19,6 +19,7 @@ import { handlePinyinGame } from "./pinyingame.js";
 import { handleChat } from "./chat.js";
 import { handleSTT } from "./chat_stt.js";
 import { handleTTS } from "./chat_tts.js";
+import { handleRVC } from "./chat_rvc.js";
 import { uploadTTS } from "./chat_tts_blob.js";
 import { getAudioDuration } from "./chat_audio.js";
 
@@ -66,6 +67,8 @@ export default async function handler(req, res) {
       // ↓
       // TTS
       // ↓
+      // RVC
+      // ↓
       // Blob
       // ↓
       // LINE Audio
@@ -108,27 +111,24 @@ export default async function handler(req, res) {
             text
           );
 
+          const MAX_INPUT_LENGTH = 100;
 
-const MAX_INPUT_LENGTH = 100;
+          if (text.length > MAX_INPUT_LENGTH) {
 
-if (text.length > MAX_INPUT_LENGTH) {
+            await replyToLine(
+              event.replyToken,
+              [
+                {
+                  type: "text",
+                  text:
+                    "ちょっと長かったみたい💦\n" +
+                    "もう少し短く話してみてね～！"
+                }
+              ]
+            );
 
-  await replyToLine(
-    event.replyToken,
-    [
-      {
-        type: "text",
-        text:
-          "ちょっと長かったみたい💦\n" +
-          "もう少し短く話してみてね～！"
-      }
-    ]
-  );
-
-  continue;
-}
-
-
+            continue;
+          }
 
           // --------------------------------------------------
           // 🤖 STT → Dify
@@ -146,28 +146,49 @@ if (text.length > MAX_INPUT_LENGTH) {
           );
 
           // --------------------------------------------------
-          // 🔊 Dify → TTS
+          // 🔊 Dify → OpenAI TTS
           // --------------------------------------------------
 
           const audioBuffer =
             await handleTTS(reply);
 
-          // --------------------------------------------------
-          // ☁️ TTS MP3 → Vercel Blob
-          // --------------------------------------------------
+          console.log(
+            "[Voice Chat] TTS generated:",
+            audioBuffer.length,
+            "bytes"
+          );
 
-          const audioUrl =
-            await uploadTTS(
+          // ==================================================
+          // 🔊 OpenAI TTS → ChaiGo RVC
+          // ==================================================
+
+          const rvcBuffer =
+            await handleRVC(
               audioBuffer
             );
 
+          console.log(
+            "[Voice Chat] RVC generated:",
+            rvcBuffer.length,
+            "bytes"
+          );
+
+          // ==================================================
+          // ☁️ RVC WAV → Vercel Blob
+          // ==================================================
+
+          const audioUrl =
+            await uploadTTS(
+              rvcBuffer
+            );
+
           // --------------------------------------------------
-          // ⏱ 取得音檔長度
+          // ⏱ 取得 RVC 音檔長度
           // --------------------------------------------------
 
           const duration =
             await getAudioDuration(
-              audioBuffer
+              rvcBuffer
             );
 
           // --------------------------------------------------
