@@ -1,0 +1,40 @@
+.game-home .section__head h1 { margin: 0; font-size: clamp(29px, 3.4vw, 42px); line-height: 1.1; }
+.pinyin-guide h3 { margin: 0 0 9px; font-size: 14px; }
+.pinyin-guide__examples { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.pinyin-guide__examples span { display: grid; gap: 2px; padding: 9px 11px; border: 2px solid var(--ink); border-radius: 11px; background: #fff; }
+.pinyin-guide__examples b { font-size: 20px; }
+.pinyin-guide__examples small { font-size: 10px; font-weight: 700; opacity: .72; }
+.pinyin-question { display: grid; min-height: 150px; place-items: center; align-content: center; gap: 3px; margin-top: 14px; border: 2px dashed var(--ink); border-radius: 18px; background: #fff9fc; text-align: center; }
+.pinyin-question p { margin: 0; font-size: 12px; font-weight: 700; opacity: .7; }
+.pinyin-question strong { font-size: clamp(64px, 8vw, 88px); line-height: 1.15; }
+.pinyin-answer-form { margin-top: 17px; }
+.pinyin-answer-form label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 900; }
+.pinyin-answer-row { display: flex; gap: 10px; }
+.pinyin-answer-row input { min-width: 0; min-height: 49px; flex: 1; padding: 9px 13px; border: 2px solid var(--ink); border-radius: 13px; background: #fff; font-size: 16px; }
+.pinyin-answer-row .btn { min-height: 49px; padding: 8px 14px; border-radius: 13px; }
+.input-help { margin: 6px 0 0; font-size: 10px; font-weight: 700; opacity: .7; }
+.pinyin-hint-row { display: flex; align-items: center; gap: 11px; margin-top: 13px; }
+.pinyin-hint-row #hint-status { font-size: 10px; font-weight: 700; opacity: .72; }
+.pinyin-hint-row .audio-button { min-height: 42px; padding: 6px 12px; font-size: 12px; }
+.pinyin-hint-row .audio-button:disabled { box-shadow: none; }
+.pinyin-feedback { margin-top: 12px; font-size: 13px; }
+.pinyin-feedback.is-correct { background: #cbffe9; }
+.pinyin-feedback.is-wrong { background: #ffe2df; }
+.pinyin-next-row { display: flex; min-height: 54px; align-items: center; justify-content: space-between; gap: 12px; margin-top: 7px; }
+.pinyin-save-status { display: grid; min-width: 0; gap: 2px; }
+.pinyin-next-row .save-status { max-width: 36ch; }
+.pinyin-next-row .retry-link { justify-self: start; margin-top: 0; padding: 0; font-size: 11px; }
+.pinyin-next-row .btn { flex: 0 0 auto; }
+.pinyin-next-row .btn:disabled { cursor: not-allowed; }
+.inline-game .progress-track { margin-bottom: 12px; }
+
+@media (max-width: 680px) {
+  .pinyin-question { min-height: 130px; }
+  .pinyin-answer-row { align-items: stretch; }
+  .pinyin-answer-row input { font-size: 16px; }
+  .pinyin-answer-row .btn { padding-inline: 10px; font-size: 12px; }
+  .pinyin-hint-row { align-items: flex-start; flex-direction: column; gap: 6px; }
+  .pinyin-next-row { align-items: flex-end; }
+  .pinyin-next-row .save-status { max-width: 34ch; font-size: 10px; }
+  .pinyin-next-row .btn { padding-inline: 10px; font-size: 12px; }
+}

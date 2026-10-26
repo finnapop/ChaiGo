@@ -1,0 +1,1387 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>チャイ語娘 ChaiGo!｜一緒に中国語を学ぼう！</title>
+    <meta
+      name="description"
+      content="VTuberの華語娘チャイ語娘と、ゲーム・会話・日常のミッションを通じて台湾華語を楽しく学ぶプラットフォーム ChaiGo!"
+    />
+
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --ink: #111;
+        --paper: #fff7ef;
+        --cream: #fff1d6;
+        --pink: #ff8fe9;
+        --yellow: #ffd200;
+        --mint: #49f2c2;
+        --blue: #77a8ff;
+        --shadow: 6px 6px 0 var(--ink);
+        --radius: 22px;
+        --border: 3px solid var(--ink);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "Noto Sans JP", system-ui, -apple-system, "Segoe UI",
+          sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+        line-height: 1.55;
+      }
+
+      img {
+        max-width: 100%;
+        display: block;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .container {
+        width: min(1120px, calc(100% - 40px));
+        margin-inline: auto;
+      }
+
+      /* Topbar */
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: rgba(255, 247, 239, 0.9);
+        backdrop-filter: blur(8px);
+        border-bottom: var(--border);
+      }
+
+      .topbar__inner {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px 0;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        grid-column: 1;
+        grid-row: 1;
+        width: fit-content;
+        min-width: 0;
+      }
+
+      .brand__logo {
+        display: block;
+        width: auto;
+        max-width: 200px;
+        height: 46px;
+        object-fit: contain;
+        object-position: left center;
+      }
+
+      .avatar-mark {
+        display: block;
+        flex: 0 0 40px;
+        width: 40px;
+        height: 40px;
+        border: var(--border);
+        border-radius: 50%;
+        background: var(--yellow);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .avatar-mark img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .topbar__account {
+        display: flex;
+        grid-column: 2;
+        grid-row: 1;
+        align-items: center;
+        gap: 10px;
+        flex: 0 0 auto;
+      }
+
+      .topbar__user {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--ink);
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .topbar__user:focus-visible {
+        outline: 3px solid var(--blue);
+        outline-offset: 4px;
+      }
+
+      .user-name { white-space: nowrap; }
+      #joinButton[hidden], .topbar__user[hidden] { display: none; }
+
+      .brand__name {
+        font-size: 18px;
+      }
+
+      .nav {
+        display: none;
+        grid-column: 1 / -1;
+        grid-row: 2;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        font-weight: 600;
+      }
+
+      .nav.is-open { display: flex; }
+
+      .nav a {
+        padding: 10px 12px;
+        border: 2px solid transparent;
+        border-radius: 999px;
+        transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease,
+          transform 150ms ease;
+      }
+
+      .nav a:hover {
+        border-color: var(--ink);
+        background: #fdafed;
+        box-shadow: 2px 2px 0 var(--ink);
+        transform: translate(-1px, -1px);
+        text-decoration: none;
+      }
+
+      .menu-toggle {
+        display: grid;
+        grid-column: 3;
+        grid-row: 1;
+        place-content: center;
+        gap: 5px;
+        width: 48px;
+        height: 48px;
+        border: var(--border);
+        border-radius: 14px;
+        background: var(--yellow);
+        box-shadow: 4px 4px 0 var(--ink);
+        cursor: pointer;
+      }
+
+      .menu-toggle span { display: block; width: 22px; height: 2px; background: var(--ink); }
+      .menu-toggle:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 12px;
+        border: var(--border);
+        border-radius: 999px;
+        background: #fff;
+        box-shadow: var(--shadow);
+        font-weight: 700;
+        font-family: inherit;
+        font-size: 14px;
+        white-space: nowrap;
+      }
+
+      .pill--dark {
+        background: var(--ink);
+        color: #fff;
+      }
+
+      .pill:hover {
+        text-decoration: none;
+        transform: translate(-1px, -1px);
+      }
+
+      .pill:disabled {
+        cursor: not-allowed;
+        opacity: 1;
+      }
+
+      /* Hero */
+      .hero {
+        border-bottom: var(--border);
+        background: linear-gradient(180deg, #ffb3f1 0 55%, #ffd200 55% 100%);
+      }
+
+      .hero__grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        padding: 36px 0;
+        align-items: center;
+      }
+
+      .hero__left {
+        padding: 10px 0;
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 12px;
+        border: var(--border);
+        border-radius: 999px;
+        background: #fff;
+        box-shadow: 4px 4px 0 var(--ink);
+        font-weight: 700;
+        font-size: 14px;
+      }
+
+      .tag--mint {
+        background: var(--mint);
+      }
+
+      .tag--yellow {
+        background: var(--yellow);
+      }
+
+      .tag--pink {
+        background: var(--pink);
+      }
+
+      .tag--blue {
+        background: var(--blue);
+      }
+
+      .hero__title {
+        margin: 0 0 14px;
+        font-size: clamp(36px, 9vw, 50px);
+        line-height: 1.02;
+        letter-spacing: -0.6px;
+      }
+
+      .hero__title-accent {
+        display: inline-block;
+        background: #fff;
+        border: var(--border);
+        border-radius: 16px;
+        padding: 6px 10px;
+        box-shadow: var(--shadow);
+      }
+
+      .hero__lead {
+        margin: 0 0 18px;
+        font-size: 18px;
+        max-width: 56ch;
+      }
+
+      .hero__support {
+        margin: 0 0 18px;
+        max-width: 56ch;
+        font-weight: 600;
+      }
+
+      .hero__cta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 18px 0 18px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 12px 16px;
+        border: var(--border);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        font-weight: 800;
+        background: #fff;
+        min-height: 48px;
+      }
+
+      .btn:hover {
+        text-decoration: none;
+        transform: translate(-1px, -1px);
+      }
+
+      .hero__cta .btn:hover {
+        background: #fdafed;
+        color: var(--ink);
+      }
+
+      .btn--dark {
+        background: var(--ink);
+        color: #fff;
+      }
+
+      .btn--light {
+        background: #fff;
+      }
+
+      .mini {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .mini__card {
+        border: var(--border);
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 4px 4px 0 var(--ink);
+        padding: 12px 12px;
+      }
+
+      .mini__k {
+        font-size: 12px;
+        opacity: 0.8;
+        font-weight: 700;
+      }
+
+      .mini__v {
+        font-size: 14px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        border: 2px solid var(--ink);
+        display: inline-block;
+      }
+
+      .dot--green {
+        background: #45f08a;
+      }
+
+      /* Hero art */
+      .hero-art {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: var(--border);
+        border-radius: var(--radius);
+        background: #fff;
+        box-shadow: var(--shadow);
+        padding: 33px 18px;
+        min-height: 420px;
+        overflow: hidden;
+      }
+
+      .hero-art__blob {
+        position: absolute;
+        inset: auto;
+        width: 320px;
+        height: 320px;
+        right: -60px;
+        top: 40px;
+        background: #ffb3f1;
+        border: var(--border);
+        border-radius: 60% 40% 60% 40% / 55% 45% 55% 45%;
+        transform: rotate(12deg);
+      }
+
+      .hero-art__portrait {
+        position: relative;
+        z-index: 2;
+        margin: 0;
+        width: 100%;
+        max-width: 360px;
+        border: var(--border);
+        border-radius: 26px;
+        background: #fff;
+        box-shadow: 5px 5px 0 var(--ink);
+        overflow: hidden;
+      }
+
+      .hero-art__portrait img {
+        width: 100%;
+        height: auto;
+        border-radius: 24px;
+      }
+
+      #avatarHotspot {
+        position: absolute;
+        left: 20%;
+        top: 38%;
+        width: 30%;
+        aspect-ratio: 1;
+        border: 0;
+        padding: 0;
+        border-radius: 50%;
+        background: transparent;
+        cursor: pointer;
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
+      }
+
+      #avatarHotspot.is-active {
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.85), 0 0 28px rgba(255, 210, 0, 0.95);
+        transform: scale(1.06);
+      }
+
+      #clickHint {
+        position: absolute;
+        left: 50%;
+        bottom: -28px;
+        transform: translateX(-50%);
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: var(--ink);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        white-space: nowrap;
+      }
+
+      #clickHint.is-visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-4px);
+      }
+
+      #avatarSpeech {
+        position: absolute;
+        z-index: 4;
+        top: 27%;
+        right: 16px;
+        max-width: min(210px, 70%);
+        padding: 12px 14px;
+        border: var(--border);
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 4px 4px 0 var(--ink);
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      #avatarSpeech[hidden] { display: none; }
+
+      .sticker {
+        position: absolute;
+        z-index: 3;
+        border: var(--border);
+        border-radius: 999px;
+        padding: 10px 12px;
+        background: #fff;
+        box-shadow: 4px 4px 0 var(--ink);
+        font-weight: 800;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .sticker--a {
+        left: 18px;
+        top: 16px;
+        background: var(--yellow);
+      }
+
+      .sticker--b {
+        right: 16px;
+        top: 14px;
+        background: var(--mint);
+      }
+
+      .sticker--c {
+        left: 18px;
+        bottom: 16px;
+        background: var(--blue);
+      }
+
+      /* Sections */
+      .section {
+        padding: 66px 0;
+        border-bottom: var(--border);
+        background: var(--paper);
+      }
+
+      .section--cream {
+        background: var(--cream);
+      }
+
+      .section--pink {
+        background: #ffd8f7;
+      }
+
+      .section__head {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 20px;
+      }
+
+      .section__head h2 {
+        margin: 0;
+        font-size: clamp(28px, 3vw, 40px);
+        line-height: 1.1;
+      }
+
+      .section__head p {
+        margin: 0;
+        max-width: 52ch;
+        font-weight: 600;
+        opacity: 0.9;
+      }
+
+      /* Checklist */
+      .checklist {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .checklist__item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: var(--border);
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 4px 4px 0 var(--ink);
+        padding: 12px 14px;
+        font-weight: 700;
+      }
+
+      .checklist__item input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--ink);
+      }
+
+      .checklist__note {
+        margin: 14px 0 0;
+        font-size: 13px;
+        font-weight: 700;
+        opacity: 0.8;
+      }
+
+      /* Profile notes */
+      .now-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .note {
+        border: var(--border);
+        border-radius: var(--radius);
+        background: #fff;
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+
+      .note h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+      }
+
+      .note p {
+        margin: 0 0 12px;
+        font-weight: 600;
+      }
+
+      .note__meta {
+        font-size: 12px;
+        font-weight: 800;
+        opacity: 0.75;
+      }
+
+      /* Cards */
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .card {
+        border: var(--border);
+        border-radius: var(--radius);
+        background: #fff;
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+
+      .card__icon {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        border: var(--border);
+        border-radius: 16px;
+        background: var(--yellow);
+        box-shadow: 4px 4px 0 var(--ink);
+        margin-bottom: 12px;
+        font-size: 22px;
+      }
+
+      .card h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+      }
+
+      .card p {
+        margin: 0 0 12px;
+        font-weight: 600;
+      }
+
+      .list {
+        margin: 0;
+        padding-left: 18px;
+        font-weight: 700;
+      }
+
+      .list li {
+        margin: 6px 0;
+      }
+
+      /* Projects */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .project {
+        border: var(--border);
+        border-radius: var(--radius);
+        background: #fff;
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+
+      .project__top {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border: 2px solid var(--ink);
+        border-radius: 999px;
+        font-weight: 900;
+        font-size: 12px;
+        background: #fff;
+      }
+
+      .badge--wip {
+        background: var(--yellow);
+      }
+
+      .project h3 {
+        margin: 0 0 8px;
+        font-size: 20px;
+      }
+
+      .project p {
+        margin: 0 0 12px;
+        font-weight: 650;
+      }
+
+      .project__links {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .project__media {
+        border: var(--border);
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 4px 4px 0 var(--ink);
+        background: #fff;
+      }
+
+      .project__media img {
+        width: 100%;
+        height: auto;
+      }
+
+      .project__media--video {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        background: #000;
+      }
+
+      .project__media--video iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+
+      .vtuber__media {
+        margin-top: 18px;
+      }
+
+      .link {
+        font-weight: 900;
+        text-decoration: underline;
+      }
+
+      .link:hover {
+        text-decoration: none;
+      }
+
+      /* About + Contact */
+      .about {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 16px;
+        align-items: start;
+      }
+
+      .about__box {
+        border: var(--border);
+        border-radius: var(--radius);
+        background: #fff;
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+
+      .about__lead {
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .contact {
+        border: var(--border);
+        border-radius: var(--radius);
+        background: var(--cream);
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+
+      .contact h3 {
+        margin: 0 0 8px;
+      }
+
+      .contact p {
+        margin: 0 0 12px;
+        font-weight: 650;
+      }
+
+      .contact__row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+
+      .tiny {
+        font-size: 12px;
+        font-weight: 800;
+        opacity: 0.85;
+      }
+
+      /* ChaiGo learning sections */
+      .learning-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .lesson-card {
+        border: var(--border);
+        border-radius: var(--radius);
+        background: #fff;
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+
+      .lesson-card--pink { background: #fff; }
+      .lesson-card--yellow { background: #fffdf1; }
+      .lesson-card--mint { background: #f2fff9; }
+
+      .lesson-card__number {
+        display: inline-grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        margin-bottom: 12px;
+        border: var(--border);
+        border-radius: 14px;
+        background: var(--pink);
+        box-shadow: 4px 4px 0 var(--ink);
+        font-weight: 900;
+      }
+
+      .lesson-card--yellow .lesson-card__number { background: var(--yellow); }
+      .lesson-card--mint .lesson-card__number { background: var(--mint); }
+
+      .lesson-card h3 { margin: 0 0 8px; font-size: 20px; }
+      .lesson-card p { margin: 0 0 12px; font-weight: 600; }
+      .lesson-card code {
+        display: inline-block;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        line-height: 1.5;
+      }
+
+      .feature-tile {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        min-width: 0;
+        min-height: 230px;
+        padding: 22px;
+        border: var(--border);
+        border-radius: var(--radius);
+        background: #fff;
+        box-shadow: var(--shadow);
+        color: var(--ink);
+        font: inherit;
+        text-align: left;
+      }
+
+      .feature-tile__icon {
+        display: grid;
+        place-items: center;
+        width: 54px;
+        height: 54px;
+        border: var(--border);
+        border-radius: 16px;
+        box-shadow: 4px 4px 0 var(--ink);
+        font-size: 26px;
+      }
+
+      .feature-tile--tone .feature-tile__icon { background: var(--pink); }
+      .feature-tile--pinyin .feature-tile__icon { background: var(--yellow); }
+      .feature-tile--chat .feature-tile__icon { background: var(--mint); }
+
+      .feature-tile__copy {
+        display: grid;
+        gap: 7px;
+        padding-bottom: 42px;
+      }
+
+      .feature-tile__eyebrow {
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+      }
+
+      .feature-tile__title {
+        margin: 0;
+        font-size: 22px;
+        line-height: 1.25;
+      }
+
+      .feature-tile__description {
+        margin: 0;
+        font-weight: 600;
+      }
+
+      .feature-tile__arrow,
+      .feature-tile__lock {
+        position: absolute;
+        right: 20px;
+        bottom: 20px;
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border: var(--border);
+        border-radius: 50%;
+        background: var(--yellow);
+        box-shadow: 4px 4px 0 var(--ink);
+        font-size: 20px;
+        font-weight: 900;
+      }
+
+      .feature-tile--link {
+        cursor: pointer;
+        text-decoration: none;
+        transition: transform 0.16s ease, box-shadow 0.16s ease;
+      }
+
+      .feature-tile--link:hover {
+        transform: translate(-1px, -1px);
+        box-shadow: 7px 7px 0 var(--ink);
+        text-decoration: none;
+      }
+
+      .feature-tile--link:focus-visible {
+        outline: 3px solid var(--blue);
+        outline-offset: 4px;
+      }
+
+      .feature-tile--disabled {
+        opacity: 0.68;
+        cursor: not-allowed;
+      }
+
+      .feature-tile__lock {
+        background: var(--paper);
+        font-size: 17px;
+      }
+
+      .about__box h2 { margin: 0 0 12px; font-size: clamp(28px, 5vw, 40px); }
+
+      .chat-layout {
+        display: grid;
+        grid-template-columns: 1fr 0.9fr;
+        gap: 18px;
+        align-items: stretch;
+      }
+
+      .chat-window,
+      .record-panel,
+      .login-callout {
+        border: var(--border);
+        border-radius: var(--radius);
+        background: #fff;
+        box-shadow: var(--shadow);
+        padding: 20px;
+      }
+
+      .chat-window { background: #fff; }
+      .chat-window__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .chat-window__top h3 { margin: 0; font-size: 20px; }
+      .chat-line {
+        width: fit-content;
+        max-width: 90%;
+        margin: 10px 0;
+        padding: 12px 14px;
+        border: 2px solid var(--ink);
+        border-radius: 16px;
+        background: var(--cream);
+        font-weight: 700;
+      }
+
+      .chat-line--learner {
+        margin-left: auto;
+        background: var(--mint);
+      }
+
+      .chat-window__hint { margin: 16px 0 0; font-size: 13px; font-weight: 700; }
+      .chat-intro { padding: 18px 4px; }
+      .chat-intro h3 { margin: 0 0 10px; font-size: 24px; }
+      .chat-intro p { margin: 0 0 14px; font-weight: 600; }
+
+      .record-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin: 16px 0;
+      }
+
+      .record-stat {
+        border: var(--border);
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 4px 4px 0 var(--ink);
+        padding: 14px;
+      }
+
+      .record-stat:nth-child(2) { background: var(--yellow); }
+      .record-stat:nth-child(3) { background: var(--mint); }
+      .record-stat span { display: block; font-size: 12px; font-weight: 800; }
+      .record-stat strong { display: block; margin-top: 4px; font-size: 22px; }
+      .record-panel h3 { margin: 0; font-size: 22px; }
+      .record-panel p { font-weight: 600; }
+      .login-callout {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        background: var(--yellow);
+      }
+
+      .login-callout h3 { margin: 0 0 6px; font-size: 22px; }
+      .login-callout p { margin: 0; font-weight: 600; }
+
+      .brand__name { display: flex; flex-direction: column; line-height: 1.15; }
+      .brand__name small { margin-top: 3px; font-size: 11px; font-weight: 700; }
+
+      #avatarHotspot:focus-visible {
+        outline: 4px solid #fff;
+        box-shadow: 0 0 0 7px var(--ink);
+      }
+
+      code {
+        border: 2px solid var(--ink);
+        border-radius: 10px;
+        padding: 2px 6px;
+        background: #fff;
+        font-weight: 900;
+      }
+
+      /* Footer */
+      .footer {
+        background: var(--paper);
+        padding: 26px 0;
+      }
+
+      .footer__inner {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .footer__small {
+        opacity: 0.8;
+        font-weight: 700;
+      }
+
+      /* Responsive: mobile first; expand at the existing 980px breakpoint. */
+      @media (max-width: 420px) {
+        .container { width: min(100% - 28px, 1120px); }
+        .topbar__inner { gap: 7px; padding: 8px 0; }
+        .brand__logo { height: 34px; max-width: 100%; }
+        .avatar-mark { flex-basis: 32px; width: 32px; height: 32px; }
+        .topbar__account { gap: 7px; }
+        .topbar__account .pill { padding: 7px 8px; font-size: 12px; }
+        .topbar__user { gap: 7px; font-size: 12px; }
+        .menu-toggle { width: 42px; height: 42px; }
+        .learning-grid { grid-template-columns: 1fr; }
+        .tag { padding: 7px 10px; font-size: 13px; }
+        .section { padding: 48px 0; }
+        .hero-art { padding: 29px 14px; }
+        .sticker { padding: 8px 9px; font-size: 11px; }
+      }
+
+      @media (min-width: 768px) {
+        .section__head { flex-direction: row; align-items: flex-end; justify-content: space-between; }
+        .learning-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+
+      @media (min-width: 981px) {
+        .topbar__inner { display: flex; padding: 14px 0; }
+        .brand__logo { height: 46px; }
+        .nav { display: flex; flex-direction: row; align-items: center; gap: 4px; grid-column: auto; grid-row: auto; }
+        .nav a { padding: 8px 10px; white-space: nowrap; }
+        .topbar__account { grid-column: auto; grid-row: auto; }
+        .menu-toggle { display: none; }
+        .hero { background: linear-gradient(90deg, #ffb3f1 0 55%, #ffd200 55% 100%); }
+        .hero__grid { grid-template-columns: 1.15fr 0.85fr; padding: 56px 0; }
+        .hero__title { font-size: clamp(42px, 4vw, 66px); }
+        .hero-art__portrait { width: 78%; }
+        .learning-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="topbar">
+      <div class="container topbar__inner">
+        <a class="brand" href="./index.html#home" aria-label="チャイ語娘 ChaiGo! ホーム">
+          <img class="brand__logo" src="./logo.png" alt="チャイ語娘 ChaiGo!" />
+        </a>
+
+        <button
+          class="menu-toggle"
+          id="menuToggle"
+          type="button"
+          aria-label="メニューを開く"
+          aria-expanded="false"
+          aria-controls="primaryNav"
+        >
+          <span></span><span></span><span></span>
+        </button>
+
+        <nav class="nav" id="primaryNav" aria-label="メインナビゲーション">
+          <a href="./tonegame_pc.html">声調ゲーム</a>
+          <a href="./pinyingame_pc.html">ピンインゲーム</a>
+          <a href="https://chaigo-aituber-kit.vercel.app/" target="_blank" rel="noopener noreferrer">チャイ語娘とチャット</a>
+          <a href="./record.html">学習記録</a>
+          <a href="./index.html#about">レッスン予約</a>
+        </nav>
+
+        <div class="topbar__account" role="group" aria-label="アカウント">
+          <button
+            id="joinButton"
+            class="pill"
+            type="button"
+            aria-label="JOIN、Mock Login"
+          >
+            JOIN
+          </button>
+          <button
+            id="mockUserButton"
+            class="topbar__user"
+            type="button"
+            aria-label="ChaiGo User。クリックして未ログイン状態に戻る"
+            hidden
+          >
+            <span class="avatar-mark" aria-hidden="true">
+              <img src="./avatar.png" alt="" />
+            </span>
+            <span class="user-name">ChaiGo User</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="home" class="hero">
+        <div class="container hero__grid">
+          <div class="hero__left">
+            <div class="tag-row" aria-label="台湾華語、VTuber、ゲームで学習">
+              <span class="tag tag--mint">台湾華語</span>
+              <span class="tag tag--yellow">VTUBER</span>
+              <span class="tag tag--pink">ゲーム</span>
+              <span class="tag tag--blue">PLAY &amp; LEARN</span>
+            </div>
+
+            <h1 class="hero__title">
+              <span class="hero__title-accent">一緒に中国語を学ぼう！</span>
+            </h1>
+            <p class="hero__lead">遊んで・話して・続けられる、新しい華語学習体験！</p>
+            <p class="hero__support">VTuberの華語娘チャイ語娘と、ゲームや会話を通して台湾華語を楽しく学ぼう。</p>
+            <div class="hero__cta">
+              <a class="btn btn--dark" href="#features">始める！ <span aria-hidden="true">→</span></a>
+            </div>
+          </div>
+
+          <div class="hero__right">
+            <div class="hero-art">
+              <div class="hero-art__blob" aria-hidden="true"></div>
+              <div class="hero-art__portrait">
+                <img src="./2026A.png" alt="ヘッドセットを着けた華語娘のキービジュアル" />
+                <button
+                  id="avatarHotspot"
+                  type="button"
+                  aria-label="チャイ語娘のあいさつを聞く"
+                >
+                  <span id="clickHint" aria-hidden="true">TAP</span>
+                </button>
+              </div>
+              <div id="avatarSpeech" role="status" aria-live="polite" hidden></div>
+              <div class="sticker sticker--a">你好！台湾華語</div>
+              <div class="sticker sticker--b">💬 AI CHAT</div>
+              <div class="sticker sticker--c">🎮 PLAY</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="section section--cream">
+        <div class="container">
+          <div class="section__head" id="records">
+            <div>
+              <span class="tag tag--pink">LEARN YOUR WAY</span>
+              <h2>遊んで、話して、身につけよう</h2>
+            </div>
+            <p>チャイ語娘と一緒に、今日の「できた！」を増やそう。</p>
+          </div>
+
+          <div class="learning-grid">
+            <button
+              class="feature-tile feature-tile--disabled feature-tile--tone"
+              id="tone-game"
+              type="button"
+              disabled
+              aria-label="声調ゲーム。現在ウェブサイトからは起動できません"
+            >
+              <span class="feature-tile__icon" aria-hidden="true">🎧</span>
+              <span class="feature-tile__copy">
+                <span class="feature-tile__eyebrow">TONE GAME</span>
+                <span class="feature-tile__title">声調ゲーム</span>
+                <span class="feature-tile__description">聞いて選んで、正しい声調をマスター！</span>
+              </span>
+              <span class="feature-tile__lock" aria-hidden="true">🔒</span>
+            </button>
+
+            <a
+              class="feature-tile feature-tile--link feature-tile--pinyin"
+              id="pinyin-game"
+              href="./pinyingame_pc.html"
+              aria-label="ピンインゲームをプレイ"
+            >
+              <span class="feature-tile__icon" aria-hidden="true">🔤</span>
+              <span class="feature-tile__copy">
+                <span class="feature-tile__eyebrow">PINYIN GAME</span>
+                <span class="feature-tile__title">ピンインゲーム</span>
+                <span class="feature-tile__description">漢字を見て、ピンインを入力しよう！</span>
+              </span>
+              <span class="feature-tile__arrow" aria-hidden="true">→</span>
+            </a>
+
+            <a
+              class="feature-tile feature-tile--link feature-tile--chat"
+              id="chat"
+              href="https://aituber-kit-dhzs.vercel.app/"
+              target="_blank"
+              rel="noopener"
+            >
+              <span class="feature-tile__icon" aria-hidden="true">💬</span>
+              <span class="feature-tile__copy">
+                <span class="feature-tile__eyebrow">AI CHAT</span>
+                <span class="feature-tile__title">AIチャット</span>
+                <span class="feature-tile__description">チャイ語娘と中国語で話そう！</span>
+              </span>
+              <span class="feature-tile__arrow" aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" class="section">
+        <div class="container">
+          <div class="about__box">
+            <div class="project__top"><span class="badge">ABOUT CHAIGO!</span></div>
+            <h2>チャイ語娘 ChaiGo! とは？</h2>
+            <p class="about__lead">
+              VTuberの「チャイ語娘（ChaiGo!）」と一緒に、ゲームや会話を通して楽しく中国語を学べるプラットフォームです。
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <a class="brand" href="#home"><span class="brand__name">チャイ語娘 <small>ChaiGo!</small></span></a>
+        <p class="footer__small">© <span id="year"></span> ChaiGo! · 台湾華語を楽しく学ぼう</p>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      // Front-end only mock state. It always starts logged out on page load.
+      let isMockLoggedIn = false;
+      const joinButton = document.getElementById("joinButton");
+      const mockUserButton = document.getElementById("mockUserButton");
+
+      function renderMockLogin() {
+        joinButton.hidden = isMockLoggedIn;
+        mockUserButton.hidden = !isMockLoggedIn;
+      }
+
+      joinButton.addEventListener("click", () => {
+        isMockLoggedIn = true;
+        renderMockLogin();
+        mockUserButton.focus();
+      });
+
+      mockUserButton.addEventListener("click", () => {
+        isMockLoggedIn = false;
+        renderMockLogin();
+        joinButton.focus();
+      });
+
+      renderMockLogin();
+
+      const menuToggle = document.getElementById("menuToggle");
+      const primaryNav = document.getElementById("primaryNav");
+
+      function closeMenu() {
+        menuToggle.setAttribute("aria-expanded", "false");
+        menuToggle.setAttribute("aria-label", "メニューを開く");
+        primaryNav.classList.remove("is-open");
+      }
+
+      menuToggle.addEventListener("click", () => {
+        const isOpen = menuToggle.getAttribute("aria-expanded") === "true";
+        menuToggle.setAttribute("aria-expanded", String(!isOpen));
+        menuToggle.setAttribute("aria-label", isOpen ? "メニューを開く" : "メニューを閉じる");
+        primaryNav.classList.toggle("is-open", !isOpen);
+      });
+
+      primaryNav.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", closeMenu);
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeMenu();
+      });
+
+      const hotspot = document.getElementById("avatarHotspot");
+      const clickHint = document.getElementById("clickHint");
+      const speech = document.getElementById("avatarSpeech");
+      const greeting = "你好！今天也一起練習台灣華語吧！";
+
+      function speak(text) {
+        if (!("speechSynthesis" in window)) return;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "zh-TW";
+        utterance.rate = 0.92;
+        utterance.pitch = 1.08;
+        window.speechSynthesis.speak(utterance);
+      }
+
+      function showHint() {
+        hotspot.classList.add("is-active");
+        clickHint.classList.add("is-visible");
+      }
+
+      function hideHint() {
+        hotspot.classList.remove("is-active");
+        clickHint.classList.remove("is-visible");
+      }
+
+      hotspot.addEventListener("mouseenter", showHint);
+      hotspot.addEventListener("mouseleave", hideHint);
+      hotspot.addEventListener("focus", showHint);
+      hotspot.addEventListener("blur", hideHint);
+      hotspot.addEventListener("click", () => {
+        speech.hidden = false;
+        speech.textContent = greeting;
+        speak(greeting);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#fff7ef" />
+    <meta
+      name="description"
+      content="華語娘 ChaiGo! と声調チャレンジ。音声を聞きながら台湾華語の四声を練習できます。"
+    />
+    <title>声調チャレンジ｜チャイ語娘 ChaiGo!</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./tonegame_pc.css" />
+    <script defer src="./tonegame-data.js"></script>
+    <script defer src="./mockLearningService.js"></script>
+    <script defer src="./tonegame_pc.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar__inner">
+        <a class="brand" href="./index.html#home" aria-label="チャイ語娘 ChaiGo! ホーム">
+          <img class="brand__logo" src="./logo.png" alt="チャイ語娘 ChaiGo!" />
+        </a>
+
+        <button
+          class="menu-toggle"
+          id="menuToggle"
+          type="button"
+          aria-label="メニューを開く"
+          aria-expanded="false"
+          aria-controls="primaryNav"
+        >
+          <span></span><span></span><span></span>
+        </button>
+
+        <nav class="nav" id="primaryNav" aria-label="メインナビゲーション">
+          <a href="./tonegame_pc.html" aria-current="page">声調ゲーム</a>
+          <a href="./pinyingame_pc.html">ピンインゲーム</a>
+          <a href="https://chaigo-aituber-kit.vercel.app/" target="_blank" rel="noopener noreferrer">チャイ語娘とチャット</a>
+          <a href="./record.html">学習記録</a>
+          <a href="./index.html#about">レッスン予約</a>
+        </nav>
+
+        <div class="topbar__account" role="group" aria-label="アカウント">
+          <div class="topbar__user" role="status" aria-label="テストプレイヤー ChaiGo User">
+            <span class="avatar-mark" aria-hidden="true"><img src="./avatar.png" alt="" /></span>
+            <span class="user-name">ChaiGo User</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section hero view" id="home-screen">
+        <div class="container game-home" id="game-setup">
+          <div class="section__head">
+            <div>
+              <p class="section__eyebrow">READY?</p>
+              <h2>チャレンジの準備</h2>
+            </div>
+              <p>固定テストプレイヤーで遊べるレベルを選んでください。</p>
+          </div>
+          <p class="record-status" id="record-status" role="status" aria-live="polite">
+            Mock Mode · テスト用の学習記録をこのブラウザーの localStorage に保存します（サーバー保存ではありません）。
+          </p>
+
+          <div class="setup-grid">
+            <div class="setup-cell setup-cell--player">
+              <section class="panel setup-panel" aria-labelledby="setup-title">
+              <div class="panel__heading">
+                <span class="panel__icon" aria-hidden="true">🎮</span>
+                <div>
+                  <p class="panel__eyebrow">PLAYER</p>
+                  <h3 id="setup-title">プレイヤー</h3>
+                </div>
+              </div>
+              <div class="current-player">
+                <span class="avatar-mark" aria-hidden="true"><img src="./avatar.png" alt="" /></span>
+                <span><strong id="current-user-name">ChaiGo User</strong><small>テストプレイヤー · chaigo-test-user-001</small></span>
+              </div>
+              <p class="field-note">すべてのテストプレイで同じプレイヤー ID を使います。</p>
+
+              <h3 class="level-heading">レベルを選ぶ</h3>
+              <div class="level-list" id="level-list" aria-label="レベル選択">
+                <button class="level-card is-selected" type="button" data-level="1" aria-pressed="true">
+                  <span class="level-card__number">LV1</span>
+                  <span class="level-card__copy"><strong>基本の声調</strong><small>ma・ba・qi｜12題から3題</small></span>
+                  <span class="level-card__badge">プレイ可能</span>
+                </button>
+                <button class="level-card is-unavailable" type="button" data-level="2" disabled aria-disabled="true">
+                  <span class="level-card__number">LV2</span>
+                  <span class="level-card__copy"><strong>ステップアップ</strong><small>音檔4件｜正解表を確認中</small></span>
+                  <span class="level-card__badge">準備中</span>
+                </button>
+                <button class="level-card is-unavailable" type="button" data-level="3" disabled aria-disabled="true">
+                  <span class="level-card__number">LV3</span>
+                  <span class="level-card__copy"><strong>声調チャレンジ</strong><small>音檔4件｜出題と正解を確認中</small></span>
+                  <span class="level-card__badge">準備中</span>
+                </button>
+                <button class="level-card is-unavailable" type="button" data-level="4" disabled aria-disabled="true">
+                  <span class="level-card__number">LV4</span>
+                  <span class="level-card__copy"><strong>上級チャレンジ</strong><small>題庫と音檔はありません</small></span>
+                  <span class="level-card__badge">未実装</span>
+                </button>
+              </div>
+              <button class="btn btn--dark btn--wide" id="start-game" type="button">LV1 に挑戦する <span aria-hidden="true">→</span></button>
+              <p class="form-message" id="setup-message" role="status" aria-live="polite"></p>
+              </section>
+            </div>
+
+            <div class="setup-cell setup-cell--guide">
+              <aside class="panel guide-panel" aria-labelledby="guide-title">
+              <div id="ready-content">
+                <div class="panel__heading">
+                  <span class="panel__icon panel__icon--pink" aria-hidden="true">✨</span>
+                  <div>
+                    <p class="panel__eyebrow">HOW TO PLAY</p>
+                    <h3 id="guide-title">遊び方</h3>
+                  </div>
+                </div>
+                <ol class="guide-list">
+                  <li><span>1</span><p><strong>音声を聞く</strong><br />再生ボタンで何度でも聞けます。</p></li>
+                  <li><span>2</span><p><strong>声調を選ぶ</strong><br />ボタンをクリック、またはキーボードの 1〜4 を押します。</p></li>
+                  <li><span>3</span><p><strong>結果をチェック</strong><br />正解数・得点・正答率を確認できます。</p></li>
+                </ol>
+                <div class="tone-guide">
+                  <h4>四声のヒント</h4>
+                  <div class="tone-guide__grid">
+                    <span><b>1</b> 第一声 <small>→</small></span>
+                    <span><b>2</b> 第二声 <small>↗</small></span>
+                    <span><b>3</b> 第三声 <small>↘↗</small></span>
+                    <span><b>4</b> 第四声 <small>↘</small></span>
+                  </div>
+                </div>
+                <p class="guide-note"><img src="./avatar.png" alt="" />1問正解で1点。毎回ランダムに3題出題し、同じラウンド内で重複しません。</p>
+              </div>
+
+              <div class="inline-game" id="game-content" hidden>
+                <div class="inline-game__heading">
+                  <div>
+                    <p class="panel__eyebrow">LV1 基本の声調</p>
+                    <h2 id="game-title">声調チャレンジ</h2>
+                  </div>
+                  <span class="session-chip" id="session-label">第 1 題 / 共 3 題</span>
+                </div>
+                <p class="question-progress" id="question-progress">第 1 題 / 共 3 題</p>
+                <div class="progress-track" role="progressbar" aria-label="ゲームの進行状況" aria-valuemin="0" aria-valuemax="3" aria-valuenow="0">
+                  <span id="progress-fill"></span>
+                </div>
+
+                <div class="audio-box">
+                  <div class="audio-orbit" aria-hidden="true">♪</div>
+                  <p>音声を聞いて、声調を選んでください</p>
+                  <button class="audio-button" id="play-audio" type="button" aria-label="問題音声を聞く">
+                    <span aria-hidden="true">🔊</span><strong>音声を聞く</strong>
+                  </button>
+                  <p class="audio-error" id="audio-error" role="alert" hidden></p>
+                </div>
+
+                <p class="answer-prompt">声調を選んでください <span>ボタンまたはキーボード 1・2・3・4</span></p>
+                <div class="answer-grid" id="answer-grid">
+                  <button class="answer-button answer-button--one" type="button" data-answer="1"><span class="answer-button__digit">1</span><span><strong>第一聲 →</strong><small>平らに伸ばす</small></span></button>
+                  <button class="answer-button answer-button--two" type="button" data-answer="2"><span class="answer-button__digit">2</span><span><strong>第二聲 ↗</strong><small>上がる声</small></span></button>
+                  <button class="answer-button answer-button--three" type="button" data-answer="3"><span class="answer-button__digit">3</span><span><strong>第三聲 ↘↗</strong><small>下がって上がる</small></span></button>
+                  <button class="answer-button answer-button--four" type="button" data-answer="4"><span class="answer-button__digit">4</span><span><strong>第四聲 ↘</strong><small>下がる声</small></span></button>
+                </div>
+                <div class="feedback" id="answer-feedback" role="status" aria-live="polite" hidden></div>
+                <div class="answer-save-row">
+                  <div>
+                    <p class="save-status" id="answer-save-status" role="status" aria-live="polite"></p>
+                    <button class="retry-link" id="retry-answer" type="button" hidden>保存を再試行</button>
+                  </div>
+                  <button class="btn btn--dark" id="next-question" type="button" disabled>次の問題 →</button>
+                </div>
+                <div class="inline-score-rail" aria-label="現在の成績">
+                  <div class="score-card"><span>回答済み</span><strong id="answered-count">0 <small>/ 3</small></strong></div>
+                  <div class="score-card score-card--yellow"><span>正解数</span><strong id="correct-count">0</strong></div>
+                  <div class="score-card score-card--mint"><span>得点</span><strong id="score-count">0 <small>点</small></strong></div>
+                </div>
+              </div>
+
+              <div class="inline-result" id="result-content" hidden>
+                <div class="result-confetti" aria-hidden="true">✦</div>
+                <p class="panel__eyebrow">ROUND COMPLETE</p>
+                <h2 id="result-title">チャレンジ結果</h2>
+                <p class="result-greeting" id="result-greeting">おつかれさま！</p>
+                <div class="result-stats">
+                  <div class="result-stat result-stat--pink"><span>得点</span><strong id="result-score">0 <small>/ 3</small></strong></div>
+                  <div class="result-stat result-stat--yellow"><span>正答率</span><strong id="result-accuracy">0<small>%</small></strong></div>
+                  <div class="result-stat result-stat--mint"><span>正解数</span><strong id="result-correct">0 <small>/ 3</small></strong></div>
+                </div>
+                <p class="result-message" id="result-message"></p>
+                <p class="result-save-status" id="complete-status" role="status" aria-live="polite"></p>
+                <div class="result-actions">
+                  <button class="btn btn--dark" id="retry-game" type="button">もう一度チャレンジ</button>
+                  <a class="btn btn--light" href="./record.html">学習記録を見る</a>
+                  <button class="btn btn--plain" id="result-home" type="button">レベル選択へ</button>
+                </div>
+                <button class="retry-link" id="retry-complete" type="button" hidden>結果保存を再試行</button>
+              </div>
+              </aside>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <a href="./ChaiGo.html" class="footer-brand"><img src="./logo.png" alt="チャイ語娘 ChaiGo!" /></a>
+        <p>声調チャレンジ · 台湾華語を楽しく学ぼう</p>
+      </div>
+    </footer>
+  </body>
+</html>

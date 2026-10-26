@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#fff7ef" />
+    <meta
+      name="description"
+      content="華語娘 ChaiGo! とピンインチャレンジ。漢字を見て、台湾華語のピンインと声調を練習できます。"
+    />
+    <title>ピンインチャレンジ｜チャイ語娘 ChaiGo!</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./tonegame_pc.css" />
+    <link rel="stylesheet" href="./pinyingame_pc.css" />
+    <script defer src="./mockPinyinLearningService.js"></script>
+    <script defer src="./pinyingame_pc.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar__inner">
+        <a class="brand" href="./index.html#home" aria-label="チャイ語娘 ChaiGo! ホーム">
+          <img class="brand__logo" src="./logo.png" alt="チャイ語娘 ChaiGo!" />
+        </a>
+
+        <button
+          class="menu-toggle"
+          id="menuToggle"
+          type="button"
+          aria-label="メニューを開く"
+          aria-expanded="false"
+          aria-controls="primaryNav"
+        >
+          <span></span><span></span><span></span>
+        </button>
+
+        <nav class="nav" id="primaryNav" aria-label="メインナビゲーション">
+          <a href="./tonegame_pc.html">声調ゲーム</a>
+          <a href="./pinyingame_pc.html" aria-current="page">ピンインゲーム</a>
+          <a href="https://chaigo-aituber-kit.vercel.app/" target="_blank" rel="noopener noreferrer">チャイ語娘とチャット</a>
+          <a href="./record.html">学習記録</a>
+          <a href="./index.html#about">レッスン予約</a>
+        </nav>
+
+        <div class="topbar__account" role="group" aria-label="アカウント">
+          <div class="topbar__user" role="status" aria-label="テストプレイヤー ChaiGo User">
+            <span class="avatar-mark" aria-hidden="true"><img src="./avatar.png" alt="" /></span>
+            <span class="user-name">ChaiGo User</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section hero view" id="home-screen">
+        <div class="container game-home" id="game-setup">
+          <div class="section__head">
+            <div>
+              <p class="section__eyebrow">READY?</p>
+              <h1>ピンインチャレンジ</h1>
+            </div>
+            <p>漢字を見て、正しいピンインと声調を入力してください。</p>
+          </div>
+          <p class="record-status" id="record-status" role="status" aria-live="polite">
+            LV1 は全 12 題から毎回ランダムに 3 題出題します。回答は ma1 または mā の形式で入力でき、結果は声調ゲームと共通の学習記録に保存されます。
+          </p>
+
+          <div class="setup-grid">
+            <div class="setup-cell setup-cell--player">
+              <section class="panel setup-panel" aria-labelledby="setup-title">
+                <div class="panel__heading">
+                  <span class="panel__icon" aria-hidden="true">🎮</span>
+                  <div>
+                    <p class="panel__eyebrow">PLAYER</p>
+                    <h2 id="setup-title">プレイヤー</h2>
+                  </div>
+                </div>
+                <div class="current-player">
+                  <span class="avatar-mark" aria-hidden="true"><img src="./avatar.png" alt="" /></span>
+                  <span><strong>ChaiGo User</strong><small>テストプレイヤー</small></span>
+                </div>
+                <p class="field-note">1ラウンドは 3 問。正解すると 1 点です。</p>
+
+                <h3 class="level-heading">レベルを選ぶ</h3>
+                <div class="level-list" id="level-list" aria-label="レベル選択">
+                  <button class="level-card is-selected" type="button" data-level="1" aria-pressed="true">
+                    <span class="level-card__number">LV1</span>
+                    <span class="level-card__copy"><strong>単漢字ピンイン</strong><small>媽・麻・馬 など｜12 題から 3 題</small></span>
+                    <span class="level-card__badge">プレイ可能</span>
+                  </button>
+                  <button class="level-card is-unavailable" type="button" data-level="2" disabled aria-disabled="true">
+                    <span class="level-card__number">LV2</span>
+                    <span class="level-card__copy"><strong>ステップアップ</strong><small>準備中</small></span>
+                    <span class="level-card__badge">準備中</span>
+                  </button>
+                  <button class="level-card is-unavailable" type="button" data-level="3" disabled aria-disabled="true">
+                    <span class="level-card__number">LV3</span>
+                    <span class="level-card__copy"><strong>単語ピンイン</strong><small>準備中</small></span>
+                    <span class="level-card__badge">準備中</span>
+                  </button>
+                  <button class="level-card is-unavailable" type="button" data-level="4" disabled aria-disabled="true">
+                    <span class="level-card__number">LV4</span>
+                    <span class="level-card__copy"><strong>上級チャレンジ</strong><small>準備中</small></span>
+                    <span class="level-card__badge">準備中</span>
+                  </button>
+                </div>
+                <button class="btn btn--dark btn--wide" id="start-game" type="button">
+                  LV1 に挑戦する <span aria-hidden="true">→</span>
+                </button>
+                <p class="form-message" id="setup-message" role="status" aria-live="polite"></p>
+              </section>
+            </div>
+
+            <div class="setup-cell setup-cell--guide">
+              <aside class="panel guide-panel" aria-labelledby="guide-title">
+                <div id="ready-content">
+                  <div class="panel__heading">
+                    <span class="panel__icon panel__icon--pink" aria-hidden="true">✨</span>
+                    <div>
+                      <p class="panel__eyebrow">HOW TO PLAY</p>
+                      <h2 id="guide-title">遊び方</h2>
+                    </div>
+                  </div>
+                  <ol class="guide-list">
+                    <li><span>1</span><p><strong>漢字を確認</strong><br />表示された漢字のピンインを考えます。</p></li>
+                    <li><span>2</span><p><strong>ピンインと声調を入力</strong><br />ma1 または mā のどちらでも OK。</p></li>
+                    <li><span>3</span><p><strong>音声ヒントを使う</strong><br />最初に間違えた後、1 回だけ聞けます。</p></li>
+                  </ol>
+                  <div class="tone-guide pinyin-guide">
+                    <h3>入力例</h3>
+                    <div class="pinyin-guide__examples">
+                      <span><b>ma1</b><small>数字で声調を入力</small></span>
+                      <span><b>mā</b><small>声調記号で入力</small></span>
+                    </div>
+                  </div>
+                  <p class="guide-note"><img src="./avatar.png" alt="" />2 回目までに正解すると 1 点。漢字は 1 題ずつ表示されます。</p>
+                </div>
+
+                <div class="inline-game" id="game-content" hidden>
+                  <div class="inline-game__heading">
+                    <div>
+                      <p class="panel__eyebrow">LV1 単漢字ピンイン</p>
+                      <h2>ピンインを入力しよう</h2>
+                    </div>
+                    <span class="session-chip" id="session-label">第 1 問 / 全 3 問</span>
+                  </div>
+                  <p class="question-progress" id="question-progress">第 1 問 / 全 3 問</p>
+                  <div class="progress-track" id="progress-track" role="progressbar" aria-label="ゲームの進行状況" aria-valuemin="0" aria-valuemax="3" aria-valuenow="0">
+                    <span id="progress-fill"></span>
+                  </div>
+
+                  <div class="pinyin-question" aria-live="polite">
+                    <p>この漢字のピンインと声調は？</p>
+                    <strong id="question-character">媽</strong>
+                  </div>
+
+                  <form class="pinyin-answer-form" id="answer-form" novalidate>
+                    <label for="pinyin-input">ピンイン＋声調</label>
+                    <div class="pinyin-answer-row">
+                      <input
+                        id="pinyin-input"
+                        name="pinyin"
+                        type="text"
+                        inputmode="text"
+                        placeholder="例：ma1 または mā"
+                        autocomplete="off"
+                        autocapitalize="none"
+                        spellcheck="false"
+                        aria-describedby="input-help"
+                        required
+                      />
+                      <button class="btn btn--dark" id="submit-answer" type="submit">回答する</button>
+                    </div>
+                    <p class="input-help" id="input-help">声調数字は 1〜4。声調記号での入力にも対応しています。</p>
+                  </form>
+
+                  <div class="pinyin-hint-row">
+                    <button class="audio-button" id="play-hint" type="button" disabled>
+                      <span aria-hidden="true">🔊</span><strong>音声ヒントを聞く</strong>
+                    </button>
+                    <span id="hint-status" role="status" aria-live="polite">1 回目に間違えると使えます</span>
+                  </div>
+                  <p class="audio-error" id="audio-error" role="alert" hidden></p>
+                  <div class="feedback pinyin-feedback" id="answer-feedback" role="status" aria-live="polite" hidden></div>
+                  <div class="pinyin-next-row">
+                    <div class="pinyin-save-status">
+                      <span class="save-status" id="answer-status" role="status" aria-live="polite"></span>
+                      <button class="retry-link" id="retry-answer" type="button" hidden>保存を再試行</button>
+                    </div>
+                    <button class="btn btn--dark" id="next-question" type="button" disabled>次の問題 →</button>
+                  </div>
+                  <div class="inline-score-rail" aria-label="現在の成績">
+                    <div class="score-card"><span>回答済み</span><strong id="answered-count">0 <small>/ 3</small></strong></div>
+                    <div class="score-card score-card--yellow"><span>正解数</span><strong id="correct-count">0</strong></div>
+                    <div class="score-card score-card--mint"><span>得点</span><strong id="score-count">0 <small>点</small></strong></div>
+                  </div>
+                </div>
+
+                <div class="inline-result" id="result-content" hidden>
+                  <div class="result-confetti" aria-hidden="true">✦</div>
+                  <p class="panel__eyebrow">ROUND COMPLETE</p>
+                  <h2>チャレンジ結果</h2>
+                  <p class="result-greeting" id="result-greeting">おつかれさま！</p>
+                  <div class="result-stats">
+                    <div class="result-stat result-stat--pink"><span>得点</span><strong id="result-score">0 <small>/ 3</small></strong></div>
+                    <div class="result-stat result-stat--yellow"><span>正答率</span><strong id="result-accuracy">0<small>%</small></strong></div>
+                    <div class="result-stat result-stat--mint"><span>正解数</span><strong id="result-correct">0 <small>/ 3</small></strong></div>
+                  </div>
+                  <p class="result-message" id="result-message"></p>
+                  <p class="result-save-status" id="result-save-status" role="status" aria-live="polite"></p>
+                  <button class="retry-link" id="retry-complete" type="button" hidden>結果保存を再試行</button>
+                  <div class="result-actions">
+                    <button class="btn btn--dark" id="retry-game" type="button">もう一度チャレンジ</button>
+                    <a class="btn btn--light" href="./record.html">学習記録を見る</a>
+                    <button class="btn btn--plain" id="result-home" type="button">レベル選択へ</button>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <a href="./ChaiGo.html" class="footer-brand"><img src="./logo.png" alt="チャイ語娘 ChaiGo!" /></a>
+        <p>ピンインチャレンジ · 台湾華語を楽しく学ぼう</p>
+      </div>
+    </footer>
+  </body>
+</html>

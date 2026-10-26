@@ -2,3 +2,6 @@ api/node_modules/
 .DS_Store
 backup/
 .vercel
+.env
+.env.*
+!.env.example

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#fff7ef" />
+    <meta name="description" content="声調ゲームとピンインゲームの学習記録を確認できます。" />
+    <title>学習記録｜チャイ語娘 ChaiGo!</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./tonegame_pc.css" />
+    <script defer src="./tonegame-data.js"></script>
+    <script defer src="./mockLearningService.js"></script>
+    <script defer src="./mockPinyinLearningService.js"></script>
+    <script defer src="./record.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar__inner">
+        <a class="brand" href="./index.html#home" aria-label="チャイ語娘 ChaiGo! ホーム">
+          <img class="brand__logo" src="./logo.png" alt="チャイ語娘 ChaiGo!" />
+        </a>
+
+        <button
+          class="menu-toggle"
+          id="menuToggle"
+          type="button"
+          aria-label="メニューを開く"
+          aria-expanded="false"
+          aria-controls="primaryNav"
+        >
+          <span></span><span></span><span></span>
+        </button>
+
+        <nav class="nav" id="primaryNav" aria-label="メインナビゲーション">
+          <a href="./tonegame_pc.html">声調ゲーム</a>
+          <a href="./pinyingame_pc.html">ピンインゲーム</a>
+          <a href="https://chaigo-aituber-kit.vercel.app/" target="_blank" rel="noopener noreferrer">チャイ語娘とチャット</a>
+          <a href="./record.html" aria-current="page">学習記録</a>
+          <a href="./index.html#about">レッスン予約</a>
+        </nav>
+
+        <div class="topbar__account" role="group" aria-label="アカウント">
+          <div class="topbar__user" role="status" aria-label="テストプレイヤー ChaiGo User">
+            <span class="avatar-mark" aria-hidden="true"><img src="./avatar.png" alt="" /></span>
+            <span class="user-name">ChaiGo User</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section section--cream" aria-labelledby="records-title">
+        <div class="container records-container">
+          <div class="game-topline">
+            <a class="text-button" href="./tonegame_pc.html">← 声調ゲーム</a>
+            <a class="text-button" href="./pinyingame_pc.html">ピンインゲーム →</a>
+          </div>
+          <div class="section__head records-heading">
+            <div><p class="section__eyebrow">YOUR PRACTICE</p><h1 id="records-title">学習記録</h1></div>
+            <p>声調ゲームとピンインゲームの成績・回答をまとめて確認できます。</p>
+          </div>
+          <p class="records-message" id="records-message" role="status" aria-live="polite">Mock 記録を読み込んでいます…</p>
+          <div class="records-summary" id="records-summary"></div>
+          <section class="records-levels" aria-labelledby="records-level-heading">
+            <h3 id="records-level-heading">ゲーム別のプレイ回数</h3>
+            <div class="level-count-list" id="level-count-list"></div>
+          </section>
+          <section class="history-section" aria-labelledby="history-heading">
+            <div class="history-heading">
+              <h3 id="history-heading">ゲーム履歴</h3>
+              <div class="history-heading__actions">
+                <span id="history-count"></span>
+                <button class="text-button" id="refresh-records" type="button">記録を更新 ↻</button>
+              </div>
+            </div>
+            <div class="history-list" id="history-list"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <a href="./ChaiGo.html" class="footer-brand"><img src="./logo.png" alt="チャイ語娘 ChaiGo!" /></a>
+        <p>学習記録 · 台湾華語を楽しく学ぼう</p>
+      </div>
+    </footer>
+  </body>
+</html>
