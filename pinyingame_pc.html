@@ -18,8 +18,10 @@
     />
     <link rel="stylesheet" href="./tonegame_pc.css" />
     <link rel="stylesheet" href="./pinyingame_pc.css" />
+    <link rel="stylesheet" href="./floating-vtuber.css" />
     <script defer src="./mockPinyinLearningService.js"></script>
     <script defer src="./pinyingame_pc.js"></script>
+    <script defer src="./floating-vtuber.js"></script>
   </head>
   <body>
     <header class="topbar">
@@ -44,7 +46,7 @@
           <a href="./pinyingame_pc.html" aria-current="page">ピンインゲーム</a>
           <a href="https://chaigo-aituber-kit.vercel.app/" target="_blank" rel="noopener noreferrer">チャイ語娘とチャット</a>
           <a href="./record.html">学習記録</a>
-          <a href="./index.html#about">レッスン予約</a>
+          <a href="https://scheduler.zoom.us/22-terf3f/chaigo" target="_blank" rel="noopener noreferrer">レッスン予約</a>
         </nav>
 
         <div class="topbar__account" role="group" aria-label="アカウント">
@@ -64,10 +66,10 @@
               <p class="section__eyebrow">READY?</p>
               <h1>ピンインチャレンジ</h1>
             </div>
-            <p>漢字を見て、正しいピンインと声調を入力してください。</p>
+            <p>漢字や言葉を見て、正しいピンインと声調を入力してください。</p>
           </div>
           <p class="record-status" id="record-status" role="status" aria-live="polite">
-            LV1 は全 12 題から毎回ランダムに 3 題出題します。回答は ma1 または mā の形式で入力でき、結果は声調ゲームと共通の学習記録に保存されます。
+            LV1 は全 12 題、LV2 と LV3 はそれぞれ全 4 題から毎回ランダムに 3 題出題します。回答は数字または声調記号で入力でき、結果は学習記録に保存されます。
           </p>
 
           <div class="setup-grid">
@@ -93,15 +95,15 @@
                     <span class="level-card__copy"><strong>単漢字ピンイン</strong><small>媽・麻・馬 など｜12 題から 3 題</small></span>
                     <span class="level-card__badge">プレイ可能</span>
                   </button>
-                  <button class="level-card is-unavailable" type="button" data-level="2" disabled aria-disabled="true">
+                  <button class="level-card" type="button" data-level="2" aria-pressed="false">
                     <span class="level-card__number">LV2</span>
-                    <span class="level-card__copy"><strong>ステップアップ</strong><small>準備中</small></span>
-                    <span class="level-card__badge">準備中</span>
+                    <span class="level-card__copy"><strong>二字語ピンイン</strong><small>開心・天氣・草莓・可愛｜4 題から 3 題</small></span>
+                    <span class="level-card__badge">プレイ可能</span>
                   </button>
-                  <button class="level-card is-unavailable" type="button" data-level="3" disabled aria-disabled="true">
+                  <button class="level-card" type="button" data-level="3" aria-pressed="false">
                     <span class="level-card__number">LV3</span>
-                    <span class="level-card__copy"><strong>単語ピンイン</strong><small>準備中</small></span>
-                    <span class="level-card__badge">準備中</span>
+                    <span class="level-card__copy"><strong>短文ピンイン</strong><small>便利商店・明天會下雨 など｜4 題から 3 題</small></span>
+                    <span class="level-card__badge">プレイ可能</span>
                   </button>
                   <button class="level-card is-unavailable" type="button" data-level="4" disabled aria-disabled="true">
                     <span class="level-card__number">LV4</span>
@@ -110,7 +112,7 @@
                   </button>
                 </div>
                 <button class="btn btn--dark btn--wide" id="start-game" type="button">
-                  LV1 に挑戦する <span aria-hidden="true">→</span>
+                  <span id="start-game-label">LV1 に挑戦する</span> <span aria-hidden="true">→</span>
                 </button>
                 <p class="form-message" id="setup-message" role="status" aria-live="polite"></p>
               </section>
@@ -127,24 +129,24 @@
                     </div>
                   </div>
                   <ol class="guide-list">
-                    <li><span>1</span><p><strong>漢字を確認</strong><br />表示された漢字のピンインを考えます。</p></li>
-                    <li><span>2</span><p><strong>ピンインと声調を入力</strong><br />ma1 または mā のどちらでも OK。</p></li>
+                    <li><span>1</span><p><strong>問題を確認</strong><br />表示された漢字や言葉のピンインを考えます。</p></li>
+                    <li><span>2</span><p><strong>ピンインと声調を入力</strong><br />shu1 または shū のどちらでも OK。</p></li>
                     <li><span>3</span><p><strong>音声ヒントを使う</strong><br />最初に間違えた後、1 回だけ聞けます。</p></li>
                   </ol>
                   <div class="tone-guide pinyin-guide">
                     <h3>入力例</h3>
                     <div class="pinyin-guide__examples">
-                      <span><b>ma1</b><small>数字で声調を入力</small></span>
-                      <span><b>mā</b><small>声調記号で入力</small></span>
+                      <span><b>shu1</b><small>数字で声調を入力</small></span>
+                      <span><b>shū</b><small>声調記号で入力</small></span>
                     </div>
                   </div>
-                  <p class="guide-note"><img src="./avatar.png" alt="" />2 回目までに正解すると 1 点。漢字は 1 題ずつ表示されます。</p>
+                  <p class="guide-note"><img src="./avatar.png" alt="" />2 回目までに正解すると 1 点。問題は 1 題ずつ表示されます。</p>
                 </div>
 
                 <div class="inline-game" id="game-content" hidden>
                   <div class="inline-game__heading">
                     <div>
-                      <p class="panel__eyebrow">LV1 単漢字ピンイン</p>
+                      <p class="panel__eyebrow" id="game-level-label">LV1 単漢字ピンイン</p>
                       <h2>ピンインを入力しよう</h2>
                     </div>
                     <span class="session-chip" id="session-label">第 1 問 / 全 3 問</span>
@@ -155,7 +157,7 @@
                   </div>
 
                   <div class="pinyin-question" aria-live="polite">
-                    <p>この漢字のピンインと声調は？</p>
+                    <p id="question-instruction">この漢字のピンインと声調は？</p>
                     <strong id="question-character">媽</strong>
                   </div>
 
@@ -167,7 +169,7 @@
                         name="pinyin"
                         type="text"
                         inputmode="text"
-                        placeholder="例：ma1 または mā"
+                        placeholder="例：shu1 または shū"
                         autocomplete="off"
                         autocapitalize="none"
                         spellcheck="false"
@@ -187,6 +189,7 @@
                   </div>
                   <p class="audio-error" id="audio-error" role="alert" hidden></p>
                   <div class="feedback pinyin-feedback" id="answer-feedback" role="status" aria-live="polite" hidden></div>
+                  <button class="btn btn--light" id="show-correct-answer" type="button" hidden>正解を見る</button>
                   <div class="pinyin-next-row">
                     <div class="pinyin-save-status">
                       <span class="save-status" id="answer-status" role="status" aria-live="polite"></span>

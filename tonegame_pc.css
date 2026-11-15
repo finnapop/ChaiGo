@@ -205,6 +205,8 @@ img { display: block; max-width: 100%; }
 .feedback { margin-top: 15px; padding: 11px 13px; border: 2px solid var(--ink); border-radius: 13px; font-weight: 800; }
 .feedback.is-correct { background: #cbffe9; }
 .feedback.is-wrong { background: #ffe2df; }
+.answer-explanation-toggle { margin-top: 10px; }
+.answer-explanation { margin: 9px 0 0; padding: 10px 12px; border-radius: 11px; background: var(--cream); font-size: 13px; font-weight: 700; line-height: 1.6; }
 .answer-save-row { display: flex; min-height: 58px; align-items: center; justify-content: space-between; gap: 12px; margin-top: 13px; }
 .save-status { margin: 0; font-size: 12px; font-weight: 700; }
 .save-status.is-error { color: #8f1e30; }

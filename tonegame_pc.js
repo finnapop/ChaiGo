@@ -8,7 +8,8 @@ if (!gameData || !learningService) {
   throw new Error("Tone game data or learning service failed to load.");
 }
 
-const { QUESTIONS_PER_ROUND, TONE_OPTIONS, LV1_QUESTIONS } = gameData;
+const { TONE_OPTIONS, LEVELS, QUESTIONS_BY_LEVEL, ANSWER_OPTIONS_BY_LEVEL } = gameData;
+const LEVEL_BY_ID = new Map(LEVELS.map((level) => [level.id, level]));
 const {
   MOCK_PLAYER,
   completeSession,
@@ -21,10 +22,12 @@ const {
 const elements = Object.fromEntries(
   [
     "home-screen", "ready-content", "game-content", "result-content",
-    "record-status", "current-user-name", "start-game", "setup-message",
+    "record-status", "current-user-name", "start-game", "start-game-label", "setup-message",
     "menuToggle", "primaryNav",
-    "session-label", "question-progress", "progress-fill", "play-audio", "audio-error",
-    "answer-grid", "answer-feedback", "answer-save-status", "next-question", "retry-answer",
+    "game-level-label", "session-label", "question-progress", "progress-fill", "play-audio", "audio-error",
+    "audio-instruction", "answer-prompt",
+    "answer-grid", "answer-feedback", "show-answer-explanation", "answer-explanation",
+    "answer-save-status", "next-question", "retry-answer",
     "answered-count", "correct-count", "score-count", "result-title", "result-greeting",
     "result-score", "result-accuracy", "result-correct", "result-message", "complete-status",
     "retry-game", "result-home", "retry-complete",
@@ -70,9 +73,35 @@ function shuffle(items) {
   return result;
 }
 
-function toneLabel(tone) {
-  const option = TONE_OPTIONS.find((entry) => entry.value === Number(tone));
-  return option ? `${option.label}（${option.contour}）` : "—";
+function selectedLevelId() {
+  return Number(document.querySelector(".level-card.is-selected")?.dataset.level || 1);
+}
+
+function explainCorrectAnswer(question) {
+  const options = ANSWER_OPTIONS_BY_LEVEL[question.level] || TONE_OPTIONS;
+  const option = options.find((entry) => entry.value === Number(question.answer));
+  if (!option) return "目前無法顯示這題的正確答案。";
+
+  if (question.level >= 2 && question.word && Array.isArray(option.tones)) {
+    const toneDescriptions = {
+      1: "第一聲（平聲）",
+      2: "第二聲（上揚）",
+      3: "第三聲（先降後升）",
+      4: "第四聲（下降）",
+    };
+    const characters = Array.from(question.word);
+    const explanation = characters
+      .map((character, index) => `${character}是${toneDescriptions[option.tones[index]]}`)
+      .join("，");
+    return `「${question.word}」：${explanation}，聲調組合為 ${option.tones.join("–")}。`;
+  }
+
+  return `正確答案是${option.label}（${option.contour}）。`;
+}
+
+function updateStartGameLabel(levelId = selectedLevelId()) {
+  const level = LEVEL_BY_ID.get(levelId);
+  if (level) elements["start-game-label"].textContent = `LV${level.id} に挑戦する`;
 }
 
 function setPhase(phase) {
@@ -103,7 +132,10 @@ function setRecordStatus(message, kind = "ready") {
 
 function setSetupLocked(locked) {
   document.querySelectorAll(".level-card").forEach((button) => {
-    button.disabled = locked || button.dataset.level !== "1";
+    const level = LEVEL_BY_ID.get(Number(button.dataset.level));
+    const isAvailable = level?.status === "available";
+    button.disabled = locked || !isAvailable;
+    button.classList.toggle("is-unavailable", !isAvailable);
     button.setAttribute("aria-disabled", String(button.disabled));
   });
   elements["start-game"].disabled = locked || state.isStarting;
@@ -116,6 +148,8 @@ function updateSetupPlayer(player) {
 }
 
 async function initialize() {
+  setSetupLocked(false);
+  updateStartGameLabel();
   try {
     const player = await getPlayer();
     updateSetupPlayer(player);
@@ -180,24 +214,40 @@ async function startGame() {
   setSetupLocked(true);
 
   if (!state.pendingStart) {
+    const levelId = selectedLevelId();
+    const level = LEVEL_BY_ID.get(levelId);
+    const questionPool = QUESTIONS_BY_LEVEL[levelId] || [];
+    if (!level || level.status !== "available" || questionPool.length < level.questionsPerRound) {
+      setRecordStatus("このレベルの問題を準備できませんでした。", "error");
+      elements["setup-message"].textContent = "レベルの題庫と問題数を確認してください。";
+      setSetupLocked(false);
+      state.isStarting = false;
+      elements["start-game"].disabled = false;
+      return;
+    }
     state.pendingStart = {
       session_id: makeId(),
-      level: 1,
-      question_ids: shuffle(LV1_QUESTIONS).slice(0, QUESTIONS_PER_ROUND).map((question) => question.id),
-      total_questions: QUESTIONS_PER_ROUND,
+      level: levelId,
+      question_ids: shuffle(questionPool).slice(0, level.questionsPerRound).map((question) => question.id),
+      total_questions: level.questionsPerRound,
     };
   }
   try {
     const response = await startSession(state.pendingStart);
-    const questionById = new Map(LV1_QUESTIONS.map((question) => [question.id, question]));
+    const levelId = state.pendingStart.level;
+    const level = LEVEL_BY_ID.get(levelId);
+    const questionById = new Map((QUESTIONS_BY_LEVEL[levelId] || []).map((question) => [question.id, question]));
     const questions = state.pendingStart.question_ids.map((questionId) => questionById.get(questionId));
     if (questions.some((question) => !question)) throw new Error("題庫と Mock 場次の問題 ID が一致しません。");
     state.pendingStart = null;
     state.game = {
       sessionId: response.session.session_id,
+      level: levelId,
+      levelTitle: level.title,
       questions,
       index: 0,
-      answers: Array(QUESTIONS_PER_ROUND).fill(null),
+      answers: Array(questions.length).fill(null),
+      attemptCounts: Array(questions.length).fill(0),
       pendingAnswer: null,
       completeSaved: false,
     };
@@ -217,12 +267,14 @@ async function startGame() {
 function renderScore() {
   const game = state.game;
   if (!game) return;
+  const totalQuestions = game.questions.length;
   const answered = game.answers.filter(Boolean);
   const correct = answered.filter((answer) => answer.is_correct).length;
-  elements["answered-count"].innerHTML = `${answered.length} <small>/ ${QUESTIONS_PER_ROUND}</small>`;
+  elements["answered-count"].innerHTML = `${answered.length} <small>/ ${totalQuestions}</small>`;
   elements["correct-count"].textContent = String(correct);
   elements["score-count"].innerHTML = `${correct} <small>点</small>`;
-  elements["progress-fill"].style.width = `${(answered.length / QUESTIONS_PER_ROUND) * 100}%`;
+  elements["progress-fill"].style.width = `${(answered.length / totalQuestions) * 100}%`;
+  document.querySelector(".progress-track").setAttribute("aria-valuemax", String(totalQuestions));
   document.querySelector(".progress-track").setAttribute("aria-valuenow", String(answered.length));
 }
 
@@ -232,18 +284,48 @@ function showQuestion() {
   if (!game || !question) return;
   state.audio.pause();
   const number = game.index + 1;
+  const totalQuestions = game.questions.length;
+  const isWordPatternLevel = game.level === 2;
+  const isPhrasePatternLevel = game.level === 3;
   state.questionStartedAt = performance.now();
-  elements["session-label"].textContent = `第 ${number} 題 / 共 ${QUESTIONS_PER_ROUND} 題`;
-  elements["question-progress"].textContent = `第 ${number} 題 / 共 ${QUESTIONS_PER_ROUND} 題`;
+  elements["game-level-label"].textContent = game.levelTitle.replace("｜", " ");
+  elements["session-label"].textContent = `第 ${number} 題 / 共 ${totalQuestions} 題`;
+  elements["question-progress"].textContent = `第 ${number} 題 / 共 ${totalQuestions} 題`;
+  elements["audio-instruction"].textContent = isWordPatternLevel
+    ? "音声を聞いて、二文字の声調の組み合わせを選んでください"
+    : isPhrasePatternLevel
+      ? "音声を聞いて、句全体の声調パターンを選んでください"
+      : "音声を聞いて、声調を選んでください";
+  elements["answer-prompt"].childNodes[0].textContent = isWordPatternLevel
+    ? "声調の組み合わせを選んでください "
+    : isPhrasePatternLevel
+      ? "各文字の声調順を選んでください "
+      : "声調を選んでください ";
+  const answerOptions = ANSWER_OPTIONS_BY_LEVEL[game.level] || TONE_OPTIONS;
+  const arrows = ["→", "↗", "↘↗", "↘"];
+  const toneHints = ["平らに伸ばす", "上がる声", "下がって上がる", "下がる声"];
+  elements["answer-grid"].querySelectorAll("button[data-answer]").forEach((button) => {
+    const option = answerOptions.find((entry) => entry.value === Number(button.dataset.answer));
+    if (!option) return;
+    button.querySelector("strong").textContent = game.level === 1
+      ? `${option.label} ${arrows[option.value - 1]}`
+      : option.label;
+    button.querySelector("small").textContent = game.level === 1
+      ? toneHints[option.value - 1]
+      : option.contour;
+  });
   elements["answer-feedback"].hidden = true;
   elements["answer-feedback"].textContent = "";
   elements["answer-feedback"].className = "feedback";
+  elements["show-answer-explanation"].hidden = true;
+  elements["answer-explanation"].hidden = true;
+  elements["answer-explanation"].textContent = "";
   elements["answer-save-status"].textContent = "";
   elements["answer-save-status"].className = "save-status";
   elements["retry-answer"].hidden = true;
   elements["retry-answer"].disabled = false;
   elements["next-question"].disabled = true;
-  elements["next-question"].textContent = number === QUESTIONS_PER_ROUND ? "結果を見る →" : "次の問題 →";
+  elements["next-question"].textContent = number === totalQuestions ? "結果を見る →" : "次の問題 →";
   elements["audio-error"].hidden = true;
   elements["audio-error"].textContent = "";
   elements["play-audio"].disabled = false;
@@ -256,18 +338,38 @@ function showQuestion() {
   renderScore();
 }
 
-function renderFeedback(answer) {
+function renderRetryFeedback(selectedAnswer) {
+  const feedback = elements["answer-feedback"];
+  feedback.hidden = false;
+  feedback.classList.remove("is-correct");
+  feedback.classList.add("is-wrong");
+  feedback.textContent = "答錯了，可以再聽一次後作答。";
+  elements["show-answer-explanation"].hidden = true;
+  elements["answer-explanation"].hidden = true;
+  elements["answer-grid"].querySelectorAll("button").forEach((button) => {
+    const value = Number(button.dataset.answer);
+    button.classList.remove("is-correct", "is-wrong");
+    if (value === Number(selectedAnswer)) button.classList.add("is-wrong");
+    button.setAttribute("aria-pressed", String(value === Number(selectedAnswer)));
+  });
+}
+
+function renderFinalFeedback(answer) {
   const feedback = elements["answer-feedback"];
   feedback.hidden = false;
   feedback.classList.toggle("is-correct", Boolean(answer.is_correct));
   feedback.classList.toggle("is-wrong", !answer.is_correct);
   feedback.textContent = answer.is_correct
     ? "🎉 正解！いい耳です！"
-    : `もう一歩！正解は ${toneLabel(answer.correct_answer)} です。`;
+    : "答錯了，已無法再次作答。可以選擇查看正確答案說明。";
+  elements["show-answer-explanation"].hidden = answer.is_correct;
+  elements["answer-explanation"].hidden = true;
+  elements["answer-explanation"].textContent = "";
   elements["answer-grid"].querySelectorAll("button").forEach((button) => {
     const value = Number(button.dataset.answer);
-    if (value === Number(answer.correct_answer)) button.classList.add("is-correct");
-    if (value === Number(answer.selected_answer) && !answer.is_correct) button.classList.add("is-wrong");
+    button.classList.remove("is-correct", "is-wrong");
+    if (answer.is_correct && value === Number(answer.correct_answer)) button.classList.add("is-correct");
+    if (!answer.is_correct && value === Number(answer.selected_answer)) button.classList.add("is-wrong");
     button.disabled = true;
     button.setAttribute("aria-pressed", String(value === Number(answer.selected_answer)));
   });
@@ -279,6 +381,7 @@ function chooseAnswer(value) {
   state.audio.pause();
   setAudioButton(false);
   const question = game.questions[game.index];
+  const attemptCount = game.attemptCounts[game.index] + 1;
   const answer = {
     player_id: MOCK_PLAYER.player_id,
     session_id: game.sessionId,
@@ -293,10 +396,20 @@ function chooseAnswer(value) {
     response_time_ms: Math.max(0, Math.round(performance.now() - state.questionStartedAt)),
     saved: false,
   };
+  game.attemptCounts[game.index] = attemptCount;
+  window.dispatchEvent(new CustomEvent("chaigo:game-answer", {
+    detail: { isCorrect: answer.is_correct },
+  }));
+
+  if (!answer.is_correct && attemptCount === 1) {
+    renderRetryFeedback(answer.selected_answer);
+    return;
+  }
+
   game.pendingAnswer = answer;
   game.answers[game.index] = answer;
   setPhase("feedback");
-  renderFeedback(answer);
+  renderFinalFeedback(answer);
   renderScore();
   persistCurrentAnswer();
 }
@@ -309,14 +422,15 @@ async function persistCurrentAnswer() {
   elements["retry-answer"].hidden = true;
   elements["retry-answer"].disabled = true;
   elements["next-question"].disabled = true;
-  elements["answer-save-status"].textContent = "Mock 記録をこのブラウザーに保存しています…";
+  elements["answer-save-status"].textContent = "保存中…";
   elements["answer-save-status"].className = "save-status";
   try {
     const response = await saveAnswer(answer);
     game.answers[game.index] = { ...response.answer, saved: true };
     game.pendingAnswer = null;
-    renderFeedback(game.answers[game.index]);
-    elements["answer-save-status"].textContent = "✓ Mock Mode · このブラウザーに保存済み（サーバー保存ではありません）";
+    renderFinalFeedback(game.answers[game.index]);
+    // Mock Mode stores records in this browser's localStorage; no server request is made.
+    elements["answer-save-status"].textContent = "✓ 已儲存";
     elements["answer-save-status"].className = "save-status is-ready";
     elements["next-question"].disabled = false;
     renderScore();
@@ -334,7 +448,7 @@ async function persistCurrentAnswer() {
 function advanceQuestion() {
   const game = state.game;
   if (state.phase !== "feedback" || !game?.answers[game.index]?.saved) return;
-  if (game.index + 1 === QUESTIONS_PER_ROUND) {
+  if (game.index + 1 === game.questions.length) {
     openResults();
     return;
   }
@@ -345,17 +459,18 @@ function advanceQuestion() {
 
 function renderResult(correctCount) {
   const game = state.game;
-  const accuracy = Math.round((correctCount / QUESTIONS_PER_ROUND) * 100);
+  const totalQuestions = game.questions.length;
+  const accuracy = Math.round((correctCount / totalQuestions) * 100);
   elements["result-greeting"].textContent = `${MOCK_PLAYER.nickname}さん、おつかれさま！`;
-  elements["result-score"].innerHTML = `${correctCount} <small>/ ${QUESTIONS_PER_ROUND}</small>`;
+  elements["result-score"].innerHTML = `${correctCount} <small>/ ${totalQuestions}</small>`;
   elements["result-accuracy"].innerHTML = `${accuracy}<small>%</small>`;
-  elements["result-correct"].innerHTML = `${correctCount} <small>/ ${QUESTIONS_PER_ROUND}</small>`;
-  elements["result-message"].textContent = correctCount === QUESTIONS_PER_ROUND
+  elements["result-correct"].innerHTML = `${correctCount} <small>/ ${totalQuestions}</small>`;
+  elements["result-message"].textContent = correctCount === totalQuestions
     ? "🏆 全問正解！すばらしい！"
-    : correctCount >= 2
+    : correctCount >= Math.ceil((totalQuestions * 2) / 3)
       ? "🎉 いい感じ！次は満点を目指そう。"
       : "💪 何度も聞いて練習しよう。もう一度挑戦できます！";
-  elements["complete-status"].textContent = "Mock Mode の結果をこのブラウザーに保存しています…";
+  elements["complete-status"].textContent = "結果を保存しています…";
   elements["retry-complete"].hidden = true;
   elements["retry-game"].disabled = true;
   elements["result-home"].disabled = true;
@@ -386,7 +501,8 @@ async function persistCompletion() {
     elements["retry-game"].disabled = false;
     elements["result-home"].disabled = false;
     elements["retry-complete"].hidden = true;
-    elements["complete-status"].textContent = `✓ Mock Mode · このブラウザーに保存済み · 累計 ${summary.play_count} 回（サーバー保存ではありません）`;
+    // Results use the browser-only Mock Mode adapter and are stored in localStorage, not on the server.
+    elements["complete-status"].textContent = "✓ 結果已儲存";
     try {
       const stats = await getLearningStats();
       setRecordStatus(
@@ -397,7 +513,7 @@ async function persistCompletion() {
       // The completed session has already been confirmed in localStorage.
     }
   } catch (error) {
-    elements["complete-status"].textContent = `結果を Mock 記録に保存できませんでした：${error.message}`;
+    elements["complete-status"].textContent = `結果を保存できませんでした：${error.message}`;
     elements["retry-complete"].hidden = false;
     elements["retry-complete"].disabled = false;
   } finally {
@@ -412,6 +528,19 @@ function returnToReady() {
   setSetupLocked(false);
   elements["start-game"].disabled = false;
   setView("setup");
+}
+
+function showCorrectAnswerExplanation() {
+  const game = state.game;
+  const answer = game?.answers[game.index];
+  const question = game?.questions[game.index];
+  if (!answer || answer.is_correct || game.attemptCounts[game.index] < 2 || !question) return;
+  elements["answer-explanation"].textContent = explainCorrectAnswer(question);
+  elements["answer-explanation"].hidden = false;
+  elements["show-answer-explanation"].hidden = true;
+  elements["answer-grid"].querySelectorAll("button[data-answer]").forEach((button) => {
+    if (Number(button.dataset.answer) === Number(question.answer)) button.classList.add("is-correct");
+  });
 }
 
 elements["start-game"].addEventListener("click", startGame);
@@ -429,6 +558,7 @@ elements["answer-grid"].addEventListener("click", (event) => {
 });
 elements["next-question"].addEventListener("click", advanceQuestion);
 elements["retry-answer"].addEventListener("click", persistCurrentAnswer);
+elements["show-answer-explanation"].addEventListener("click", showCorrectAnswerExplanation);
 elements["retry-complete"].addEventListener("click", persistCompletion);
 elements["retry-game"].addEventListener("click", startGame);
 elements["result-home"].addEventListener("click", returnToReady);
@@ -461,14 +591,15 @@ document.addEventListener("keydown", (event) => {
 });
 
 document.querySelectorAll(".level-card").forEach((button) => {
-  if (button.dataset.level !== "1") return;
   button.addEventListener("click", () => {
-    if (state.phase !== "ready") return;
+    if (state.phase !== "ready" || button.disabled) return;
+    if (Number(button.dataset.level) !== selectedLevelId()) state.pendingStart = null;
     document.querySelectorAll(".level-card").forEach((card) => {
       const selected = card === button;
       card.classList.toggle("is-selected", selected);
       card.setAttribute("aria-pressed", String(selected));
     });
+    updateStartGameLabel(Number(button.dataset.level));
   });
 });
 

@@ -1,4 +1,3 @@
-const AUDIO_BASE_URL = "./ToneGame/audio/lv1";
 const QUESTIONS_PER_ROUND = 3;
 const learningService = window.ChaiGoMockPinyinLearningService;
 if (!learningService) {
@@ -12,26 +11,48 @@ if (!learningService) {
 const { startSession, saveAnswer, completeSession } = learningService;
 
 const QUESTIONS = [
-  { char: "媽", pinyin: "ma1", audio: `${AUDIO_BASE_URL}/ma_01.mp3` },
-  { char: "麻", pinyin: "ma2", audio: `${AUDIO_BASE_URL}/ma_02.mp3` },
-  { char: "馬", pinyin: "ma3", audio: `${AUDIO_BASE_URL}/ma_03.mp3` },
-  { char: "罵", pinyin: "ma4", audio: `${AUDIO_BASE_URL}/ma_04.mp3` },
-  { char: "八", pinyin: "ba1", audio: `${AUDIO_BASE_URL}/ba_01.mp3` },
-  { char: "拔", pinyin: "ba2", audio: `${AUDIO_BASE_URL}/ba_02.mp3` },
-  { char: "把", pinyin: "ba3", audio: `${AUDIO_BASE_URL}/ba_03.mp3` },
-  { char: "爸", pinyin: "ba4", audio: `${AUDIO_BASE_URL}/ba_04.mp3` },
-  { char: "七", pinyin: "qi1", audio: `${AUDIO_BASE_URL}/qi_01.mp3` },
-  { char: "旗", pinyin: "qi2", audio: `${AUDIO_BASE_URL}/qi_02.mp3` },
-  { char: "起", pinyin: "qi3", audio: `${AUDIO_BASE_URL}/qi_03.mp3` },
-  { char: "氣", pinyin: "qi4", audio: `${AUDIO_BASE_URL}/qi_04.mp3` },
+  { level: 1, char: "媽", pinyin: "ma1", audio: "./ToneGame/audio/lv1/ma_01.mp3" },
+  { level: 1, char: "麻", pinyin: "ma2", audio: "./ToneGame/audio/lv1/ma_02.mp3" },
+  { level: 1, char: "馬", pinyin: "ma3", audio: "./ToneGame/audio/lv1/ma_03.mp3" },
+  { level: 1, char: "罵", pinyin: "ma4", audio: "./ToneGame/audio/lv1/ma_04.mp3" },
+  { level: 1, char: "八", pinyin: "ba1", audio: "./ToneGame/audio/lv1/ba_01.mp3" },
+  { level: 1, char: "拔", pinyin: "ba2", audio: "./ToneGame/audio/lv1/ba_02.mp3" },
+  { level: 1, char: "把", pinyin: "ba3", audio: "./ToneGame/audio/lv1/ba_03.mp3" },
+  { level: 1, char: "爸", pinyin: "ba4", audio: "./ToneGame/audio/lv1/ba_04.mp3" },
+  { level: 1, char: "七", pinyin: "qi1", audio: "./ToneGame/audio/lv1/qi_01.mp3" },
+  { level: 1, char: "旗", pinyin: "qi2", audio: "./ToneGame/audio/lv1/qi_02.mp3" },
+  { level: 1, char: "起", pinyin: "qi3", audio: "./ToneGame/audio/lv1/qi_03.mp3" },
+  { level: 1, char: "氣", pinyin: "qi4", audio: "./ToneGame/audio/lv1/qi_04.mp3" },
 ];
+
+const LV2_QUESTIONS = [
+  { level: 2, char: "開心", pinyin: "kai1xin1", pinyinMarked: "kāixīn", audio: "./ToneGame/audio/lv2/開心.wav" },
+  { level: 2, char: "天氣", pinyin: "tian1qi4", pinyinMarked: "tiānqì", audio: "./ToneGame/audio/lv2/天氣.wav" },
+  { level: 2, char: "草莓", pinyin: "cao3mei2", pinyinMarked: "cǎoméi", audio: "./ToneGame/audio/lv2/草莓.wav" },
+  { level: 2, char: "可愛", pinyin: "ke3ai4", pinyinMarked: "kě'ài", audio: "./ToneGame/audio/lv2/可愛.wav" },
+];
+
+const LV3_QUESTIONS = [
+  { level: 3, char: "便利商店", pinyin: "bian4li4shang1dian4", pinyinMarked: "biàn lì shāng diàn", audio: "./ToneGame/audio/lv3/便利商店.m4a" },
+  { level: 3, char: "明天會下雨", pinyin: "ming2tian1hui4xia4yu3", pinyinMarked: "míng tiān huì xià yǔ", audio: "./ToneGame/audio/lv3/明天會下雨.m4a" },
+  { level: 3, char: "大家好", pinyin: "da4jia1hao3", pinyinMarked: "dà jiā hǎo", audio: "./ToneGame/audio/lv3/大家好.m4a" },
+  { level: 3, char: "台灣很熱", pinyin: "tai2wan1hen3re4", pinyinMarked: "tái wān hěn rè", audio: "./ToneGame/audio/lv3/台灣很熱.m4a" },
+];
+
+const QUESTIONS_BY_LEVEL = { 1: QUESTIONS, 2: LV2_QUESTIONS, 3: LV3_QUESTIONS };
+const LEVEL_TITLES = {
+  1: "単漢字ピンイン",
+  2: "二字語ピンイン",
+  3: "短文ピンイン",
+};
 
 const elements = Object.fromEntries(
   [
     "ready-content", "game-content", "result-content", "record-status", "start-game",
-    "setup-message", "menuToggle", "primaryNav", "session-label", "question-progress",
+    "start-game-label", "setup-message", "menuToggle", "primaryNav", "level-list",
+    "game-level-label", "question-instruction", "input-help", "session-label", "question-progress",
     "progress-track", "progress-fill", "question-character", "answer-form", "pinyin-input",
-    "submit-answer", "play-hint", "hint-status", "audio-error", "answer-feedback",
+    "submit-answer", "play-hint", "hint-status", "audio-error", "answer-feedback", "show-correct-answer",
     "answer-status", "retry-answer", "next-question", "answered-count", "correct-count", "score-count",
     "result-greeting", "result-score", "result-accuracy", "result-correct", "result-message",
     "result-save-status", "retry-complete", "retry-game", "result-home",
@@ -40,6 +61,8 @@ const elements = Object.fromEntries(
 
 const state = {
   phase: "ready",
+  selectedLevel: 1,
+  level: 1,
   questions: [],
   index: 0,
   score: 0,
@@ -86,7 +109,7 @@ function makeId() {
 }
 
 function questionId(question) {
-  return `lv1-${question.pinyin}-${question.char}`;
+  return `lv${question.level}-${question.pinyin}-${question.char}`;
 }
 
 function normalizePinyin(text) {
@@ -115,6 +138,56 @@ function normalizePinyin(text) {
   }
 
   return { base: value, tone: detectedTone };
+}
+
+function normalizePinyinSequence(text, expectedPinyin = "") {
+  const toneMap = {
+    "ā": ["a", "1"], "á": ["a", "2"], "ǎ": ["a", "3"], "à": ["a", "4"],
+    "ē": ["e", "1"], "é": ["e", "2"], "ě": ["e", "3"], "è": ["e", "4"],
+    "ī": ["i", "1"], "í": ["i", "2"], "ǐ": ["i", "3"], "ì": ["i", "4"],
+    "ō": ["o", "1"], "ó": ["o", "2"], "ǒ": ["o", "3"], "ò": ["o", "4"],
+    "ū": ["u", "1"], "ú": ["u", "2"], "ǔ": ["u", "3"], "ù": ["u", "4"],
+    "ǖ": ["ü", "1"], "ǘ": ["ü", "2"], "ǚ": ["ü", "3"], "ǜ": ["ü", "4"],
+  };
+  const value = text.trim().toLowerCase().normalize("NFC").replace(/u:/g, "ü");
+  const expectedSyllables = expectedPinyin.match(/[a-zü]+[1-4]/g) || [];
+  const plainExpected = expectedSyllables.map((syllable) => syllable.slice(0, -1)).join("");
+
+  // Number input already identifies each syllable's tone directly.
+  if (/[1-4]/.test(value)) {
+    return value.replace(/[\s'’·-]/g, "");
+  }
+
+  let base = "";
+  const tonesByOffset = new Map();
+  for (const character of value) {
+    const marked = toneMap[character];
+    if (marked) {
+      tonesByOffset.set(base.length, marked[1]);
+      base += marked[0];
+    } else if (/[a-zü]/.test(character)) base += character;
+    else if (/[\s'’·-]/.test(character)) continue;
+    else base += character;
+  }
+
+  if (!expectedSyllables.length || base !== plainExpected) return base;
+
+  let offset = 0;
+  return expectedSyllables.map((syllable) => {
+    const syllableBase = syllable.slice(0, -1);
+    const tone = tonesByOffset.get(offset) || [...tonesByOffset.entries()]
+      .find(([position]) => position >= offset && position < offset + syllableBase.length)?.[1];
+    offset += syllableBase.length;
+    return `${syllableBase}${tone || ""}`;
+  }).join("");
+}
+
+function pinyinBaseSequence(text, expectedPinyin) {
+  return normalizePinyinSequence(text, expectedPinyin).replace(/[1-4]/g, "");
+}
+
+function formattedPinyin(question) {
+  return question.pinyinMarked || numberToToneMark(question.pinyin);
 }
 
 function numberToToneMark(pinyin) {
@@ -159,9 +232,28 @@ function numberToToneMark(pinyin) {
 function setPhase(phase) {
   state.phase = phase;
   elements["ready-content"].hidden = phase !== "ready";
-  elements["game-content"].hidden = !["playing", "first-wrong", "answered"].includes(phase);
+  elements["game-content"].hidden = !["playing", "first-wrong", "awaiting-reveal", "answered"].includes(phase);
   elements["result-content"].hidden = phase !== "result";
+  elements["level-list"].querySelectorAll(".level-card").forEach((button) => {
+    const available = Boolean(QUESTIONS_BY_LEVEL[Number(button.dataset.level)]);
+    button.disabled = !available || phase !== "ready";
+    button.classList.toggle("is-unavailable", !available);
+    button.setAttribute("aria-disabled", String(button.disabled));
+    button.setAttribute("aria-pressed", String(Number(button.dataset.level) === state.selectedLevel));
+  });
   document.body.dataset.gameState = phase;
+}
+
+function updateSelectedLevel(level) {
+  if (!QUESTIONS_BY_LEVEL[level]) return;
+  state.selectedLevel = level;
+  elements["level-list"].querySelectorAll(".level-card").forEach((button) => {
+    const selected = Number(button.dataset.level) === level;
+    button.classList.toggle("is-selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
+  elements["start-game-label"].textContent = `LV${level} に挑戦する`;
+  elements["setup-message"].textContent = "";
 }
 
 function setHintPlaying(playing) {
@@ -181,7 +273,7 @@ function showAudioError() {
 }
 
 function renderScore() {
-  elements["answered-count"].innerHTML = `${state.answered} <small>/ ${QUESTIONS_PER_ROUND}</small>`;
+  elements["answered-count"].innerHTML = `${state.answered} <small>/ ${state.questions.length || QUESTIONS_PER_ROUND}</small>`;
   elements["correct-count"].textContent = String(state.score);
   elements["score-count"].innerHTML = `${state.score} <small>点</small>`;
 }
@@ -189,13 +281,34 @@ function renderScore() {
 function renderQuestion() {
   const question = state.questions[state.index];
   const number = state.index + 1;
+  const totalQuestions = state.questions.length;
+  const isWord = question.level === 2;
+  const isPhrase = question.level === 3;
+  const isMultiSyllable = isWord || isPhrase;
   state.questionStartedAt = performance.now();
-  elements["session-label"].textContent = `第 ${number} 問 / 全 ${QUESTIONS_PER_ROUND} 問`;
-  elements["question-progress"].textContent = `第 ${number} 問 / 全 ${QUESTIONS_PER_ROUND} 問`;
+  elements["session-label"].textContent = `第 ${number} 問 / 全 ${totalQuestions} 問`;
+  elements["question-progress"].textContent = `第 ${number} 問 / 全 ${totalQuestions} 問`;
   elements["progress-track"].setAttribute("aria-valuenow", String(state.index));
-  elements["progress-fill"].style.width = `${(state.index / QUESTIONS_PER_ROUND) * 100}%`;
+  elements["progress-fill"].style.width = `${(state.index / totalQuestions) * 100}%`;
+  elements["game-level-label"].textContent = `LV${state.level} ${LEVEL_TITLES[state.level]}`;
+  elements["question-instruction"].textContent = isPhrase
+    ? "このフレーズのピンインと声調は？"
+    : isWord
+      ? "この言葉のピンインと声調は？"
+      : "この漢字のピンインと声調は？";
   elements["question-character"].textContent = question.char;
+  elements["question-character"].classList.toggle("is-phrase", isPhrase);
   elements["pinyin-input"].value = "";
+  elements["pinyin-input"].placeholder = isPhrase
+    ? "例：da4jia1hao3 または dà jiā hǎo"
+    : isWord
+      ? "例：gao1xing4 または gāoxìng"
+      : "例：shu1 または shū";
+  elements["input-help"].textContent = isPhrase
+    ? "「大家好」の例：da4jia1hao3 / dà jiā hǎo。各音節を続けて入力できます。"
+    : isWord
+      ? "二つの音節を続けて入力できます。例：gao1xing4 / gāoxìng。"
+      : "声調数字は 1〜4。声調記号での入力にも対応しています。";
   elements["pinyin-input"].disabled = false;
   elements["submit-answer"].disabled = false;
   elements["next-question"].disabled = true;
@@ -203,6 +316,8 @@ function renderQuestion() {
   elements["answer-feedback"].hidden = true;
   elements["answer-feedback"].textContent = "";
   elements["answer-feedback"].className = "feedback pinyin-feedback";
+  elements["show-correct-answer"].hidden = true;
+  elements["show-correct-answer"].disabled = false;
   elements["answer-status"].textContent = "";
   elements["answer-status"].className = "save-status";
   elements["retry-answer"].hidden = true;
@@ -223,14 +338,15 @@ async function startGame() {
   state.isStarting = true;
   elements["start-game"].disabled = true;
   elements["setup-message"].textContent = "新しいゲームと学習記録を準備しています…";
-  state.questions = shuffle(QUESTIONS).slice(0, QUESTIONS_PER_ROUND);
+  state.level = state.selectedLevel;
+  state.questions = shuffle(QUESTIONS_BY_LEVEL[state.level]).slice(0, QUESTIONS_PER_ROUND);
   state.sessionId = makeId();
   state.recordingEnabled = true;
   state.completeSaved = false;
   try {
     await startSession({
       session_id: state.sessionId,
-      level: 1,
+      level: state.level,
       question_ids: state.questions.map(questionId),
       total_questions: QUESTIONS_PER_ROUND,
     });
@@ -263,19 +379,31 @@ function submitAnswer(event) {
   state.attempts += 1;
   elements["answer-status"].textContent = "";
   const question = state.questions[state.index];
-  const userPinyin = normalizePinyin(answer);
-  const correctPinyin = normalizePinyin(question.pinyin);
-  const isCorrect = userPinyin.base === correctPinyin.base && userPinyin.tone === correctPinyin.tone;
+  const isMultiSyllable = question.level >= 2;
+  const userPinyin = isMultiSyllable ? normalizePinyinSequence(answer, question.pinyin) : normalizePinyin(answer);
+  const correctPinyin = isMultiSyllable ? normalizePinyinSequence(question.pinyin) : normalizePinyin(question.pinyin);
+  const isCorrect = isMultiSyllable
+    ? userPinyin === correctPinyin
+    : userPinyin.base === correctPinyin.base && userPinyin.tone === correctPinyin.tone;
   state.currentAttempts.push({ input: answer, is_correct: isCorrect, answered_at: new Date().toISOString() });
+  window.dispatchEvent(new CustomEvent("chaigo:game-answer", {
+    detail: { isCorrect },
+  }));
 
   if (isCorrect) {
     state.score += 1;
-    resolveQuestion(true, `正解！【${question.char}】のピンインは ${numberToToneMark(question.pinyin)} です。`, answer);
+    resolveQuestion(true, `正解！【${question.char}】のピンインは ${formattedPinyin(question)} です。`, answer);
     return;
   }
 
   if (state.attempts === 1) {
-    const message = userPinyin.base === correctPinyin.base && userPinyin.tone !== correctPinyin.tone
+    const hasCorrectBase = isMultiSyllable
+      ? pinyinBaseSequence(answer, question.pinyin) === pinyinBaseSequence(question.pinyin)
+      : userPinyin.base === correctPinyin.base;
+    const hasWrongTone = isMultiSyllable
+      ? userPinyin !== correctPinyin
+      : userPinyin.tone !== correctPinyin.tone;
+    const message = hasCorrectBase && hasWrongTone
       ? "ピンインは合っていますが、声調が違います。もう一度入力してみましょう。"
       : "もう一度チャレンジしてみましょう。";
     elements["answer-feedback"].textContent = `${message} 音声ヒントも 1 回聞けます。`;
@@ -287,7 +415,26 @@ function submitAnswer(event) {
     return;
   }
 
-  resolveQuestion(false, `残念！正解は ${numberToToneMark(question.pinyin)} です。`, answer);
+  state.audio.pause();
+  elements["pinyin-input"].disabled = true;
+  elements["submit-answer"].disabled = true;
+  elements["answer-feedback"].textContent = "2 回目も不正解です。ボタンを押すと正解を確認できます。";
+  elements["answer-feedback"].className = "feedback pinyin-feedback is-wrong";
+  elements["answer-feedback"].hidden = false;
+  elements["show-correct-answer"].hidden = false;
+  setPhase("awaiting-reveal");
+  setHintPlaying(false);
+}
+
+function revealCorrectAnswer() {
+  if (state.phase !== "awaiting-reveal") return;
+  const question = state.questions[state.index];
+  const lastAttempt = state.currentAttempts[state.currentAttempts.length - 1];
+  resolveQuestion(
+    false,
+    `正解は ${formattedPinyin(question)} です。`,
+    lastAttempt?.input || "",
+  );
 }
 
 function resolveQuestion(isCorrect, message, selectedPinyin) {
@@ -298,7 +445,7 @@ function resolveQuestion(isCorrect, message, selectedPinyin) {
     question_id: questionId(question),
     question_order: state.index + 1,
     character: question.char,
-    correct_pinyin: numberToToneMark(question.pinyin),
+    correct_pinyin: formattedPinyin(question),
     selected_pinyin: selectedPinyin,
     is_correct: isCorrect,
     attempts: state.currentAttempts.length,
@@ -312,9 +459,10 @@ function resolveQuestion(isCorrect, message, selectedPinyin) {
   elements["answer-feedback"].textContent = message;
   elements["answer-feedback"].className = `feedback pinyin-feedback ${isCorrect ? "is-correct" : "is-wrong"}`;
   elements["answer-feedback"].hidden = false;
+  elements["show-correct-answer"].hidden = true;
   elements["answer-status"].textContent = isCorrect ? "✓ 正解" : "次の問題で再チャレンジ！";
   elements["next-question"].disabled = true;
-  elements["next-question"].textContent = state.index + 1 === QUESTIONS_PER_ROUND ? "結果を見る →" : "次の問題 →";
+  elements["next-question"].textContent = state.index + 1 === state.questions.length ? "結果を見る →" : "次の問題 →";
   state.audio.pause();
   renderScore();
   setPhase("answered");
@@ -367,7 +515,7 @@ function playHint() {
 
 async function advanceQuestion() {
   if (state.phase !== "answered") return;
-  if (state.index + 1 >= QUESTIONS_PER_ROUND) {
+  if (state.index + 1 >= state.questions.length) {
     await showResult();
     return;
   }
@@ -376,14 +524,15 @@ async function advanceQuestion() {
 }
 
 async function showResult() {
-  const accuracy = Math.round((state.score / QUESTIONS_PER_ROUND) * 100);
-  elements["progress-track"].setAttribute("aria-valuenow", String(QUESTIONS_PER_ROUND));
+  const totalQuestions = state.questions.length;
+  const accuracy = Math.round((state.score / totalQuestions) * 100);
+  elements["progress-track"].setAttribute("aria-valuenow", String(totalQuestions));
   elements["progress-fill"].style.width = "100%";
   elements["result-greeting"].textContent = "ChaiGo User さん、おつかれさま！";
-  elements["result-score"].innerHTML = `${state.score} <small>/ ${QUESTIONS_PER_ROUND}</small>`;
+  elements["result-score"].innerHTML = `${state.score} <small>/ ${totalQuestions}</small>`;
   elements["result-accuracy"].innerHTML = `${accuracy}<small>%</small>`;
-  elements["result-correct"].innerHTML = `${state.score} <small>/ ${QUESTIONS_PER_ROUND}</small>`;
-  elements["result-message"].textContent = state.score === QUESTIONS_PER_ROUND
+  elements["result-correct"].innerHTML = `${state.score} <small>/ ${totalQuestions}</small>`;
+  elements["result-message"].textContent = state.score === totalQuestions
     ? "🏆 全問正解！すばらしい！"
     : state.score >= 2
       ? "🎉 いい感じ！次は満点を目指そう。"
@@ -420,7 +569,7 @@ async function persistCompletion() {
 function returnToReady() {
   state.audio.pause();
   setPhase("ready");
-  elements["setup-message"].textContent = "いつでも LV1 に挑戦できます。";
+  elements["setup-message"].textContent = `いつでも LV${state.selectedLevel} に挑戦できます。`;
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -433,7 +582,13 @@ function closePrimaryNav() {
 elements["start-game"].addEventListener("click", startGame);
 elements["retry-game"].addEventListener("click", startGame);
 elements["result-home"].addEventListener("click", returnToReady);
+elements["level-list"].addEventListener("click", (event) => {
+  const button = event.target.closest(".level-card");
+  if (!button || button.disabled || state.phase !== "ready") return;
+  updateSelectedLevel(Number(button.dataset.level));
+});
 elements["answer-form"].addEventListener("submit", submitAnswer);
+elements["show-correct-answer"].addEventListener("click", revealCorrectAnswer);
 elements["retry-answer"].addEventListener("click", persistCurrentAnswer);
 elements["retry-complete"].addEventListener("click", persistCompletion);
 elements["play-hint"].addEventListener("click", playHint);

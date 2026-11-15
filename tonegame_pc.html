@@ -17,9 +17,11 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./tonegame_pc.css" />
+    <link rel="stylesheet" href="./floating-vtuber.css" />
     <script defer src="./tonegame-data.js"></script>
     <script defer src="./mockLearningService.js"></script>
     <script defer src="./tonegame_pc.js"></script>
+    <script defer src="./floating-vtuber.js"></script>
   </head>
   <body>
     <header class="topbar">
@@ -44,7 +46,7 @@
           <a href="./pinyingame_pc.html">ピンインゲーム</a>
           <a href="https://chaigo-aituber-kit.vercel.app/" target="_blank" rel="noopener noreferrer">チャイ語娘とチャット</a>
           <a href="./record.html">学習記録</a>
-          <a href="./index.html#about">レッスン予約</a>
+          <a href="https://scheduler.zoom.us/22-terf3f/chaigo" target="_blank" rel="noopener noreferrer">レッスン予約</a>
         </nav>
 
         <div class="topbar__account" role="group" aria-label="アカウント">
@@ -93,15 +95,15 @@
                   <span class="level-card__copy"><strong>基本の声調</strong><small>ma・ba・qi｜12題から3題</small></span>
                   <span class="level-card__badge">プレイ可能</span>
                 </button>
-                <button class="level-card is-unavailable" type="button" data-level="2" disabled aria-disabled="true">
+                <button class="level-card" type="button" data-level="2" disabled aria-disabled="true">
                   <span class="level-card__number">LV2</span>
-                  <span class="level-card__copy"><strong>ステップアップ</strong><small>音檔4件｜正解表を確認中</small></span>
-                  <span class="level-card__badge">準備中</span>
+                  <span class="level-card__copy"><strong>ステップアップ</strong><small>四つの音声からランダムに3題｜声調パターン</small></span>
+                  <span class="level-card__badge">プレイ可能</span>
                 </button>
-                <button class="level-card is-unavailable" type="button" data-level="3" disabled aria-disabled="true">
+                <button class="level-card" type="button" data-level="3" disabled aria-disabled="true">
                   <span class="level-card__number">LV3</span>
-                  <span class="level-card__copy"><strong>声調チャレンジ</strong><small>音檔4件｜出題と正解を確認中</small></span>
-                  <span class="level-card__badge">準備中</span>
+                  <span class="level-card__copy"><strong>声調チャレンジ</strong><small>四段音檔からランダムに3題｜句の声調パターン</small></span>
+                  <span class="level-card__badge">プレイ可能</span>
                 </button>
                 <button class="level-card is-unavailable" type="button" data-level="4" disabled aria-disabled="true">
                   <span class="level-card__number">LV4</span>
@@ -109,7 +111,7 @@
                   <span class="level-card__badge">未実装</span>
                 </button>
               </div>
-              <button class="btn btn--dark btn--wide" id="start-game" type="button">LV1 に挑戦する <span aria-hidden="true">→</span></button>
+              <button class="btn btn--dark btn--wide" id="start-game" type="button"><span id="start-game-label">LV1 に挑戦する</span> <span aria-hidden="true">→</span></button>
               <p class="form-message" id="setup-message" role="status" aria-live="polite"></p>
               </section>
             </div>
@@ -138,13 +140,13 @@
                     <span><b>4</b> 第四声 <small>↘</small></span>
                   </div>
                 </div>
-                <p class="guide-note"><img src="./avatar.png" alt="" />1問正解で1点。毎回ランダムに3題出題し、同じラウンド内で重複しません。</p>
+                <p class="guide-note"><img src="./avatar.png" alt="" />1問正解で1点。問題数はレベルによって異なります。</p>
               </div>
 
               <div class="inline-game" id="game-content" hidden>
                 <div class="inline-game__heading">
                   <div>
-                    <p class="panel__eyebrow">LV1 基本の声調</p>
+                    <p class="panel__eyebrow" id="game-level-label">LV1 基本の声調</p>
                     <h2 id="game-title">声調チャレンジ</h2>
                   </div>
                   <span class="session-chip" id="session-label">第 1 題 / 共 3 題</span>
@@ -156,14 +158,14 @@
 
                 <div class="audio-box">
                   <div class="audio-orbit" aria-hidden="true">♪</div>
-                  <p>音声を聞いて、声調を選んでください</p>
+                  <p id="audio-instruction">音声を聞いて、声調を選んでください</p>
                   <button class="audio-button" id="play-audio" type="button" aria-label="問題音声を聞く">
                     <span aria-hidden="true">🔊</span><strong>音声を聞く</strong>
                   </button>
                   <p class="audio-error" id="audio-error" role="alert" hidden></p>
                 </div>
 
-                <p class="answer-prompt">声調を選んでください <span>ボタンまたはキーボード 1・2・3・4</span></p>
+                <p class="answer-prompt" id="answer-prompt">声調を選んでください <span>ボタンまたはキーボード 1・2・3・4</span></p>
                 <div class="answer-grid" id="answer-grid">
                   <button class="answer-button answer-button--one" type="button" data-answer="1"><span class="answer-button__digit">1</span><span><strong>第一聲 →</strong><small>平らに伸ばす</small></span></button>
                   <button class="answer-button answer-button--two" type="button" data-answer="2"><span class="answer-button__digit">2</span><span><strong>第二聲 ↗</strong><small>上がる声</small></span></button>
@@ -171,6 +173,8 @@
                   <button class="answer-button answer-button--four" type="button" data-answer="4"><span class="answer-button__digit">4</span><span><strong>第四聲 ↘</strong><small>下がる声</small></span></button>
                 </div>
                 <div class="feedback" id="answer-feedback" role="status" aria-live="polite" hidden></div>
+                <button class="btn btn--light answer-explanation-toggle" id="show-answer-explanation" type="button" hidden>查看正確答案說明</button>
+                <p class="answer-explanation" id="answer-explanation" role="status" hidden></p>
                 <div class="answer-save-row">
                   <div>
                     <p class="save-status" id="answer-save-status" role="status" aria-live="polite"></p>

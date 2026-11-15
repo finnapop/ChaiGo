@@ -1120,6 +1120,8 @@
         .learning-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       }
     </style>
+    <link rel="stylesheet" href="./floating-vtuber.css" />
+    <script defer src="./floating-vtuber.js"></script>
   </head>
 
   <body>
@@ -1145,7 +1147,7 @@
           <a href="./pinyingame_pc.html">ピンインゲーム</a>
           <a href="https://chaigo-aituber-kit.vercel.app/" target="_blank" rel="noopener noreferrer">チャイ語娘とチャット</a>
           <a href="./record.html">学習記録</a>
-          <a href="./index.html#about">レッスン予約</a>
+          <a href="https://scheduler.zoom.us/22-terf3f/chaigo" target="_blank" rel="noopener noreferrer">レッスン予約</a>
         </nav>
 
         <div class="topbar__account" role="group" aria-label="アカウント">
@@ -1227,12 +1229,11 @@
           </div>
 
           <div class="learning-grid">
-            <button
-              class="feature-tile feature-tile--disabled feature-tile--tone"
+            <a
+              class="feature-tile feature-tile--link feature-tile--tone"
               id="tone-game"
-              type="button"
-              disabled
-              aria-label="声調ゲーム。現在ウェブサイトからは起動できません"
+              href="./tonegame_pc.html"
+              aria-label="声調ゲームをプレイ"
             >
               <span class="feature-tile__icon" aria-hidden="true">🎧</span>
               <span class="feature-tile__copy">
@@ -1240,8 +1241,8 @@
                 <span class="feature-tile__title">声調ゲーム</span>
                 <span class="feature-tile__description">聞いて選んで、正しい声調をマスター！</span>
               </span>
-              <span class="feature-tile__lock" aria-hidden="true">🔒</span>
-            </button>
+              <span class="feature-tile__arrow" aria-hidden="true">→</span>
+            </a>
 
             <a
               class="feature-tile feature-tile--link feature-tile--pinyin"

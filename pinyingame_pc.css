@@ -7,6 +7,7 @@
 .pinyin-question { display: grid; min-height: 150px; place-items: center; align-content: center; gap: 3px; margin-top: 14px; border: 2px dashed var(--ink); border-radius: 18px; background: #fff9fc; text-align: center; }
 .pinyin-question p { margin: 0; font-size: 12px; font-weight: 700; opacity: .7; }
 .pinyin-question strong { font-size: clamp(64px, 8vw, 88px); line-height: 1.15; }
+.pinyin-question strong.is-phrase { font-size: clamp(42px, 6vw, 64px); }
 .pinyin-answer-form { margin-top: 17px; }
 .pinyin-answer-form label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 900; }
 .pinyin-answer-row { display: flex; gap: 10px; }

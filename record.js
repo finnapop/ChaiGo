@@ -8,7 +8,7 @@ if (!toneGameData || !toneLearningService || !pinyinLearningService) {
   throw new Error("Learning records dependencies failed to load.");
 }
 
-const { TONE_OPTIONS } = toneGameData;
+const { TONE_OPTIONS, ANSWER_OPTIONS_BY_LEVEL } = toneGameData;
 const { getLearningStats: getToneLearningStats, getSessionHistory: getToneSessionHistory } = toneLearningService;
 const { getLearningStats: getPinyinLearningStats, getSessionHistory: getPinyinSessionHistory } = pinyinLearningService;
 
@@ -26,8 +26,9 @@ const elements = Object.fromEntries(
   ].map((id) => [id, document.getElementById(id)]),
 );
 
-function toneLabel(tone) {
-  const option = TONE_OPTIONS.find((entry) => entry.value === Number(tone));
+function toneLabel(tone, level = 1) {
+  const options = ANSWER_OPTIONS_BY_LEVEL[level] || TONE_OPTIONS;
+  const option = options.find((entry) => entry.value === Number(tone));
   return option ? `${option.label}（${option.contour}）` : "—";
 }
 
@@ -96,7 +97,7 @@ function renderSession(session) {
       .join(" → ");
     response.textContent = isPinyin
       ? `${answer.is_correct ? "○" : "×"} 入力 ${pinyinAttempts || answer.selected_pinyin || "—"} · 正解 ${answer.correct_pinyin || "—"} · ${answer.attempts} 回目${answer.hint_used ? "・音声ヒント使用" : ""} · ${answer.response_time_ms} ms · ${prettyDate(answer.answered_at)}`
-      : `${answer.is_correct ? "○" : "×"} 選択 ${toneLabel(answer.selected_answer)} · 正解 ${toneLabel(answer.correct_answer)} · ${answer.response_time_ms} ms · ${prettyDate(answer.answered_at)}`;
+      : `${answer.is_correct ? "○" : "×"} 選択 ${toneLabel(answer.selected_answer, answer.level)} · 正解 ${toneLabel(answer.correct_answer, answer.level)} · ${answer.response_time_ms} ms · ${prettyDate(answer.answered_at)}`;
     item.append(prompt, response);
     answers.append(item);
   }
