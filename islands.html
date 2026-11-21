@@ -1,0 +1,2233 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Three.jsでつくった3Dの華語学習島を探検しよう。声調、拼音、AI会話の島から学習を始められます。"
+    />
+    <meta name="theme-color" content="#fff7ef" />
+    <title>華語學習島 Chinese Learning Islands | ChaiGo!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #111;
+        --paper: #fff7ef;
+        --cream: #fff1d6;
+        --pink: #ff8fe9;
+        --yellow: #ffd200;
+        --mint: #49f2c2;
+        --blue: #77a8ff;
+        --border: 3px solid var(--ink);
+        --hard-shadow: 7px 7px 0 var(--ink);
+      }
+
+      * { box-sizing: border-box; }
+
+      html { min-width: 320px; scroll-behavior: smooth; }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--paper);
+        font-family: "Space Grotesk", "Noto Sans JP", system-ui, sans-serif;
+        line-height: 1.5;
+      }
+
+      a { color: inherit; text-decoration: none; }
+      a:hover { text-decoration: none; }
+      button, a { -webkit-tap-highlight-color: transparent; }
+
+      .container {
+        width: min(1200px, calc(100% - 40px));
+        margin-inline: auto;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: var(--border);
+        background: rgb(255 247 239 / 92%);
+        backdrop-filter: blur(10px);
+      }
+
+      .topbar__inner {
+        display: flex;
+        min-height: 72px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+      }
+
+      .brand { display: inline-flex; align-items: center; min-width: 0; }
+      .brand img { display: block; width: auto; height: 43px; max-width: min(200px, 52vw); object-fit: contain; }
+
+      .back-link {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border: var(--border);
+        border-radius: 999px;
+        background: var(--yellow);
+        box-shadow: 4px 4px 0 var(--ink);
+        font-weight: 900;
+        transition: transform 150ms ease, box-shadow 150ms ease;
+      }
+
+      .back-link:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+      .back-link:focus-visible, .island-hotspot:focus-visible, .island-card__link:focus-visible {
+        outline: 4px solid var(--blue);
+        outline-offset: 4px;
+      }
+
+      main { overflow: hidden; }
+
+      .intro {
+        position: relative;
+        isolation: isolate;
+        padding: clamp(34px, 6vw, 68px) 0 28px;
+        text-align: center;
+      }
+
+      .intro::before, .intro::after {
+        position: absolute;
+        z-index: -1;
+        width: 150px;
+        height: 150px;
+        border: var(--border);
+        border-radius: 50%;
+        content: "";
+        opacity: .85;
+      }
+
+      .intro::before { top: 35px; left: max(2vw, calc((100vw - 1200px) / 2)); background: var(--pink); }
+      .intro::after { right: max(2vw, calc((100vw - 1200px) / 2)); bottom: 4px; width: 92px; height: 92px; background: var(--mint); }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        padding: 7px 13px;
+        border: var(--border);
+        border-radius: 999px;
+        background: var(--mint);
+        box-shadow: 4px 4px 0 var(--ink);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: .12em;
+      }
+
+      h1 {
+        max-width: 900px;
+        margin: 0 auto 14px;
+        font-size: clamp(36px, 7vw, 68px);
+        font-weight: 900;
+        letter-spacing: -.045em;
+        line-height: 1.05;
+      }
+
+      h1 span {
+        display: inline-block;
+        padding: 5px 13px 11px;
+        border: var(--border);
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: var(--hard-shadow);
+        transform: rotate(-1deg);
+      }
+
+      .intro__copy {
+        max-width: 610px;
+        margin: 22px auto 0;
+        font-size: clamp(15px, 2vw, 18px);
+        font-weight: 700;
+      }
+
+      .world-section { padding: 8px 0 62px; }
+
+      .world-frame {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        min-height: 690px;
+        border: 4px solid var(--ink);
+        border-radius: 30px;
+        background:
+          radial-gradient(ellipse at 50% 42%, rgb(255 255 255 / 25%), transparent 42%),
+          linear-gradient(165deg, #76dcff 0%, #55c9e6 45%, #2ca9c5 100%);
+        box-shadow: 9px 9px 0 var(--ink);
+      }
+
+      .world-frame::before, .world-frame::after {
+        position: absolute;
+        z-index: -1;
+        border: 3px solid rgb(17 17 17 / 75%);
+        border-radius: 50%;
+        background: rgb(255 255 255 / 20%);
+        content: "";
+        pointer-events: none;
+      }
+
+      .world-frame::before { top: 14%; left: 8%; width: 102px; height: 28px; transform: rotate(-12deg); }
+      .world-frame::after { right: 7%; bottom: 18%; width: 136px; height: 33px; transform: rotate(10deg); }
+
+      .world-frame__topline {
+        position: absolute;
+        z-index: 2;
+        top: 18px;
+        left: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border: 2px solid var(--ink);
+        border-radius: 999px;
+        background: #fff;
+        box-shadow: 3px 3px 0 var(--ink);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: .08em;
+        pointer-events: none;
+      }
+
+      .world-frame__topline::before {
+        width: 9px;
+        height: 9px;
+        border: 2px solid var(--ink);
+        border-radius: 50%;
+        background: #45f08a;
+        content: "";
+      }
+
+      #islandWorld {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        touch-action: pan-y;
+      }
+
+      .island-hotspots {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .island-hotspot {
+        position: absolute;
+        z-index: 3;
+        display: grid;
+        min-width: 148px;
+        gap: 1px;
+        padding: 8px 12px 9px;
+        border: 3px solid var(--ink);
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 4px 4px 0 var(--ink);
+        color: var(--ink);
+        line-height: 1.2;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+        pointer-events: auto;
+        transform: translate(-50%, -100%);
+        transition: transform 150ms ease, box-shadow 150ms ease;
+      }
+
+      .island-hotspot:hover, .island-hotspot:focus-visible, .island-hotspot.is-selected {
+        z-index: 5;
+        box-shadow: 6px 6px 0 var(--ink);
+        transform: translate(-50%, calc(-100% - 4px));
+      }
+
+      .island-hotspot__title { font-size: 14px; font-weight: 900; white-space: nowrap; }
+      .island-hotspot__subtitle { font-size: 10px; font-weight: 800; opacity: .76; }
+      .island-hotspot__detail {
+        position: absolute;
+        bottom: calc(100% + 12px);
+        left: 50%;
+        display: none;
+        width: max-content;
+        max-width: min(250px, 70vw);
+        padding: 10px 12px;
+        border: 2px solid var(--ink);
+        border-radius: 12px;
+        background: var(--yellow);
+        box-shadow: 3px 3px 0 var(--ink);
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1.4;
+        text-align: left;
+        white-space: normal;
+        transform: translateX(-50%);
+      }
+
+      .island-hotspot__detail::after {
+        position: absolute;
+        bottom: -8px;
+        left: calc(50% - 6px);
+        width: 12px;
+        height: 12px;
+        border-right: 2px solid var(--ink);
+        border-bottom: 2px solid var(--ink);
+        background: var(--yellow);
+        content: "";
+        transform: rotate(45deg);
+      }
+
+      .island-hotspot:hover .island-hotspot__detail,
+      .island-hotspot:focus-visible .island-hotspot__detail { display: block; }
+
+      .world-message {
+        position: absolute;
+        z-index: 4;
+        inset: 50% 20px auto;
+        display: none;
+        max-width: 430px;
+        margin: 0 auto;
+        padding: 18px;
+        border: var(--border);
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: var(--hard-shadow);
+        font-weight: 800;
+        text-align: center;
+        transform: translateY(-50%);
+      }
+
+      .world-frame.is-fallback .world-message { display: block; }
+      .world-frame.is-fallback .island-hotspots { display: none; }
+
+      .panda-speech {
+        position: absolute;
+        z-index: 6;
+        max-width: min(250px, 68vw);
+        padding: 9px 13px;
+        border: 3px solid var(--ink);
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 4px 4px 0 var(--ink);
+        font-size: 14px;
+        font-weight: 900;
+        text-align: center;
+        pointer-events: none;
+        transform: translate(-50%, -100%);
+      }
+
+      .panda-speech::after {
+        position: absolute;
+        bottom: -8px;
+        left: calc(50% - 7px);
+        width: 12px;
+        height: 12px;
+        border-right: 3px solid var(--ink);
+        border-bottom: 3px solid var(--ink);
+        background: #fff;
+        content: "";
+        transform: rotate(45deg);
+      }
+
+      .island-detail {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px 22px;
+        margin-top: 24px;
+        padding: 22px 24px;
+        border: var(--border);
+        border-radius: 22px;
+        background: #fff;
+        box-shadow: var(--hard-shadow);
+      }
+
+      .island-detail[hidden] { display: none; }
+      .island-detail__eyebrow { margin: 0 0 4px; font-size: 11px; font-weight: 900; letter-spacing: .12em; }
+      .island-detail h2 { margin: 0 0 6px; font-size: clamp(23px, 3vw, 32px); }
+      .island-detail__copy { max-width: 64ch; margin: 0 0 10px; font-weight: 700; }
+      .island-detail__topics { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+      .island-detail__topics li { padding: 5px 9px; border: 2px solid var(--ink); border-radius: 999px; background: var(--cream); font-size: 12px; font-weight: 900; }
+      .island-detail__actions { display: flex; align-items: center; gap: 10px; }
+      .island-detail__start, .island-detail__close {
+        display: inline-flex;
+        min-height: 46px;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 9px 15px;
+        border: var(--border);
+        border-radius: 14px;
+        background: var(--yellow);
+        box-shadow: 4px 4px 0 var(--ink);
+        color: var(--ink);
+        font: inherit;
+        font-weight: 900;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .island-detail__close { min-width: 46px; padding: 8px; background: #fff; font-size: 20px; }
+      .island-detail__start:hover, .island-detail__close:hover { transform: translate(-1px, -1px); }
+      .island-detail__start:focus-visible, .island-detail__close:focus-visible, .island-card__select:focus-visible {
+        outline: 4px solid var(--blue);
+        outline-offset: 3px;
+      }
+
+      .island-list {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 22px;
+      }
+
+      .island-card {
+        position: relative;
+        display: flex;
+        min-height: 180px;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 18px;
+        border: var(--border);
+        border-radius: 20px;
+        background: #fff;
+        box-shadow: 5px 5px 0 var(--ink);
+      }
+
+      .island-card:nth-child(1) { background: #fff3fb; }
+      .island-card:nth-child(2) { background: #fffbea; }
+      .island-card:nth-child(3) { background: #effff9; }
+      .island-card:nth-child(4) { background: #fff0e8; }
+
+      .island-card__icon {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        margin-bottom: 10px;
+        place-items: center;
+        border: 2px solid var(--ink);
+        border-radius: 13px;
+        background: var(--pink);
+        box-shadow: 3px 3px 0 var(--ink);
+        font-size: 22px;
+      }
+
+      .island-card:nth-child(2) .island-card__icon { background: var(--yellow); }
+      .island-card:nth-child(3) .island-card__icon { background: var(--mint); }
+      .island-card:nth-child(4) .island-card__icon { background: #ffad80; }
+      .island-card h2 { margin: 0; font-size: 19px; line-height: 1.2; }
+      .island-card__english { margin: 3px 0 7px; font-size: 11px; font-weight: 900; letter-spacing: .08em; }
+      .island-card p { margin: 0 0 14px; font-size: 13px; font-weight: 600; }
+
+      .island-card__link {
+        display: inline-flex;
+        min-height: 40px;
+        align-items: center;
+        gap: 8px;
+        margin-top: auto;
+        padding: 8px 12px;
+        border: 2px solid var(--ink);
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 3px 3px 0 var(--ink);
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .island-card__link:hover { transform: translate(-1px, -1px); }
+
+      .island-card__select {
+        margin-top: auto;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: var(--ink);
+        font: inherit;
+        font-size: 13px;
+        font-weight: 900;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+      .island-card__select:hover { text-decoration: none; }
+      .island-card__fallback-link {
+        display: none;
+        align-items: center;
+        gap: 7px;
+        margin-top: 8px;
+        padding: 7px 10px;
+        border: 2px solid var(--ink);
+        border-radius: 11px;
+        background: #fff;
+        box-shadow: 3px 3px 0 var(--ink);
+        font-size: 12px;
+        font-weight: 900;
+      }
+      .world-frame.is-fallback ~ .island-list .island-card__fallback-link { display: inline-flex; }
+
+      @media (max-width: 1040px) {
+        .island-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+
+      .page-foot { padding: 0 0 34px; text-align: center; }
+      .page-foot p { margin: 0; font-size: 12px; font-weight: 700; opacity: .72; }
+
+      @media (max-width: 760px) {
+        .container { width: min(calc(100% - 28px), 1200px); }
+        .topbar__inner { min-height: 62px; }
+        .brand img { height: 36px; }
+        .back-link { min-height: 40px; padding-inline: 11px; font-size: 13px; }
+        .intro { padding-top: 34px; }
+        .intro::before { top: 10px; left: -36px; width: 94px; height: 94px; }
+        .intro::after { right: -16px; bottom: -8px; width: 65px; height: 65px; }
+        .intro__copy { max-width: 36ch; }
+        .world-section { padding-bottom: 44px; }
+        .world-frame { min-height: 590px; border-radius: 22px; }
+        .world-frame__topline { top: 12px; left: 12px; padding: 6px 9px; font-size: 10px; }
+        .island-hotspots { display: none; }
+        .island-list { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        .island-card { min-height: 0; display: grid; grid-template-columns: 48px 1fr auto; align-items: center; column-gap: 12px; padding: 13px; }
+        .island-card__icon { grid-column: 1; grid-row: 1 / span 3; margin: 0; }
+        .island-card h2, .island-card__english, .island-card p { grid-column: 2; }
+        .island-card h2 { font-size: 16px; }
+        .island-card__english { margin: 2px 0 4px; }
+        .island-card p { margin: 0; font-size: 12px; }
+        .island-card__link { grid-column: 3; grid-row: 1 / span 3; min-height: 38px; margin: 0; padding: 6px 9px; font-size: 12px; }
+        .island-card__select { grid-column: 2; margin-top: 8px; justify-self: start; }
+        .island-detail { grid-template-columns: 1fr; gap: 12px; padding: 18px; }
+        .island-detail__actions { justify-content: flex-start; }
+      }
+
+      @media (max-width: 420px) {
+        .world-frame { min-height: 520px; }
+        .island-card { grid-template-columns: 42px 1fr; }
+        .island-card__icon { width: 38px; height: 38px; }
+        .island-card__link { grid-column: 2; grid-row: auto; justify-self: start; margin-top: 9px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+      }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar__inner">
+        <a class="brand" href="./index.html" aria-label="ChaiGo! ホームへ戻る">
+          <img src="./logo.png" alt="チャイ語娘 ChaiGo!" />
+        </a>
+        <a class="back-link" href="./index.html"><span aria-hidden="true">←</span> ホームへ戻る</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro container" aria-labelledby="pageTitle">
+        <span class="eyebrow">✦ CHINESE LEARNING ISLANDS ✦</span>
+        <h1 id="pageTitle"><span>華語學習島</span></h1>
+        <p class="intro__copy">四座學習浮島圍繞中央主島，瀑布、石橋與雲海串起華語冒險。<br />點擊島嶼查看學習內容，也可以和熊貓導覽員打招呼！</p>
+      </section>
+
+      <section class="world-section container" aria-label="3D learning islands">
+        <div class="world-frame" id="worldFrame">
+          <div class="world-frame__topline">ISLANDS ONLINE</div>
+          <canvas id="islandWorld" aria-label="四座華語學習浮島環繞中央主島，並由石橋、瀑布和河流連接。點擊島嶼查看學習內容，點擊熊貓互動。"></canvas>
+          <nav class="island-hotspots" id="islandHotspots" aria-label="学習島を選ぶ">
+            <button class="island-hotspot" type="button" data-island="tone" aria-pressed="false">
+              <span class="island-hotspot__title">聲調島 · Tone</span>
+              <span class="island-hotspot__subtitle">LISTEN · LISTENING · TONES</span>
+              <span class="island-hotspot__detail">聽辨四聲、跟讀發音，挑戰聲調遊戲。</span>
+            </button>
+            <button class="island-hotspot" type="button" data-island="pinyin" aria-pressed="false">
+              <span class="island-hotspot__title">拼音島 · Pinyin</span>
+              <span class="island-hotspot__subtitle">INITIALS · FINALS · SPELLING</span>
+              <span class="island-hotspot__detail">從 a、o、e 到 b、p、m、f，練習拼讀。</span>
+            </button>
+            <button class="island-hotspot" type="button" data-island="conversation" aria-pressed="false">
+              <span class="island-hotspot__title">對話島 · Conversation</span>
+              <span class="island-hotspot__subtitle">AI CHAT · SPEAKING</span>
+              <span class="island-hotspot__detail">在庭院廣場和 AI 導師練習日常中文。</span>
+            </button>
+            <button class="island-hotspot" type="button" data-island="situational" aria-pressed="false">
+              <span class="island-hotspot__title">情境島 · Situational</span>
+              <span class="island-hotspot__subtitle">NIGHT MARKET · EVERYDAY</span>
+              <span class="island-hotspot__detail">在夜市、商店和街道中完成生活任務。</span>
+            </button>
+          </nav>
+          <div class="panda-speech" id="pandaSpeech" role="status" aria-live="polite" hidden></div>
+          <p class="world-message" id="worldMessage" role="status">3Dシーンを表示できませんでした。下の島カードから学習先を選べます。</p>
+        </div>
+
+        <section class="island-detail" id="islandDetail" aria-live="polite" hidden>
+          <div>
+            <p class="island-detail__eyebrow" id="islandDetailEyebrow">ISLAND GUIDE</p>
+            <h2 id="islandDetailTitle"></h2>
+            <p class="island-detail__copy" id="islandDetailCopy"></p>
+            <ul class="island-detail__topics" id="islandDetailTopics"></ul>
+          </div>
+          <div class="island-detail__actions">
+            <a class="island-detail__start" id="islandDetailStart" href="#">開始學習 <span aria-hidden="true">→</span></a>
+            <button class="island-detail__close" id="islandDetailClose" type="button" aria-label="關閉島嶼介紹">×</button>
+          </div>
+        </section>
+
+        <div class="island-list" aria-label="島と學習內容">
+          <article class="island-card">
+            <span class="island-card__icon" aria-hidden="true">🎧</span>
+            <h2>聲調島</h2>
+            <span class="island-card__english">TONE ISLAND</span>
+            <p>聽辨四聲、跟讀發音，挑戰聲調遊戲。</p>
+            <button class="island-card__select" type="button" data-open-island="tone">查看島嶼內容 →</button>
+            <a class="island-card__fallback-link" href="./tonegame_pc.html">開始聲調遊戲 →</a>
+          </article>
+          <article class="island-card">
+            <span class="island-card__icon" aria-hidden="true">🔤</span>
+            <h2>拼音島</h2>
+            <span class="island-card__english">PINYIN ISLAND</span>
+            <p>從聲母、韻母開始，練習看字拼讀。</p>
+            <button class="island-card__select" type="button" data-open-island="pinyin">查看島嶼內容 →</button>
+            <a class="island-card__fallback-link" href="./pinyingame_pc.html">開始拼音遊戲 →</a>
+          </article>
+          <article class="island-card">
+            <span class="island-card__icon" aria-hidden="true">💬</span>
+            <h2>對話島</h2>
+            <span class="island-card__english">CONVERSATION ISLAND</span>
+            <p>和 AI 導師練習日常中文與口語表達。</p>
+            <button class="island-card__select" type="button" data-open-island="conversation">查看島嶼內容 →</button>
+            <a class="island-card__fallback-link" href="https://aituber-kit-dhzs.vercel.app/" target="_blank" rel="noopener noreferrer">開始 AI 對話 ↗</a>
+          </article>
+          <article class="island-card">
+            <span class="island-card__icon" aria-hidden="true">🧋</span>
+            <h2>情境島</h2>
+            <span class="island-card__english">SITUATIONAL ISLAND</span>
+            <p>夜市點餐、購物、問路與搭車情境。</p>
+            <button class="island-card__select" type="button" data-open-island="situational">查看島嶼內容 →</button>
+            <a class="island-card__fallback-link" href="https://aituber-kit-dhzs.vercel.app/" target="_blank" rel="noopener noreferrer">開始情境練習 ↗</a>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="page-foot container"><p>© <span id="year"></span> ChaiGo! · 台湾華語を楽しく学ぼう</p></footer>
+
+    <script>
+      window.addEventListener("error", (event) => {
+        if (event.target instanceof HTMLScriptElement && event.target.type === "module") {
+          document.getElementById("worldFrame")?.classList.add("is-fallback");
+        }
+      }, true);
+    </script>
+    <script type="module">
+      import * as THREE from "three";
+
+      const frame = document.getElementById("worldFrame");
+      const canvas = document.getElementById("islandWorld");
+      const hotspotLayer = document.getElementById("islandHotspots");
+      const islandDetail = document.getElementById("islandDetail");
+      const pandaSpeech = document.getElementById("pandaSpeech");
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const compactDevice = window.matchMedia("(max-width: 760px)").matches;
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      const islandData = [
+        {
+          id: "tone",
+          name: "聲調島",
+          english: "TONE ISLAND",
+          description: "走進粉紫色的藍白樓閣，聽辨四聲、跟讀發音，完成聲調挑戰。",
+          topics: ["四聲 ˉ ˊ ˇ ˋ", "聽力辨音", "發音挑戰"],
+          position: [-4.8, 2.15, -2.3],
+          radius: 2.2,
+          depth: 1.3,
+          seed: 1.2,
+          ground: 0xc77be4,
+          soil: 0x744b9a,
+          accent: 0xff56b6,
+          blockers: [[0.52, -0.36, 0.68], [-0.78, 0.35, 0.32], [-0.98, -0.66, 0.25], [1.15, -0.65, 0.24], [-0.13, -0.98, 0.25], [1.4, -0.4, 0.2], [-1.45, -0.12, 0.22], [0.25, -0.79, 0.22], [0.64, -0.62, 0.22], [1.04, -0.5, 0.22]],
+          route: "./tonegame_pc.html",
+        },
+        {
+          id: "pinyin",
+          name: "拼音島",
+          english: "PINYIN ISLAND",
+          description: "在青綠書院認識 a、o、e 與 b、p、m、f，練習聲母、韻母和拼讀。",
+          topics: ["聲母與韻母", "a · o · e", "拼音拼讀"],
+          position: [4.15, 1.05, -2.85],
+          radius: 2.12,
+          depth: 1.02,
+          seed: 2.4,
+          ground: 0x43c8b7,
+          soil: 0x176e76,
+          accent: 0x28b8d2,
+          blockers: [[-0.52, -0.38, 0.62], [0.61, 0.45, 0.36], [-1.23, -0.56, 0.25], [1.18, -0.66, 0.25], [-0.22, 0.96, 0.26], [-1.45, 0.22, 0.18], [-0.95, 0.77, 0.22], [-0.05, 0.88, 0.22], [0.85, 0.74, 0.22], [-1.1, 0.78, 0.22], [0.45, -0.48, 0.25], [-0.56, 0.73, 0.22], [-0.9, 0.53, 0.22], [-1.18, 0.38, 0.22]],
+          route: "./pinyingame_pc.html",
+        },
+        {
+          id: "conversation",
+          name: "對話島",
+          english: "CONVERSATION ISLAND",
+          description: "在綠色庭院廣場與 AI 導師聊天，練習生活中文和自然口語。",
+          topics: ["AI 中文對話", "日常交流", "口說練習"],
+          position: [-4.0, -0.62, 2.7],
+          radius: 2.55,
+          depth: 1.14,
+          seed: 3.6,
+          ground: 0x43bd68,
+          soil: 0x195542,
+          accent: 0x43d889,
+          blockers: [[0.35, -0.7, 0.72], [-0.85, 0.82, 0.28], [1.42, 0.06, 0.18], [-1.2, -0.68, 0.26], [1.22, -0.65, 0.24], [-0.98, 0.52, 0.35], [-1.25, 0.18, 0.3], [-0.08, 1.32, 0.3], [-0.3, 1.08, 0.22], [0.35, 1.08, 0.22], [0.98, 0.72, 0.22]],
+          route: "https://aituber-kit-dhzs.vercel.app/",
+        },
+        {
+          id: "situational",
+          name: "情境島",
+          english: "SITUATIONAL ISLAND",
+          description: "走進夜市與小店，模擬點餐、購物、問路、搭車等日常任務。",
+          topics: ["夜市點餐", "購物問路", "搭車生活"],
+          position: [4.45, 0.12, 1.8],
+          radius: 2.32,
+          depth: 1.3,
+          seed: 4.8,
+          ground: 0xf2a1b8,
+          soil: 0x96566b,
+          accent: 0xff9a52,
+          blockers: [[0.55, -0.55, 0.62], [-0.82, 0.4, 0.55], [0.52, 0.85, 0.55], [0.05, -1.2, 0.25], [-1.43, -0.12, 0.22], [1.45, -0.82, 0.22], [1.42, -0.48, 0.22], [-1.42, -0.45, 0.2], [-1.35, 0.16, 0.15], [1.48, -0.06, 0.15], [0.1, -1.63, 0.35], [-1.28, -1.02, 0.25], [1.63, 0.25, 0.18], [0.48, -1.02, 0.22], [0.86, -0.72, 0.22], [1.28, -0.34, 0.22]],
+          route: "https://aituber-kit-dhzs.vercel.app/",
+        },
+      ];
+
+      const hubData = {
+        id: "hub",
+        position: [0, -1.45, -0.05],
+        radius: 1.82,
+        depth: 1.22,
+        seed: 5.9,
+        ground: 0x58bd70,
+        soil: 0x35644c,
+        blockers: [[0, -0.34, 0.56]],
+      };
+      const navigationData = [...islandData, hubData];
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x83d7ff);
+      scene.fog = new THREE.Fog(0x83d7ff, 24, 45);
+
+      const camera = new THREE.OrthographicCamera(-9, 9, 5.4, -5.4, 0.1, 120);
+      camera.position.set(12, 18, 19);
+      camera.lookAt(0, 0.15, 0);
+
+      let renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({
+          canvas,
+          antialias: !window.matchMedia("(max-width: 760px)").matches,
+          alpha: false,
+          powerPreference: "low-power",
+        });
+      } catch (error) {
+        frame.classList.add("is-fallback");
+        console.error("WebGL could not be initialized for the learning islands.", error);
+      }
+
+      if (renderer) {
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.12;
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+
+        const ambient = new THREE.HemisphereLight(0xe9f8ff, 0x5e684f, 2.15);
+        scene.add(ambient);
+        const sun = new THREE.DirectionalLight(0xfff4d2, 3.1);
+        sun.position.set(-7, 14, 9);
+        scene.add(sun);
+
+        const water = new THREE.Mesh(
+          new THREE.PlaneGeometry(180, 180),
+          new THREE.MeshStandardMaterial({ color: 0x29b5d0, roughness: 0.46, metalness: 0.02 }),
+        );
+        water.rotation.x = -Math.PI / 2;
+        water.position.y = -5.35;
+        scene.add(water);
+
+        const world = new THREE.Group();
+        scene.add(world);
+
+        const clickableMeshes = [];
+        const islandGroups = new Map();
+        const labelAnchors = new Map();
+        const pickRay = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
+        const pointerTarget = new THREE.Vector2();
+        const pointerCurrent = new THREE.Vector2();
+        const clock = new THREE.Clock();
+
+        function material(color, extra = {}) {
+          return new THREE.MeshStandardMaterial({ color, flatShading: true, roughness: 0.82, ...extra });
+        }
+
+        function putMesh(parent, geometry, mat, position, islandId, options = {}) {
+          const mesh = new THREE.Mesh(geometry, mat);
+          mesh.position.set(...position);
+          if (options.rotation) mesh.rotation.set(...options.rotation);
+          if (options.scale) mesh.scale.set(...options.scale);
+          parent.add(mesh);
+          if (islandId) {
+            mesh.userData.islandId = islandId;
+            clickableMeshes.push(mesh);
+          }
+          return mesh;
+        }
+
+        function addTree(parent, id, x, z, scale, leafColor) {
+          const topY = 0.48;
+          putMesh(parent, new THREE.CylinderGeometry(0.07 * scale, 0.1 * scale, 0.48 * scale, 6), material(0x80502c), [x, topY + 0.24 * scale, z], id);
+          const crown = new THREE.Group();
+          crown.position.set(x, topY + 0.57 * scale, z);
+          parent.add(crown);
+          putMesh(crown, new THREE.IcosahedronGeometry(0.34 * scale, 1), material(leafColor), [0, 0, 0], id);
+          putMesh(crown, new THREE.IcosahedronGeometry(0.23 * scale, 0), material(leafColor), [-0.19 * scale, -0.09 * scale, 0.12 * scale], id);
+          putMesh(crown, new THREE.IcosahedronGeometry(0.23 * scale, 0), material(leafColor), [0.18 * scale, -0.08 * scale, -0.12 * scale], id);
+        }
+
+        function addPineTree(parent, id, x, z, scale = 1, leafColor = 0x247d58) {
+          const groundY = 0.48;
+          putMesh(parent, new THREE.CylinderGeometry(0.045 * scale, 0.075 * scale, 0.56 * scale, 6), material(0x795137), [x, groundY + 0.28 * scale, z], id);
+          for (let tier = 0; tier < (compactDevice ? 2 : 3); tier += 1) {
+            const radius = (0.38 - tier * 0.085) * scale;
+            const height = 0.57 * scale;
+            putMesh(
+              parent,
+              new THREE.ConeGeometry(radius, height, 7),
+              material(new THREE.Color(leafColor).multiplyScalar(1 - tier * 0.08)),
+              [x, groundY + 0.47 * scale + tier * 0.31 * scale, z],
+              id,
+            );
+          }
+        }
+
+        function addCherryBlossomTree(parent, id, x, z, scale = 1) {
+          const trunkCurve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(x, 0.48, z),
+            new THREE.Vector3(x - 0.08 * scale, 0.9 * scale, z),
+            new THREE.Vector3(x + 0.12 * scale, 1.24 * scale, z),
+            new THREE.Vector3(x + 0.04 * scale, 1.58 * scale, z),
+          ]);
+          putMesh(parent, new THREE.TubeGeometry(trunkCurve, 12, 0.075 * scale, 6, false), material(0x543c52), [0, 0, 0], id);
+          const branchEnds = compactDevice
+            ? [[x - 0.55 * scale, 1.72 * scale, z], [x + 0.5 * scale, 1.86 * scale, z - 0.04]]
+            : [
+            [x - 0.62 * scale, 1.62 * scale, z],
+            [x + 0.58 * scale, 1.76 * scale, z - 0.04],
+            [x - 0.22 * scale, 1.98 * scale, z + 0.08],
+            [x + 0.46 * scale, 2.1 * scale, z + 0.02],
+          ];
+          branchEnds.forEach(([endX, endY, endZ], index) => {
+            const branch = new THREE.CatmullRomCurve3([
+              new THREE.Vector3(x + 0.04 * scale, 1.28 * scale, z),
+              new THREE.Vector3((x + endX) * 0.5, endY - 0.12 * scale, (z + endZ) * 0.5),
+              new THREE.Vector3(endX, endY, endZ),
+            ]);
+            putMesh(parent, new THREE.TubeGeometry(branch, 8, 0.035 * scale, 5, false), material(0x543c52), [0, 0, 0], id);
+            const blossoms = index % 2 ? 0xffb4e7 : 0xff8fd5;
+            for (let puff = 0; puff < (compactDevice ? 2 : 3); puff += 1) {
+              const offset = (puff - 1) * 0.16 * scale;
+              putMesh(
+                parent,
+                new THREE.IcosahedronGeometry(0.2 * scale, 1),
+                material(blossoms),
+                [endX + offset, endY + (puff === 1 ? 0.08 : 0), endZ + offset * 0.4],
+                id,
+              );
+            }
+          });
+        }
+
+        function addChineseRoof(parent, id, x, z, eaveY, width, color) {
+          const depth = width * 0.84;
+          putMesh(parent, new THREE.BoxGeometry(width, 0.1, depth), material(new THREE.Color(color).multiplyScalar(0.72)), [x, eaveY, z], id);
+          putMesh(
+            parent,
+            new THREE.ConeGeometry(width * 0.73, width * 0.43, 4),
+            material(color),
+            [x, eaveY + width * 0.19, z],
+            id,
+            { rotation: [0, Math.PI / 4, 0] },
+          );
+
+          // Curled gold eaves give the roofs their Chinese silhouette.
+          for (const sx of [-1, 1]) {
+            for (const sz of [-1, 1]) {
+              if (compactDevice && sx !== sz) continue;
+              const cornerX = x + sx * width * 0.51;
+              const cornerZ = z + sz * depth * 0.51;
+              const eave = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(x + sx * width * 0.3, eaveY - 0.01, z + sz * depth * 0.28),
+                new THREE.Vector3(cornerX, eaveY, cornerZ),
+                new THREE.Vector3(x + sx * width * 0.64, eaveY + width * 0.12, z + sz * depth * 0.64),
+              ]);
+              putMesh(parent, new THREE.TubeGeometry(eave, 8, 0.025, 5, false), material(0xffd66d), [0, 0, 0], id);
+              putMesh(parent, new THREE.SphereGeometry(0.055, 7, 5), material(0xffd66d), [x + sx * width * 0.64, eaveY + width * 0.12, z + sz * depth * 0.64], id);
+            }
+          }
+        }
+
+        function addChinesePavilion(parent, id, options = {}) {
+          const {
+            x = 0,
+            z = 0,
+            width = 1,
+            roofColor = 0x286f9d,
+            wallColor = 0xffe7b6,
+            tiered = false,
+          } = options;
+          const groundY = 0.49;
+          const depth = width * 0.78;
+          const pillarColor = material(0x9a3d3d);
+
+          putMesh(parent, new THREE.BoxGeometry(width * 1.08, 0.12, depth * 1.08), material(0xd6c4a5), [x, groundY + 0.06, z], id);
+          putMesh(parent, new THREE.BoxGeometry(width * 0.7, 0.52, 0.08), material(wallColor), [x, groundY + 0.36, z - depth * 0.37], id);
+          putMesh(parent, new THREE.BoxGeometry(0.08, 0.52, depth * 0.76), material(wallColor), [x - width * 0.36, groundY + 0.36, z], id);
+          putMesh(parent, new THREE.BoxGeometry(0.08, 0.52, depth * 0.76), material(wallColor), [x + width * 0.36, groundY + 0.36, z], id);
+
+          for (const sx of [-1, 1]) {
+            for (const sz of [-1, 1]) {
+              putMesh(parent, new THREE.CylinderGeometry(0.045, 0.06, 0.66, 7), pillarColor, [x + sx * width * 0.36, groundY + 0.39, z + sz * depth * 0.36], id);
+            }
+          }
+
+          // A dark doorway and lattice windows sit on the open front side.
+          putMesh(parent, new THREE.BoxGeometry(width * 0.22, 0.36, 0.035), material(0x483646), [x, groundY + 0.25, z + depth * 0.39], id);
+          if (!compactDevice) {
+            for (const sx of [-1, 1]) {
+              putMesh(parent, new THREE.BoxGeometry(width * 0.19, 0.18, 0.035), material(0x58b8ca), [x + sx * width * 0.24, groundY + 0.4, z + depth * 0.4], id);
+              putMesh(parent, new THREE.BoxGeometry(0.025, 0.2, 0.05), material(0xffd66d), [x + sx * width * 0.24, groundY + 0.4, z + depth * 0.43], id);
+              putMesh(parent, new THREE.BoxGeometry(width * 0.2, 0.025, 0.05), material(0xffd66d), [x + sx * width * 0.24, groundY + 0.4, z + depth * 0.43], id);
+            }
+          }
+
+          for (let step = 0; step < (compactDevice ? 2 : 3); step += 1) {
+            putMesh(
+              parent,
+              new THREE.BoxGeometry(width * (0.46 - step * 0.06), 0.09, 0.16),
+              material(step % 2 ? 0xcab998 : 0xe2d2b5),
+              [x, groundY - step * 0.07, z + depth * 0.48 + step * 0.13],
+              id,
+            );
+          }
+
+          const lowerEave = groundY + 0.72;
+          addChineseRoof(parent, id, x, z, lowerEave, width * 1.3, roofColor);
+          if (tiered) {
+            putMesh(parent, new THREE.BoxGeometry(width * 0.45, 0.28, depth * 0.45), material(wallColor), [x, lowerEave + 0.29, z], id);
+            addChineseRoof(parent, id, x, z, lowerEave + 0.47, width * 0.84, roofColor);
+          }
+          return { x, z, width, roofY: tiered ? lowerEave + 0.75 : lowerEave + width * 0.28 };
+        }
+
+        function addLantern(parent, id, x, y, z, scale = 1, color = 0xd93643) {
+          putMesh(parent, new THREE.CylinderGeometry(0.12 * scale, 0.12 * scale, 0.26 * scale, 8), material(color), [x, y, z], id);
+          putMesh(parent, new THREE.CylinderGeometry(0.15 * scale, 0.15 * scale, 0.055 * scale, 8), material(0xffd66d), [x, y + 0.15 * scale, z], id);
+          putMesh(parent, new THREE.CylinderGeometry(0.15 * scale, 0.15 * scale, 0.055 * scale, 8), material(0xffd66d), [x, y - 0.15 * scale, z], id);
+          putMesh(parent, new THREE.CylinderGeometry(0.018 * scale, 0.018 * scale, 0.16 * scale, 5), material(0xffd66d), [x, y - 0.25 * scale, z], id);
+        }
+
+        function addWaterfall(parent, id, x, z, height = 1.55, width = 0.38) {
+          const baseY = parent.userData.baseY ?? 0;
+          const poolY = -5.12 - baseY;
+          const topY = 0.42;
+          height = Math.max(height, topY - poolY);
+          const sheet = putMesh(
+            parent,
+            new THREE.PlaneGeometry(width, height),
+            new THREE.MeshBasicMaterial({ color: 0x31e5f2, transparent: true, opacity: 0.82, side: THREE.DoubleSide }),
+            [x, (topY + poolY) / 2, z],
+            id,
+          );
+          sheet.rotation.y = -0.1;
+          for (let stripe = 0; stripe < 3; stripe += 1) {
+            putMesh(
+              parent,
+              new THREE.PlaneGeometry(0.035, height * (0.55 + stripe * 0.08)),
+              new THREE.MeshBasicMaterial({ color: 0xc9ffff, transparent: true, opacity: 0.62, side: THREE.DoubleSide }),
+              [x - width * 0.28 + stripe * width * 0.28, topY - height * (0.37 + stripe * 0.17), z + 0.025],
+              id,
+            );
+          }
+          const pool = putMesh(
+            parent,
+            new THREE.CircleGeometry(width * 1.55, 20),
+            new THREE.MeshBasicMaterial({ color: 0x29dce9, transparent: true, opacity: 0.8, side: THREE.DoubleSide }),
+            [x, poolY + 0.03, z + 0.1],
+            id,
+          );
+          pool.rotation.x = -Math.PI / 2;
+          pool.scale.set(1, 0.68, 1);
+        }
+
+        function addLotusPond(parent, id, x, z, radius = 0.5) {
+          const pond = putMesh(
+            parent,
+            new THREE.CircleGeometry(radius, 20),
+            new THREE.MeshBasicMaterial({ color: 0x20cfe0, side: THREE.DoubleSide }),
+            [x, 0.492, z],
+            id,
+          );
+          pond.rotation.x = -Math.PI / 2;
+          const lilyPad = putMesh(parent, new THREE.CircleGeometry(radius * 0.25, 10), material(0x31b95e), [x + radius * 0.28, 0.505, z - radius * 0.12], id);
+          lilyPad.rotation.x = -Math.PI / 2;
+          addFlower(parent, id, x - radius * 0.25, z + radius * 0.15, 0xff8fd5, 1.25);
+        }
+
+        function addIslandStream(parent, id, points, width = 0.11) {
+          const centerLine = new THREE.CatmullRomCurve3(points.map(([x, z]) => new THREE.Vector3(x, 0.505, z)));
+          const stream = new THREE.Mesh(
+            new THREE.TubeGeometry(centerLine, 28, width, 7, false),
+            new THREE.MeshStandardMaterial({ color: 0x24ddec, emissive: 0x075965, transparent: true, opacity: 0.86, roughness: 0.25 }),
+          );
+          stream.userData.islandId = id;
+          parent.add(stream);
+          clickableMeshes.push(stream);
+          const glint = new THREE.CatmullRomCurve3(points.slice(0, -1).map(([x, z]) => new THREE.Vector3(x - 0.025, 0.59, z)));
+          const highlight = new THREE.Mesh(
+            new THREE.TubeGeometry(glint, 18, 0.018, 5, false),
+            new THREE.MeshBasicMaterial({ color: 0xd5ffff, transparent: true, opacity: 0.75 }),
+          );
+          highlight.userData.islandId = id;
+          parent.add(highlight);
+          clickableMeshes.push(highlight);
+        }
+
+        function addStoneBridge(parent, id, x, z, width = 1.15) {
+          const arch = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(x - width / 2, 0.5, z),
+            new THREE.Vector3(x - width * 0.24, 0.66, z + 0.03),
+            new THREE.Vector3(x, 0.72, z + 0.05),
+            new THREE.Vector3(x + width * 0.24, 0.66, z + 0.03),
+            new THREE.Vector3(x + width / 2, 0.5, z),
+          ]);
+          putMesh(parent, new THREE.TubeGeometry(arch, 18, 0.085, 6, false), material(0xd3c4a5), [0, 0, 0], id);
+          for (let post = 0; post < 5; post += 1) {
+            const t = post / 4;
+            const point = arch.getPoint(t);
+            putMesh(parent, new THREE.BoxGeometry(0.07, 0.19, 0.07), material(0xe8dbc1), [point.x, point.y + 0.1, point.z], id);
+          }
+        }
+
+        function add3DLetter(parent, id, character, x, y, z, color, scale = 1) {
+          const letter = new THREE.Group();
+          letter.position.set(x, y, z);
+          letter.scale.setScalar(scale);
+          parent.add(letter);
+
+          const stroke = (points, closed = false) => {
+            const curve = new THREE.CatmullRomCurve3(points.map(([px, py]) => new THREE.Vector3(px, py, 0)), closed, "centripetal");
+            putMesh(letter, new THREE.TubeGeometry(curve, 22, 0.052, 7, closed), material(color), [0, 0, 0], id);
+          };
+
+          if (character === "o" || character === "a" || character === "e" || character === "b" || character === "p") {
+            const start = character === "e" ? Math.PI * 0.12 : 0;
+            const end = character === "e" ? Math.PI * 1.86 : Math.PI * 2;
+            const ring = [];
+            for (let i = 0; i <= 18; i += 1) {
+              const angle = start + (end - start) * (i / 18);
+              ring.push([Math.cos(angle) * 0.18, Math.sin(angle) * 0.2]);
+            }
+            stroke(ring, character !== "e");
+          }
+
+          if (character === "a") stroke([[0.18, -0.21], [0.18, -0.02], [0.18, 0.18]]);
+          if (character === "p") stroke([[-0.18, 0.21], [-0.18, 0], [-0.18, -0.3]]);
+          if (character === "b") stroke([[-0.18, -0.22], [-0.18, 0], [-0.18, 0.3]]);
+          if (character === "e") stroke([[-0.2, 0], [0, 0.015], [0.18, 0.015]]);
+          if (character === "m") {
+            stroke([[-0.2, -0.2], [-0.2, 0.18], [0, 0.02], [0.2, 0.18], [0.2, -0.2]]);
+          }
+          if (character === "f") {
+            stroke([[-0.12, -0.23], [-0.12, 0.1], [-0.08, 0.25], [0.14, 0.25]]);
+            stroke([[-0.22, 0.04], [0.1, 0.04]]);
+          }
+          return letter;
+        }
+
+        function addStonePath(parent, id, points, count = 12, color = 0xd7c7a4) {
+          const curve = new THREE.CatmullRomCurve3(points.map(([x, z]) => new THREE.Vector3(x, 0.505, z)));
+          for (let stone = 0; stone < count; stone += 1) {
+            const t = (stone + 0.5) / count;
+            const point = curve.getPoint(t);
+            const size = 0.11 + (stone % 3) * 0.025;
+            const tile = putMesh(parent, new THREE.CylinderGeometry(size, size * 1.08, 0.055, 6), material(stone % 3 ? color : 0xe9dcc2), [point.x, point.y, point.z], id);
+            tile.rotation.y = stone * 0.47;
+          }
+        }
+
+        function addBench(parent, id, x, z, scale = 1) {
+          putMesh(parent, new THREE.BoxGeometry(0.52 * scale, 0.09 * scale, 0.2 * scale), material(0xb66a3c), [x, 0.72, z], id);
+          putMesh(parent, new THREE.BoxGeometry(0.52 * scale, 0.34 * scale, 0.08 * scale), material(0x9c5735), [x, 0.92, z - 0.08 * scale], id);
+          for (const dx of [-0.19, 0.19]) {
+            putMesh(parent, new THREE.BoxGeometry(0.055 * scale, 0.34 * scale, 0.07 * scale), material(0x654632), [x + dx * scale, 0.54, z], id);
+          }
+        }
+
+        function addMarketStall(parent, id, x, z, canopyColor = 0xd94842) {
+          putMesh(parent, new THREE.BoxGeometry(0.96, 0.1, 0.65), material(0x9a5935), [x, 0.76, z], id);
+          putMesh(parent, new THREE.BoxGeometry(0.92, 0.34, 0.58), material(0xf4bb61), [x, 0.55, z], id);
+          for (const dx of [-0.39, 0.39]) {
+            for (const dz of [-0.23, 0.23]) {
+              putMesh(parent, new THREE.CylinderGeometry(0.035, 0.045, 0.92, 6), material(0x874a32), [x + dx, 1.0, z + dz], id);
+            }
+          }
+
+          // Alternating fabric strips form a striped night-market awning.
+          const stripeCount = compactDevice ? 4 : 6;
+          for (let strip = 0; strip < stripeCount; strip += 1) {
+            const color = strip % 2 ? 0xfff0ce : canopyColor;
+            const awning = putMesh(
+              parent,
+              new THREE.BoxGeometry(0.96 / stripeCount, 0.08, 0.68),
+              material(color),
+              [x - 0.48 + (strip + 0.5) * (0.96 / stripeCount), 1.48, z + 0.04],
+              id,
+              { rotation: [0.1, 0, -0.05] },
+            );
+            awning.rotation.x = -0.12;
+          }
+          addSign(parent, id, "夜市", "NIGHT MARKET", 0xffd66d, [x, 1.92, z + 0.37], [0.88, 0.42]);
+
+          // Bamboo steamer and tiny dumplings on the counter.
+          putMesh(parent, new THREE.CylinderGeometry(0.22, 0.2, 0.12, 10), material(0xd8a45d), [x - 0.2, 0.87, z + 0.02], id);
+          for (let dumpling = 0; dumpling < (compactDevice ? 2 : 4); dumpling += 1) {
+            const angle = dumpling * Math.PI / 2;
+            putMesh(parent, new THREE.SphereGeometry(0.075, 8, 6), material(0xffefdc), [x - 0.2 + Math.cos(angle) * 0.1, 0.96, z + 0.02 + Math.sin(angle) * 0.1], id, { scale: [1, 0.72, 1] });
+          }
+        }
+
+        function addBubbleTea(parent, id, x, z) {
+          putMesh(parent, new THREE.CylinderGeometry(0.18, 0.23, 0.44, 10), material(0xffd27a), [x, 0.77, z], id);
+          putMesh(parent, new THREE.CylinderGeometry(0.24, 0.24, 0.055, 10), material(0xfff1d8), [x, 1.01, z], id);
+          putMesh(parent, new THREE.CylinderGeometry(0.025, 0.025, 0.38, 6), material(0xff5f71), [x + 0.06, 1.19, z], id, { rotation: [0, 0, -0.16] });
+          for (let pearl = 0; pearl < 5; pearl += 1) {
+            putMesh(parent, new THREE.SphereGeometry(0.035, 6, 5), material(0x453330), [x - 0.12 + (pearl % 3) * 0.1, 0.59, z + (pearl > 2 ? 0.06 : -0.05)], id);
+          }
+        }
+
+        function addShoppingBag(parent, id, x, z) {
+          putMesh(parent, new THREE.BoxGeometry(0.3, 0.35, 0.2), material(0xffd200), [x, 0.7, z], id);
+          const handle = putMesh(parent, new THREE.TorusGeometry(0.075, 0.022, 5, 10, Math.PI), material(0x9b583a), [x, 0.91, z], id);
+          handle.rotation.z = Math.PI;
+        }
+
+        function addNightMarketTable(parent, id, x, z) {
+          putMesh(parent, new THREE.BoxGeometry(0.66, 0.08, 0.44), material(0x9d5d3a), [x, 0.74, z], id);
+          putMesh(parent, new THREE.CylinderGeometry(0.045, 0.06, 0.34, 6), material(0x704b38), [x, 0.53, z], id);
+          for (const side of [-1, 1]) {
+            putMesh(parent, new THREE.CylinderGeometry(0.11, 0.12, 0.19, 8), material(0xb8784b), [x + side * 0.52, 0.58, z + 0.04], id);
+          }
+        }
+
+        function addFlower(parent, id, x, z, color, scale = 1) {
+          const y = 0.49;
+          putMesh(parent, new THREE.CylinderGeometry(0.018 * scale, 0.025 * scale, 0.2 * scale, 5), material(0x348d50), [x, y + 0.1 * scale, z], id);
+          putMesh(parent, new THREE.SphereGeometry(0.1 * scale, 7, 5), material(color), [x, y + 0.23 * scale, z], id, { scale: [1, 0.76, 0.7] });
+          putMesh(parent, new THREE.SphereGeometry(0.045 * scale, 6, 4), material(0xffe45c), [x, y + 0.24 * scale, z], id);
+        }
+
+        function signTexture(title, subtitle, fill) {
+          const signCanvas = document.createElement("canvas");
+          signCanvas.width = 512;
+          signCanvas.height = 256;
+          const context = signCanvas.getContext("2d");
+          context.fillStyle = fill;
+          context.fillRect(8, 8, 496, 240);
+          context.strokeStyle = "#111111";
+          context.lineWidth = 14;
+          context.strokeRect(8, 8, 496, 240);
+          context.fillStyle = "#111111";
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          context.font = "900 92px system-ui, sans-serif";
+          context.fillText(title, 256, 112, 440);
+          context.font = "800 36px system-ui, sans-serif";
+          context.fillText(subtitle, 256, 195, 440);
+          const texture = new THREE.CanvasTexture(signCanvas);
+          texture.colorSpace = THREE.SRGBColorSpace;
+          return texture;
+        }
+
+        function addSign(parent, id, title, subtitle, color, position, size = [1.25, 0.64]) {
+          const board = putMesh(
+            parent,
+            new THREE.BoxGeometry(size[0] + 0.08, size[1] + 0.08, 0.09),
+            material(0xf8ffff),
+            [position[0], position[1], position[2] - 0.04],
+            id,
+          );
+          board.rotation.y = -0.02;
+          const sign = new THREE.Mesh(
+            new THREE.PlaneGeometry(size[0], size[1]),
+            new THREE.MeshBasicMaterial({ map: signTexture(title, subtitle, color), side: THREE.DoubleSide }),
+          );
+          sign.position.set(...position);
+          parent.add(sign);
+          sign.userData.islandId = id;
+          clickableMeshes.push(sign);
+        }
+
+        function islandEdgeShape(angle, seed, amount = 1) {
+          return 1 + amount * (
+            Math.sin(angle * 3 + seed) * 0.065
+            + Math.cos(angle * 5 - seed * 1.7) * 0.042
+            + Math.sin(angle * 7 + seed * 0.6) * 0.024
+          );
+        }
+
+        function createIslandTopGeometry(data) {
+          const segments = compactDevice ? 18 : 30;
+          const levels = [0.32, 0.66, 0.88, 1];
+          const positions = [0, 0.48, 0];
+          const indices = [];
+
+          for (let ring = 0; ring < levels.length; ring += 1) {
+            for (let segment = 0; segment < segments; segment += 1) {
+              const angle = (segment / segments) * Math.PI * 2;
+              const radial = levels[ring];
+              const edge = islandEdgeShape(angle, data.seed, ring === levels.length - 1 ? 1 : 0.12);
+              const radius = data.radius * radial * edge;
+              const ridge = (Math.sin(angle * 3 + data.seed) * 0.038 + Math.cos(angle * 5 - data.seed) * 0.024) * radial;
+              const roughness = (ring === levels.length - 1 ? -0.025 : 0) + ridge;
+              positions.push(Math.cos(angle) * radius, 0.48 + roughness, Math.sin(angle) * radius);
+            }
+          }
+
+          for (let segment = 0; segment < segments; segment += 1) {
+            indices.push(0, 1 + ((segment + 1) % segments), 1 + segment);
+          }
+          for (let ring = 0; ring < levels.length - 1; ring += 1) {
+            const current = 1 + ring * segments;
+            const next = current + segments;
+            for (let segment = 0; segment < segments; segment += 1) {
+              const a = current + segment;
+              const b = current + ((segment + 1) % segments);
+              const c = next + segment;
+              const d = next + ((segment + 1) % segments);
+              indices.push(a, c, b, b, c, d);
+            }
+          }
+
+          const geometry = new THREE.BufferGeometry();
+          geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+          geometry.setIndex(indices);
+          geometry.computeVertexNormals();
+          return geometry;
+        }
+
+        function createIslandRockGeometry(data) {
+          const segments = compactDevice ? 18 : 30;
+          const depth = data.depth || 1;
+          const layers = [
+            { radius: 0.985, y: 0.405 },
+            { radius: 0.9, y: 0.405 - depth * 0.42 },
+            { radius: 0.72, y: 0.34 - depth * 0.95 },
+            { radius: 0.51, y: 0.16 - depth * 1.48 },
+            { radius: 0.3, y: -0.1 - depth * 1.96 },
+            { radius: 0.13, y: -0.26 - depth * 2.25 },
+          ];
+          const positions = [];
+          const colors = [];
+          const indices = [];
+          const baseColor = new THREE.Color(data.soil);
+
+          layers.forEach((layer, ring) => {
+            for (let segment = 0; segment < segments; segment += 1) {
+              const angle = (segment / segments) * Math.PI * 2;
+              const rough = islandEdgeShape(angle, data.seed + ring * 0.83, ring === 0 ? 0.92 : 0.48);
+              const radius = data.radius * layer.radius * rough;
+              const jaggedOffset = Math.sin(angle * 9 + data.seed + ring) * 0.11 * depth;
+              positions.push(Math.cos(angle) * radius, layer.y + jaggedOffset, Math.sin(angle) * radius);
+              const shade = 0.68 + ring * 0.055 + ((segment * 7 + ring * 3) % 5) * 0.025;
+              const color = baseColor.clone().multiplyScalar(shade);
+              colors.push(color.r, color.g, color.b);
+            }
+          });
+
+          for (let ring = 0; ring < layers.length - 1; ring += 1) {
+            const current = ring * segments;
+            const next = current + segments;
+            for (let segment = 0; segment < segments; segment += 1) {
+              const a = current + segment;
+              const b = current + ((segment + 1) % segments);
+              const c = next + segment;
+              const d = next + ((segment + 1) % segments);
+              indices.push(a, b, c, b, d, c);
+            }
+          }
+
+          const bottomCenter = positions.length / 3;
+          positions.push(0, layers[layers.length - 1].y - depth * 0.28, 0);
+          colors.push(baseColor.r * 0.52, baseColor.g * 0.52, baseColor.b * 0.52);
+          const lastRing = (layers.length - 1) * segments;
+          for (let segment = 0; segment < segments; segment += 1) {
+            indices.push(lastRing + segment, lastRing + ((segment + 1) % segments), bottomCenter);
+          }
+
+          const geometry = new THREE.BufferGeometry();
+          geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+          geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+          geometry.setIndex(indices);
+          geometry.computeVertexNormals();
+          return geometry;
+        }
+
+        function addRockIsland(group, data) {
+          const r = data.radius;
+          const depth = data.depth || 1;
+          const pickId = data.clickable === false ? null : data.id;
+          const top = putMesh(group, createIslandTopGeometry(data), material(data.ground), [0, 0, 0], pickId);
+          top.material.side = THREE.DoubleSide;
+          putMesh(
+            group,
+            createIslandRockGeometry(data),
+            new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.96 }),
+            [0, 0, 0],
+            pickId,
+          );
+
+          // Faceted outcrops and detached stones make the underside look eroded and airborne.
+          const outcropCount = compactDevice ? 4 : 7;
+          for (let index = 0; index < outcropCount; index += 1) {
+            const angle = (index / outcropCount) * Math.PI * 2 + data.seed;
+            const radius = r * (0.43 + (index % 3) * 0.065);
+            const rock = putMesh(
+              group,
+              new THREE.IcosahedronGeometry(0.3 + (index % 2) * 0.09, 0),
+              material(index % 2 ? 0x9b765e : new THREE.Color(data.soil).multiplyScalar(1.2)),
+              [Math.cos(angle) * radius, -depth * (0.92 + (index % 3) * 0.3), Math.sin(angle) * radius],
+              pickId,
+              { scale: [1.35, 1.75, 0.9] },
+            );
+            rock.rotation.set(angle * 0.24, angle, angle * 0.36);
+          }
+
+          const floatingStoneCount = compactDevice ? 1 : 3;
+          for (let index = 0; index < floatingStoneCount; index += 1) {
+            const angle = data.seed + index * 2.1;
+            const shard = putMesh(
+              group,
+              new THREE.IcosahedronGeometry(0.18 + index * 0.035, 0),
+              material(0x9bb5bd),
+              [Math.cos(angle) * r * 1.1, -depth * (1.2 + index * 0.23), Math.sin(angle) * r * 1.1],
+              pickId,
+              { scale: [1.4, 0.8, 1.1] },
+            );
+            shard.rotation.set(angle, angle * 0.6, angle * 0.35);
+          }
+
+          const shadow = new THREE.Mesh(
+            new THREE.CircleGeometry(r * 1.15, compactDevice ? 20 : 32),
+            new THREE.MeshBasicMaterial({ color: 0x075b79, transparent: true, opacity: 0.13, depthWrite: false }),
+          );
+          shadow.rotation.x = -Math.PI / 2;
+          shadow.position.set(0, -5.12 - group.position.y, 0.15);
+          group.add(shadow);
+        }
+
+        function addToneDecor(group, id) {
+          const notePositions = [[0.9, 1.32, 0.92], [1.36, 1.75, 0.56], [0.28, 1.46, 1.05]];
+          notePositions.forEach(([x, y, z], index) => {
+            const note = new THREE.Group();
+            note.position.set(x, y, z);
+            group.add(note);
+            const color = index === 1 ? 0xffd200 : 0xff61b8;
+            putMesh(note, new THREE.SphereGeometry(0.18, 9, 6), material(color), [0, 0, 0], id, { scale: [1.28, 0.76, 0.72] });
+            putMesh(note, new THREE.CylinderGeometry(0.035, 0.035, 0.69, 6), material(0x20202a), [0.2, 0.33, 0], id);
+            if (index !== 2) {
+              const flag = putMesh(note, new THREE.TorusGeometry(0.15, 0.035, 5, 10, Math.PI * 1.25), material(0x20202a), [0.3, 0.53, 0], id);
+              flag.rotation.z = Math.PI * 0.95;
+            }
+          });
+
+          addChinesePavilion(group, id, { x: 0.54, z: -0.42, width: 1.12, roofColor: 0x4269bd, wallColor: 0xf5eaff, tiered: true });
+          addSign(group, id, "ˉ ˊ ˇ ˋ", "FOUR TONES", 0xfff5ff, [0.46, 2.3, 0.62], [1.42, 0.5]);
+          addLantern(group, id, 1.02, 1.02, 0.16, 0.72, 0xe44861);
+
+          const headphones = new THREE.Group();
+          headphones.position.set(-0.78, 0, 0.35);
+          headphones.scale.setScalar(0.76);
+          group.add(headphones);
+          const earBand = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(-0.58, 0.6, 0.42),
+            new THREE.Vector3(-0.62, 1.02, 0.42),
+            new THREE.Vector3(-0.42, 1.4, 0.42),
+            new THREE.Vector3(0, 1.58, 0.42),
+            new THREE.Vector3(0.42, 1.4, 0.42),
+            new THREE.Vector3(0.62, 1.02, 0.42),
+            new THREE.Vector3(0.58, 0.6, 0.42),
+          ]);
+          putMesh(headphones, new THREE.TubeGeometry(earBand, 24, 0.09, 8, false), material(0x282337), [0, 0, 0], id);
+          putMesh(headphones, new THREE.BoxGeometry(0.27, 0.52, 0.3), material(0xff75c4), [-0.6, 0.82, 0.42], id, { rotation: [0, 0, -0.08] });
+          putMesh(headphones, new THREE.BoxGeometry(0.27, 0.52, 0.3), material(0xff75c4), [0.6, 0.82, 0.42], id, { rotation: [0, 0, 0.08] });
+          putMesh(group, new THREE.CylinderGeometry(0.15, 0.28, 0.34, 8), material(0x29384e), [-1.45, 0.72, -0.12], id, { rotation: [0, 0, -0.2] });
+          putMesh(group, new THREE.CylinderGeometry(0.08, 0.08, 0.055, 10), material(0xff62b9), [-1.45, 0.72, 0.065], id, { rotation: [Math.PI / 2, 0, 0] });
+
+          addCherryBlossomTree(group, id, -0.98, -0.66, 0.62);
+          addCherryBlossomTree(group, id, 1.15, -0.65, 0.58);
+          addLotusPond(group, id, -0.13, -0.98, 0.34);
+          addIslandStream(group, id, [[-0.13, -0.98], [0.25, -0.79], [0.64, -0.62], [1.04, -0.5], [1.4, -0.4]], 0.1);
+          addWaterfall(group, id, 1.4, -0.4, 2.2, 0.34);
+          addWaterfall(group, id, -1.56, -0.08, 1.7, 0.28);
+          addFlower(group, id, -0.9, 0.64, 0xff75c4, 0.9);
+          addFlower(group, id, 0.9, -0.88, 0xffd200, 0.8);
+        }
+
+        function addPinyinDecor(group, id) {
+          addChinesePavilion(group, id, { x: -0.58, z: -0.48, width: 1.05, roofColor: 0x168d99, wallColor: 0xe7fff3 });
+          // A miniature open workbook, assembled from simple 3D slabs.
+          putMesh(group, new THREE.BoxGeometry(0.9, 0.14, 0.62), material(0xffd229), [0.61, 0.61, 0.45], id, { rotation: [0.08, -0.12, -0.08] });
+          putMesh(group, new THREE.BoxGeometry(0.8, 0.06, 0.54), material(0xfffdf4), [0.59, 0.7, 0.45], id, { rotation: [0.08, -0.12, -0.08] });
+          putMesh(group, new THREE.BoxGeometry(0.05, 0.07, 0.54), material(0xff6a9e), [0.58, 0.75, 0.45], id, { rotation: [0.08, -0.12, -0.08] });
+          for (let i = 0; i < 3; i += 1) {
+            putMesh(group, new THREE.BoxGeometry(0.23, 0.018, 0.025), material(0x76a8ff), [0.38 + i * 0.12, 0.744, 0.28 + i * 0.13], id, { rotation: [0.08, -0.12, -0.08] });
+          }
+          putMesh(group, new THREE.BoxGeometry(0.66, 0.13, 0.42), material(0x64c8ff), [0.45, 0.59, -0.48], id, { rotation: [0.03, 0.25, 0.06] });
+          putMesh(group, new THREE.BoxGeometry(0.56, 0.04, 0.33), material(0xfffdf4), [0.45, 0.68, -0.48], id, { rotation: [0.03, 0.25, 0.06] });
+          add3DLetter(group, id, "a", -0.95, 0.97, 0.77, 0xffc928, 1.2);
+          add3DLetter(group, id, "o", -0.05, 0.97, 0.88, 0xff6a9e, 1.24);
+          add3DLetter(group, id, "e", 0.85, 0.97, 0.74, 0x5a94ef, 1.2);
+          addSign(group, id, "b p m f", "INITIALS", 0xffef7a, [0.62, 2.0, -0.98], [1.05, 0.48]);
+          // A rolled parchment and loose phonics cards decorate the study courtyard.
+          putMesh(group, new THREE.CylinderGeometry(0.09, 0.09, 0.72, 8), material(0xb66d43), [-1.1, 0.62, 0.78], id, { rotation: [0, 0, Math.PI / 2] });
+          putMesh(group, new THREE.BoxGeometry(0.62, 0.025, 0.38), material(0xfff1d4), [-1.1, 0.67, 0.78], id, { rotation: [-0.04, 0.12, 0] });
+          addPineTree(group, id, -1.23, -0.56, 0.75);
+          addPineTree(group, id, 1.18, -0.66, 0.72, 0x16775b);
+          addLotusPond(group, id, -0.22, 0.96, 0.32);
+          addIslandStream(group, id, [[-0.22, 0.96], [-0.56, 0.73], [-0.9, 0.53], [-1.18, 0.38], [-1.45, 0.22]], 0.095);
+          addStoneBridge(group, id, -0.18, 0.98, 0.95);
+          addWaterfall(group, id, -1.45, 0.22, 1.8, 0.3);
+          addWaterfall(group, id, 1.7, -0.24, 1.3, 0.27);
+          addLantern(group, id, -0.52, 1.19, 0.08, 0.58, 0x1c9b9f);
+          addFlower(group, id, 1.15, 0.65, 0xff719d, 0.75);
+        }
+
+        function addConversationDecor(group, id) {
+          addChinesePavilion(group, id, { x: 0.35, z: -0.7, width: 1.24, roofColor: 0xe1ad35, wallColor: 0xfff0cd, tiered: true });
+          addLantern(group, id, -0.42, 1.2, 0.02, 0.72, 0xd93643);
+          addLantern(group, id, 1.12, 1.2, 0.02, 0.72, 0xd93643);
+          addSign(group, id, "AI 對話", "SPEAK TOGETHER", 0xa8f4d0, [-0.98, 1.8, 0.52], [1.12, 0.52]);
+          // Central courtyard plaza with seats and a stone approach.
+          const plaza = putMesh(group, new THREE.CircleGeometry(0.72, 20), material(0xd7c5a3), [-0.58, 0.492, 0.73], id);
+          plaza.rotation.x = -Math.PI / 2;
+          addStonePath(group, id, [[-1.25, 1.35], [-1.0, 1.08], [-0.72, 0.86], [-0.45, 0.56]], 10);
+          addBench(group, id, -1.25, 0.18, 0.84);
+          addBench(group, id, -0.08, 1.32, 0.84);
+
+          // Two speech bubbles float beside the classroom.
+          const bubble1 = putMesh(group, new THREE.SphereGeometry(0.32, 12, 8), material(0xffffff), [-1.0, 1.82, 0.68], id, { scale: [1.35, 0.72, 0.22] });
+          bubble1.rotation.z = -0.1;
+          const bubble2 = putMesh(group, new THREE.SphereGeometry(0.26, 12, 8), material(0xff8fe9), [1.0, 1.63, 0.62], id, { scale: [1.35, 0.75, 0.22] });
+          bubble2.rotation.z = 0.08;
+          addCherryBlossomTree(group, id, 1.22, -0.65, 0.57);
+          addPineTree(group, id, -1.2, -0.68, 0.68, 0x19795c);
+          addLotusPond(group, id, -0.85, 0.82, 0.31);
+          addIslandStream(group, id, [[-0.85, 0.82], [-0.3, 1.08], [0.35, 1.08], [0.98, 0.72], [1.42, 0.06]], 0.1);
+          addStoneBridge(group, id, -0.78, 0.84, 0.72);
+          addWaterfall(group, id, 1.42, 0.06, 1.7, 0.3);
+          addWaterfall(group, id, -1.95, -0.25, 1.3, 0.26);
+          addFlower(group, id, 0.96, 0.78, 0xffd200, 0.8);
+        }
+
+        function addSituationalDecor(group, id) {
+          addChinesePavilion(group, id, { x: 0.55, z: -0.55, width: 1.08, roofColor: 0xc94442, wallColor: 0xffe7d2 });
+          addMarketStall(group, id, -0.82, 0.4, 0xd94b43);
+          addMarketStall(group, id, 0.52, 0.85, 0x398eaa);
+          addNightMarketTable(group, id, 0.1, -1.63);
+          addBubbleTea(group, id, 1.42, -0.48);
+          addShoppingBag(group, id, -1.42, -0.45);
+          addLantern(group, id, -1.35, 1.14, 0.16, 0.65, 0xd93643);
+          addLantern(group, id, 1.48, 1.12, -0.06, 0.62, 0xe0443c);
+          addStonePath(group, id, [[-1.48, 1.0], [-0.92, 0.98], [-0.4, 1.05], [0.1, 1.16]], 13, 0xe4c29d);
+          addBench(group, id, -1.28, -1.02, 0.72);
+          addPineTree(group, id, -1.43, -0.12, 0.54, 0x257c51);
+          addCherryBlossomTree(group, id, 1.45, -0.82, 0.5);
+          addLotusPond(group, id, 0.05, -1.2, 0.3);
+          addIslandStream(group, id, [[0.05, -1.2], [0.48, -1.02], [0.86, -0.72], [1.28, -0.34], [1.63, 0.25]], 0.1);
+          addWaterfall(group, id, 1.63, 0.25, 1.8, 0.34);
+          addWaterfall(group, id, -1.72, 0.54, 1.35, 0.28);
+        }
+
+        function createIsland(data) {
+          const group = new THREE.Group();
+          group.position.set(...data.position);
+          group.userData = { islandId: data.id, baseY: data.position[1], depth: data.depth, hoverY: 0, bobOffset: 0 };
+          world.add(group);
+          islandGroups.set(data.id, group);
+          addRockIsland(group, data);
+
+          if (data.id === "tone") addToneDecor(group, data.id);
+          if (data.id === "pinyin") addPinyinDecor(group, data.id);
+          if (data.id === "conversation") addConversationDecor(group, data.id);
+          if (data.id === "situational") addSituationalDecor(group, data.id);
+
+          const anchor = new THREE.Object3D();
+          const labelPosition = {
+            tone: [-0.82, 3.15, 0.35],
+            pinyin: [0.82, 2.95, 0.25],
+            conversation: [-1.25, 3.0, 0.15],
+            situational: [1.12, 2.72, 0.05],
+          }[data.id];
+          anchor.position.set(...labelPosition);
+          group.add(anchor);
+          labelAnchors.set(data.id, anchor);
+        }
+
+        islandData.forEach(createIsland);
+
+        function createMainIsland() {
+          const group = new THREE.Group();
+          group.position.set(...hubData.position);
+          group.userData = { islandId: hubData.id, baseY: hubData.position[1], depth: hubData.depth, hoverY: 0, bobOffset: 0 };
+          world.add(group);
+          islandGroups.set(hubData.id, group);
+          addRockIsland(group, { ...hubData, clickable: false });
+
+          addChinesePavilion(group, null, { x: 0, z: -0.36, width: 0.76, roofColor: 0xe2ad35, wallColor: 0xfff0d2, tiered: true });
+          const plaza = putMesh(group, new THREE.CircleGeometry(0.64, 24), material(0xd8c8a8), [0, 0.492, 0.58], null);
+          plaza.rotation.x = -Math.PI / 2;
+          addStonePath(group, null, [[-0.84, 0.78], [-0.46, 0.64], [0, 0.56], [0.48, 0.64], [0.86, 0.78]], compactDevice ? 8 : 14);
+          addLantern(group, null, -0.92, 0.94, -0.04, 0.42, 0xd93643);
+          addLantern(group, null, 0.92, 0.94, -0.04, 0.42, 0xd93643);
+          addSign(group, null, "華語島", "ISLAND HUB", 0xffd66d, [0, 1.86, -0.18], [0.9, 0.42]);
+          addWaterfall(group, null, 0.94, 0.6, 1.1, 0.25);
+          addWaterfall(group, null, -0.95, -0.22, 1.1, 0.24);
+        }
+
+        createMainIsland();
+
+        // The panda follows walkable grids. Buildings, ponds and trees are blocked;
+        // the hub's raised stair-bridges are the only links between islands.
+        const pandaPickables = [];
+        const navNodes = [];
+        const navByIsland = new Map();
+        const navGrid = new Map();
+        const navSpacing = 0.3;
+        const navDirections = [[1, 0], [0, 1], [1, 1], [1, -1]];
+
+        function islandWalkable(data, x, z) {
+          const walkRadius = data.radius * 0.8;
+          if (x * x + z * z > walkRadius * walkRadius) return false;
+          return !(data.blockers || []).some(([bx, bz, radius]) => {
+            const dx = x - bx;
+            const dz = z - bz;
+            return dx * dx + dz * dz < (radius + 0.08) ** 2;
+          });
+        }
+
+        for (const data of navigationData) {
+          const cells = new Map();
+          navGrid.set(data.id, cells);
+          const range = Math.floor(data.radius * 0.8 / navSpacing);
+          for (let gx = -range; gx <= range; gx += 1) {
+            for (let gz = -range; gz <= range; gz += 1) {
+              const localX = gx * navSpacing;
+              const localZ = gz * navSpacing;
+              if (!islandWalkable(data, localX, localZ)) continue;
+              const node = {
+                id: `${data.id}:${gx}:${gz}`,
+                islandId: data.id,
+                gx,
+                gz,
+                localX,
+                localZ,
+                x: data.position[0] + localX,
+                y: data.position[1] + 0.5,
+                z: data.position[2] + localZ,
+                edges: [],
+              };
+              cells.set(`${gx}:${gz}`, node);
+              navNodes.push(node);
+            }
+          }
+          navByIsland.set(data.id, [...cells.values()]);
+        }
+
+        function connectNodes(a, b, cost) {
+          a.edges.push({ node: b, cost });
+          b.edges.push({ node: a, cost });
+        }
+
+        for (const data of navigationData) {
+          const cells = navGrid.get(data.id);
+          for (const node of cells.values()) {
+            for (const [dx, dz] of navDirections) {
+              const neighbor = cells.get(`${node.gx + dx}:${node.gz + dz}`);
+              if (!neighbor) continue;
+              if (dx && dz && (!cells.has(`${node.gx + dx}:${node.gz}`) || !cells.has(`${node.gx}:${node.gz + dz}`))) continue;
+              connectNodes(node, neighbor, Math.hypot(dx, dz) * navSpacing);
+            }
+          }
+        }
+
+        // The panda roams the largest clear walking area on each island; isolated decorative
+        // pockets remain scenery instead of becoming unreachable navigation targets.
+        for (const data of navigationData) {
+          const remaining = new Set(navByIsland.get(data.id) || []);
+          const components = [];
+          while (remaining.size) {
+            const first = remaining.values().next().value;
+            const component = [];
+            const queue = [first];
+            remaining.delete(first);
+            while (queue.length) {
+              const node = queue.shift();
+              component.push(node);
+              for (const edge of node.edges) {
+                if (edge.node.islandId !== data.id || !remaining.has(edge.node)) continue;
+                remaining.delete(edge.node);
+                queue.push(edge.node);
+              }
+            }
+            components.push(component);
+          }
+          components.sort((a, b) => b.length - a.length);
+          const walkableArea = components[0] || [];
+          navByIsland.set(data.id, walkableArea);
+          for (let index = navNodes.length - 1; index >= 0; index -= 1) {
+            if (navNodes[index].islandId === data.id && !walkableArea.includes(navNodes[index])) navNodes.splice(index, 1);
+          }
+        }
+
+        function nearestWalkNode(islandId, localX, localZ) {
+          return (navByIsland.get(islandId) || []).reduce((best, node) => {
+            const distance = (node.localX - localX) ** 2 + (node.localZ - localZ) ** 2;
+            return !best || distance < best.distance ? { node, distance } : best;
+          }, null)?.node || null;
+        }
+
+        function createIslandBridge(fromNode, toNode, index) {
+          const start = new THREE.Vector3(fromNode.x, fromNode.y - 0.015, fromNode.z);
+          const end = new THREE.Vector3(toNode.x, toNode.y - 0.015, toNode.z);
+          const midpoint = start.clone().add(end).multiplyScalar(0.5);
+          midpoint.y += 0.06;
+          const curve = new THREE.CatmullRomCurve3([start, midpoint, end]);
+          const horizontalDistance = Math.hypot(end.x - start.x, end.z - start.z);
+          const heightDifference = Math.abs(end.y - start.y);
+          const needsSteps = heightDifference > 0.55;
+          const segments = Math.max(
+            6,
+            Math.ceil(horizontalDistance / (needsSteps ? 0.2 : 0.22)),
+            needsSteps ? Math.ceil(heightDifference / 0.15) : 0,
+          );
+          const plankAxis = new THREE.Vector3(0, 0, 1);
+
+          for (let plank = 0; plank < segments; plank += 1) {
+            const t = (plank + 0.5) / segments;
+            const point = curve.getPoint(t);
+            const tangent = curve.getTangent(t).normalize();
+            const deck = new THREE.Mesh(new THREE.BoxGeometry(
+              0.58,
+              needsSteps ? 0.17 : 0.12,
+              horizontalDistance / segments + (needsSteps ? 0.09 : 0.035),
+            ), material(plank % 2 ? 0xd5c2a0 : 0xe7d6b9));
+            deck.position.copy(point);
+            if (needsSteps) {
+              deck.position.y -= 0.075;
+              tangent.y = 0;
+              tangent.normalize();
+            }
+            deck.quaternion.setFromUnitVectors(plankAxis, tangent);
+            world.add(deck);
+          }
+
+          for (const side of [-1, 1]) {
+            const railPoints = [];
+            for (let step = 0; step <= segments; step += 1) {
+              const t = step / segments;
+              const point = curve.getPoint(t);
+              const tangent = curve.getTangent(t).normalize();
+              const lateral = new THREE.Vector3().crossVectors(tangent, new THREE.Vector3(0, 1, 0)).normalize().multiplyScalar(side * 0.35);
+              point.add(lateral).y += needsSteps ? 0.34 : 0.2;
+              railPoints.push(point);
+              if (step % 2 === 0 && step > 0 && step < segments) {
+                const post = new THREE.Mesh(new THREE.BoxGeometry(0.055, needsSteps ? 0.32 : 0.2, 0.055), material(0xb89f7c));
+                post.position.copy(point).y -= needsSteps ? 0.16 : 0.1;
+                world.add(post);
+              }
+            }
+            world.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(railPoints), segments * 2, 0.035, 5, false), material(0xb89f7c)));
+          }
+        }
+
+        function addInterIslandWaterFlow(fromNode, toNode, index) {
+          if (fromNode.y < toNode.y) [fromNode, toNode] = [toNode, fromNode];
+          const horizontal = new THREE.Vector3(toNode.x - fromNode.x, 0, toNode.z - fromNode.z);
+          const side = new THREE.Vector3(-horizontal.z, 0, horizontal.x).normalize().multiplyScalar(index % 2 ? 0.52 : -0.52);
+          const start = new THREE.Vector3(fromNode.x, fromNode.y + 0.04, fromNode.z).add(side);
+          const end = new THREE.Vector3(toNode.x, toNode.y + 0.04, toNode.z).add(side);
+          const drop = start.y - end.y;
+          const firstBend = start.clone().lerp(end, 0.32);
+          firstBend.y = start.y - Math.min(0.52, drop * 0.25);
+          const secondBend = start.clone().lerp(end, 0.72);
+          secondBend.y = end.y + Math.min(0.54, drop * 0.22);
+          const flow = new THREE.CatmullRomCurve3([start, firstBend, secondBend, end]);
+          const water = new THREE.Mesh(
+            new THREE.TubeGeometry(flow, 36, 0.11, 7, false),
+            new THREE.MeshBasicMaterial({ color: 0x27e8f4, transparent: true, opacity: 0.82, depthWrite: false }),
+          );
+          world.add(water);
+          const sparkleCurve = flow.clone();
+          const sparkle = new THREE.Mesh(
+            new THREE.TubeGeometry(sparkleCurve, 36, 0.025, 5, false),
+            new THREE.MeshBasicMaterial({ color: 0xe0ffff, transparent: true, opacity: 0.78, depthWrite: false }),
+          );
+          sparkle.position.y += 0.06;
+          world.add(sparkle);
+        }
+
+        const bridgePairs = [
+          ["tone", "hub"],
+          ["pinyin", "hub"],
+          ["conversation", "hub"],
+          ["situational", "hub"],
+        ];
+
+        bridgePairs.forEach(([fromId, toId], index) => {
+          const from = navigationData.find((item) => item.id === fromId);
+          const to = navigationData.find((item) => item.id === toId);
+          const dx = to.position[0] - from.position[0];
+          const dz = to.position[2] - from.position[2];
+          const distance = Math.hypot(dx, dz) || 1;
+          const fromNode = nearestWalkNode(fromId, (dx / distance) * from.radius * 0.76, (dz / distance) * from.radius * 0.76);
+          const toNode = nearestWalkNode(toId, (-dx / distance) * to.radius * 0.76, (-dz / distance) * to.radius * 0.76);
+          if (!fromNode || !toNode) return;
+          createIslandBridge(fromNode, toNode, index);
+          connectNodes(fromNode, toNode, Math.hypot(toNode.x - fromNode.x, toNode.y - fromNode.y, toNode.z - fromNode.z));
+          addInterIslandWaterFlow(fromNode, toNode, index);
+        });
+
+        function findNavPath(startNode, targetNode) {
+          if (!startNode || !targetNode) return [];
+          const open = [startNode];
+          const costSoFar = new Map([[startNode, 0]]);
+          const cameFrom = new Map();
+          const visited = new Set();
+
+          while (open.length) {
+            open.sort((a, b) => costSoFar.get(a) - costSoFar.get(b));
+            const current = open.shift();
+            if (current === targetNode) break;
+            if (visited.has(current)) continue;
+            visited.add(current);
+
+            for (const edge of current.edges) {
+              const nextCost = costSoFar.get(current) + edge.cost;
+              if (nextCost >= (costSoFar.get(edge.node) ?? Infinity)) continue;
+              costSoFar.set(edge.node, nextCost);
+              cameFrom.set(edge.node, current);
+              open.push(edge.node);
+            }
+          }
+
+          if (!cameFrom.has(targetNode) && startNode !== targetNode) return [];
+          const path = [targetNode];
+          while (path[0] !== startNode) path.unshift(cameFrom.get(path[0]));
+          return path;
+        }
+
+        function pandaMesh(parent, geometry, mat, position, scale) {
+          const mesh = new THREE.Mesh(geometry, mat);
+          mesh.position.set(...position);
+          if (scale) mesh.scale.set(...scale);
+          parent.add(mesh);
+          pandaPickables.push(mesh);
+          return mesh;
+        }
+
+        function createPandaPrototype() {
+          // This procedural rig is isolated here so a future GLB can replace it cleanly.
+          const root = new THREE.Group();
+          root.scale.setScalar(0.7);
+          const rig = new THREE.Group();
+          root.add(rig);
+          world.add(root);
+
+          const black = material(0x20212a);
+          const white = material(0xfffbf3);
+          const pink = material(0xf28db1);
+          const torso = pandaMesh(rig, new THREE.SphereGeometry(0.34, 12, 10), white, [0, 0.48, 0], [0.88, 1.12, 0.76]);
+          pandaMesh(rig, new THREE.SphereGeometry(0.25, 12, 10), white, [0, 0.48, 0.23], [0.88, 0.9, 0.35]);
+
+          const head = new THREE.Group();
+          head.position.set(0, 0.96, 0.035);
+          rig.add(head);
+          pandaMesh(head, new THREE.SphereGeometry(0.35, 14, 12), white, [0, 0, 0], [1.05, 0.98, 0.88]);
+          for (const side of [-1, 1]) {
+            pandaMesh(head, new THREE.SphereGeometry(0.13, 9, 7), black, [side * 0.265, 0.245, -0.005], [1, 1.08, 0.72]);
+            const patch = pandaMesh(head, new THREE.SphereGeometry(0.105, 10, 8), black, [side * 0.145, 0.045, 0.268], [0.86, 1.25, 0.55]);
+            patch.rotation.z = side * -0.3;
+            pandaMesh(head, new THREE.SphereGeometry(0.052, 8, 6), white, [side * 0.145, 0.045, 0.317], [1, 1, 0.5]);
+            pandaMesh(head, new THREE.SphereGeometry(0.026, 8, 6), black, [side * 0.145, 0.04, 0.339]);
+          }
+          pandaMesh(head, new THREE.SphereGeometry(0.13, 10, 8), white, [0, -0.105, 0.28], [1.15, 0.72, 0.62]);
+          pandaMesh(head, new THREE.SphereGeometry(0.052, 9, 7), black, [0, -0.07, 0.37], [1.2, 0.8, 0.65]);
+          pandaMesh(head, new THREE.SphereGeometry(0.025, 7, 5), pink, [-0.07, -0.17, 0.34]);
+          pandaMesh(head, new THREE.SphereGeometry(0.025, 7, 5), pink, [0.07, -0.17, 0.34]);
+
+          const armPivots = [];
+          for (const side of [-1, 1]) {
+            const arm = new THREE.Group();
+            arm.position.set(side * 0.275, 0.68, 0.02);
+            rig.add(arm);
+            pandaMesh(arm, new THREE.CapsuleGeometry(0.095, 0.24, 4, 7), black, [0, -0.16, 0]);
+            pandaMesh(arm, new THREE.SphereGeometry(0.11, 8, 7), black, [0, -0.31, 0.02], [1, 0.7, 1]);
+            armPivots.push(arm);
+
+            const leg = new THREE.Group();
+            leg.position.set(side * 0.145, 0.24, 0.015);
+            rig.add(leg);
+            pandaMesh(leg, new THREE.CapsuleGeometry(0.105, 0.16, 4, 7), black, [0, -0.11, 0]);
+            pandaMesh(leg, new THREE.SphereGeometry(0.13, 9, 7), black, [0, -0.22, 0.07], [1.1, 0.7, 1.25]);
+            armPivots.push(leg);
+          }
+
+          const tail = new THREE.Group();
+          tail.position.set(0, 0.42, -0.23);
+          rig.add(tail);
+          pandaMesh(tail, new THREE.SphereGeometry(0.105, 8, 7), black, [0, 0, -0.08], [1, 1, 1.15]);
+          const scarf = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.035, 6, 14), material(0xffd200));
+          scarf.position.set(0, 0.77, 0.01);
+          scarf.rotation.x = Math.PI / 2;
+          rig.add(scarf);
+
+          return { root, rig, head, torso, tail, armPivots, pandaPickables };
+        }
+
+        const panda = createPandaPrototype();
+        const startingNode = nearestWalkNode("hub", 0.8, 0.7) || navNodes[0];
+        let pandaCurrentNode = startingNode;
+        let pandaPath = [];
+        let pandaPathIndex = 0;
+        let pandaState = "idle";
+        let pandaIdleState = "idle";
+        let pandaPauseUntil = performance.now() + 1400;
+        let pandaNextTarget = null;
+        let pandaTalkUntil = 0;
+        let pandaSpeechText = "";
+
+        if (startingNode) panda.root.position.set(startingNode.x, startingNode.y, startingNode.z);
+
+        function planPandaTrip() {
+          const candidates = navNodes.filter((node) => node !== pandaCurrentNode && node.islandId !== pandaCurrentNode?.islandId);
+          const target = candidates[Math.floor(Math.random() * candidates.length)] || navNodes[Math.floor(Math.random() * navNodes.length)];
+          const route = findNavPath(pandaCurrentNode, target);
+          if (!route.length) {
+            pandaPauseUntil = performance.now() + 900;
+            pandaIdleState = "look";
+            return;
+          }
+          pandaNextTarget = target;
+          pandaPath = route.slice(1);
+          pandaPathIndex = 0;
+          pandaState = pandaPath.length ? "walk" : "idle";
+          if (!pandaPath.length) pandaPauseUntil = performance.now() + 900;
+        }
+
+        function greetPanda() {
+          const greetings = [
+            "你好！歡迎來到華語學習島！",
+            "你好呀！今天想去哪座島？",
+            "一起來練習中文吧！",
+            "嗨！我帶你去看看！",
+          ];
+          pandaSpeechText = greetings[Math.floor(Math.random() * greetings.length)];
+          pandaSpeech.textContent = pandaSpeechText;
+          pandaSpeech.hidden = false;
+          pandaTalkUntil = performance.now() + 3600;
+          pandaState = "wave";
+          const towardViewer = Math.atan2(9.5 - panda.root.position.x, 17 - panda.root.position.z);
+          panda.root.rotation.y = towardViewer;
+        }
+
+        function updatePanda(delta, now) {
+          if (!panda.root || !pandaCurrentNode) return;
+          if (now < pandaTalkUntil) {
+            pandaState = "wave";
+          } else if (!pandaPath.length || pandaPathIndex >= pandaPath.length) {
+            if (pandaSpeech && !pandaSpeech.hidden) pandaSpeech.hidden = true;
+            if (now >= pandaPauseUntil) planPandaTrip();
+            else pandaState = pandaIdleState;
+          } else {
+            pandaState = "walk";
+            const destination = pandaPath[pandaPathIndex];
+            const current = panda.root.position;
+            const dx = destination.x - current.x;
+            const dz = destination.z - current.z;
+            const distance = Math.hypot(dx, dz);
+            const step = 0.74 * delta;
+            if (distance <= step + 0.015) {
+              current.set(destination.x, destination.y, destination.z);
+              pandaCurrentNode = destination;
+              pandaPathIndex += 1;
+              if (pandaPathIndex >= pandaPath.length) {
+                pandaPauseUntil = now + 1000 + Math.random() * 2200;
+                pandaIdleState = ["look", "sit", "hop", "idle"][Math.floor(Math.random() * 4)];
+                pandaNextTarget = null;
+                pandaPath = [];
+                pandaPathIndex = 0;
+              }
+            } else {
+              current.x += (dx / distance) * step;
+              current.z += (dz / distance) * step;
+              current.y += (destination.y - current.y) * Math.min(1, delta * 5);
+            }
+            panda.root.rotation.y = Math.atan2(dx, dz);
+          }
+
+          const gait = now * 0.012;
+          const walking = pandaState === "walk";
+          const swing = walking ? Math.sin(gait) * 0.62 : 0;
+          panda.armPivots[0].rotation.x = swing;
+          panda.armPivots[1].rotation.x = -swing;
+          panda.armPivots[2].rotation.x = -swing;
+          panda.armPivots[3].rotation.x = swing;
+          panda.rig.position.y = walking ? Math.abs(Math.sin(gait * 2)) * 0.035 : pandaState === "hop" ? Math.abs(Math.sin(now * 0.018)) * 0.2 : 0;
+          panda.head.rotation.y = pandaState === "look" ? Math.sin(now * 0.003) * 0.28 : 0;
+          panda.rig.rotation.z = pandaState === "sit" ? 0.12 : 0;
+          panda.tail.rotation.x = Math.sin(now * 0.004) * 0.3;
+          panda.tail.rotation.z = Math.cos(now * 0.003) * 0.18;
+          panda.armPivots[2].rotation.z = pandaState === "wave" ? -1.65 + Math.sin(now * 0.012) * 0.18 : 0;
+        }
+
+        function updatePandaSpeechPosition() {
+          if (pandaSpeech.hidden) return;
+          const point = panda.root.localToWorld(new THREE.Vector3(0, 1.82, 0));
+          point.project(camera);
+          const bounds = frame.getBoundingClientRect();
+          pandaSpeech.style.left = `${(point.x * 0.5 + 0.5) * bounds.width}px`;
+          pandaSpeech.style.top = `${(-point.y * 0.5 + 0.5) * bounds.height}px`;
+        }
+
+        // A few stylized cloud puffs add depth without loading image assets.
+        function addCloud(x, y, z, size, opacity = 0.75) {
+          const cloud = new THREE.Group();
+          cloud.position.set(x, y, z);
+          world.add(cloud);
+          const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity, roughness: 1, flatShading: true });
+          [[0, 0, 0, 0.45], [0.34, 0.08, 0, 0.34], [-0.34, 0.04, 0.02, 0.3]].forEach(([cx, cy, cz, radius]) => {
+            const puff = new THREE.Mesh(new THREE.IcosahedronGeometry(radius * size, 1), cloudMat);
+            puff.position.set(cx * size, cy * size, cz * size);
+            cloud.add(puff);
+          });
+        }
+
+        const distantScenery = new THREE.Group();
+        world.add(distantScenery);
+
+        const sunDisc = new THREE.Mesh(
+          new THREE.SphereGeometry(0.72, 16, 12),
+          new THREE.MeshBasicMaterial({ color: 0xfffdf5 }),
+        );
+        sunDisc.position.set(-1.4, 1.9, -4.5);
+        distantScenery.add(sunDisc);
+
+        [
+          [-9.5, -0.1, -6.5, 2.2, 3.9],
+          [-7.1, 0.1, -6.9, 2.7, 4.6],
+          [-4.2, -0.15, -7.2, 2.1, 3.1],
+          [4.0, -0.1, -7.1, 2.5, 3.8],
+          [7.0, 0.05, -6.7, 2.8, 4.9],
+          [9.6, -0.2, -6.2, 2.2, 3.6],
+        ].forEach(([x, y, z, radius, height], index) => {
+          const mountain = new THREE.Mesh(
+            new THREE.ConeGeometry(radius, height, 5),
+            new THREE.MeshBasicMaterial({
+              color: index % 2 ? 0x7294c6 : 0x8ba9d2,
+              transparent: true,
+              opacity: 0.34,
+              depthWrite: false,
+            }),
+          );
+          mountain.position.set(x, y + height * 0.25, z);
+          mountain.rotation.y = index * 0.38;
+          distantScenery.add(mountain);
+        });
+
+        function addRuyiCloud(x, y, z, scale) {
+          const points = [
+            [-1.4, 0, 0], [-0.85, 0.03, 0], [-0.56, 0.36, 0], [-0.8, 0.68, 0],
+            [-1.04, 0.49, 0], [-0.87, 0.31, 0], [-0.5, 0.38, 0], [0, 0.32, 0],
+            [0.48, 0.3, 0], [0.82, 0.12, 0], [1.4, 0.18, 0],
+          ].map(([px, py, pz]) => new THREE.Vector3(x + px * scale, y + py * scale, z + pz * scale));
+          const cloudLine = new THREE.Mesh(
+            new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 40, 0.055 * scale, 6, false),
+            new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.62, depthWrite: false }),
+          );
+          distantScenery.add(cloudLine);
+        }
+
+        const birds = [];
+        function addFlyingBird(x, y, z, scale = 1, phase = 0) {
+          const bird = new THREE.Group();
+          bird.position.set(x, y, z);
+          world.add(bird);
+          const body = new THREE.Mesh(new THREE.SphereGeometry(0.11 * scale, 8, 6), new THREE.MeshBasicMaterial({ color: 0xfffdf8 }));
+          body.scale.set(1.5, 0.6, 0.65);
+          bird.add(body);
+          const head = new THREE.Mesh(new THREE.SphereGeometry(0.07 * scale, 7, 5), new THREE.MeshBasicMaterial({ color: 0xfffdf8 }));
+          head.position.set(0.12 * scale, 0.035 * scale, 0);
+          bird.add(head);
+          const beak = new THREE.Mesh(new THREE.ConeGeometry(0.035 * scale, 0.13 * scale, 5), new THREE.MeshBasicMaterial({ color: 0xffb44f }));
+          beak.position.set(0.22 * scale, 0.02 * scale, 0);
+          beak.rotation.z = -Math.PI / 2;
+          bird.add(beak);
+
+          const wings = [];
+          for (const side of [-1, 1]) {
+            const wing = new THREE.Group();
+            wing.position.set(0, 0.02 * scale, side * 0.025 * scale);
+            bird.add(wing);
+            const curve = new THREE.CatmullRomCurve3([
+              new THREE.Vector3(0, 0, 0),
+              new THREE.Vector3(-0.14 * scale, 0.08 * scale, 0),
+              new THREE.Vector3(-0.32 * scale, 0.015 * scale, 0),
+            ]);
+            wing.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 8, 0.035 * scale, 5, false), new THREE.MeshBasicMaterial({ color: 0xfffdf8 })));
+            wings.push(wing);
+          }
+          birds.push({ bird, wings, x, y, z, phase });
+        }
+
+        addCloud(-6.8, 2.7, -3.7, 1.15, 0.72);
+        addCloud(6.6, 3.1, -3.4, 0.94, 0.8);
+        addCloud(0.1, 3.7, 4.7, 0.76, 0.64);
+        addCloud(-7.2, -3.45, 0.7, 1.45, 0.72);
+        addCloud(7.0, -3.35, -0.6, 1.28, 0.68);
+        addCloud(0.2, -4.05, 5.3, 1.62, 0.76);
+        addRuyiCloud(-5.1, 2.0, -4.9, 1.75);
+        addRuyiCloud(5.0, 2.4, -5.1, 1.65);
+        addFlyingBird(-7.8, 2.8, 0.8, 1.1, 0.3);
+        addFlyingBird(2.8, 3.7, -2.8, 0.8, 1.5);
+        addFlyingBird(7.4, 2.2, -1.0, 0.9, 2.7);
+
+        function resize() {
+          const width = Math.max(1, frame.clientWidth);
+          const height = Math.max(1, frame.clientHeight);
+          const aspect = width / height;
+          const compactScale = width < 760 ? Math.min(0.68, 0.54 + aspect * 0.16) : aspect < 1.4 ? 0.9 : 1;
+          const halfHeight = width < 760 ? 8.7 : aspect < 1.4 ? 7.6 : 7;
+          camera.left = -halfHeight * aspect;
+          camera.right = halfHeight * aspect;
+          camera.top = halfHeight;
+          camera.bottom = -halfHeight;
+          camera.updateProjectionMatrix();
+          world.scale.setScalar(compactScale);
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, width < 760 ? 1.25 : 1.5));
+          renderer.setSize(width, height, false);
+          updateHotspotPositions();
+        }
+
+        function updateHotspotPositions() {
+          const bounds = frame.getBoundingClientRect();
+          const width = bounds.width;
+          const height = bounds.height;
+          for (const [id, anchor] of labelAnchors) {
+            const link = hotspotLayer.querySelector(`[data-island="${id}"]`);
+            if (!link) continue;
+            const projected = anchor.getWorldPosition(new THREE.Vector3()).project(camera);
+            const x = Math.min(width - 95, Math.max(95, (projected.x * 0.5 + 0.5) * width));
+            const y = Math.min(height - 28, Math.max(92, (-projected.y * 0.5 + 0.5) * height));
+            link.style.left = `${x}px`;
+            link.style.top = `${y}px`;
+          }
+        }
+
+        function setHoveredIsland(id) {
+          for (const [islandId, group] of islandGroups) {
+            group.userData.hoverY = islandId === id ? (reduceMotion ? 0 : 0.22) : 0;
+          }
+          frame.classList.toggle("is-hovering", Boolean(id));
+          canvas.style.cursor = id ? "pointer" : "grab";
+        }
+
+        function showIslandDetails(id) {
+          const island = islandData.find((item) => item.id === id);
+          if (!island) return;
+          document.getElementById("islandDetailEyebrow").textContent = island.english;
+          document.getElementById("islandDetailTitle").textContent = island.name;
+          document.getElementById("islandDetailCopy").textContent = island.description;
+          const topics = document.getElementById("islandDetailTopics");
+          topics.replaceChildren(...island.topics.map((topic) => {
+            const item = document.createElement("li");
+            item.textContent = topic;
+            return item;
+          }));
+          const start = document.getElementById("islandDetailStart");
+          start.href = island.route;
+          start.target = island.route.startsWith("http") ? "_blank" : "_self";
+          start.rel = island.route.startsWith("http") ? "noopener noreferrer" : "";
+          start.setAttribute("aria-label", `開始${island.name}的學習`);
+          islandDetail.hidden = false;
+          setHoveredIsland(id);
+          hotspotLayer.querySelectorAll(".island-hotspot").forEach((button) => {
+            const selected = button.dataset.island === id;
+            button.classList.toggle("is-selected", selected);
+            button.setAttribute("aria-pressed", String(selected));
+          });
+        }
+
+        function closeIslandDetails() {
+          islandDetail.hidden = true;
+          setHoveredIsland(null);
+          hotspotLayer.querySelectorAll(".island-hotspot").forEach((button) => {
+            button.classList.remove("is-selected");
+            button.setAttribute("aria-pressed", "false");
+          });
+        }
+
+        function pickIsland(event) {
+          const bounds = canvas.getBoundingClientRect();
+          pointer.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
+          pointer.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1;
+          pickRay.setFromCamera(pointer, camera);
+          const hit = pickRay.intersectObjects(clickableMeshes, false).find((entry) => entry.object.userData.islandId);
+          return hit?.object.userData.islandId || null;
+        }
+
+        function pickPanda(event) {
+          const bounds = canvas.getBoundingClientRect();
+          pointer.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
+          pointer.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1;
+          pickRay.setFromCamera(pointer, camera);
+          return pickRay.intersectObjects(pandaPickables, false).length > 0;
+        }
+
+        canvas.addEventListener("pointermove", (event) => {
+          if (event.pointerType === "mouse") {
+            pointerTarget.x = ((event.clientX - frame.getBoundingClientRect().left) / frame.clientWidth) * 2 - 1;
+            pointerTarget.y = -(((event.clientY - frame.getBoundingClientRect().top) / frame.clientHeight) * 2 - 1);
+            if (pickPanda(event)) {
+              setHoveredIsland(null);
+              canvas.style.cursor = "pointer";
+            } else {
+              setHoveredIsland(pickIsland(event));
+            }
+          }
+        });
+
+        canvas.addEventListener("pointerleave", () => {
+          pointerTarget.set(0, 0);
+          setHoveredIsland(null);
+        });
+
+        canvas.addEventListener("click", (event) => {
+          if (pickPanda(event)) {
+            closeIslandDetails();
+            greetPanda();
+            return;
+          }
+          const id = pickIsland(event);
+          if (id) showIslandDetails(id);
+        });
+
+        hotspotLayer.querySelectorAll(".island-hotspot").forEach((button) => {
+          button.addEventListener("pointerenter", () => setHoveredIsland(button.dataset.island));
+          button.addEventListener("pointerleave", () => {
+            if (!button.classList.contains("is-selected")) setHoveredIsland(null);
+          });
+          button.addEventListener("focus", () => setHoveredIsland(button.dataset.island));
+          button.addEventListener("blur", () => {
+            if (!button.classList.contains("is-selected")) setHoveredIsland(null);
+          });
+          button.addEventListener("click", () => showIslandDetails(button.dataset.island));
+        });
+
+        document.querySelectorAll("[data-open-island]").forEach((button) => {
+          button.addEventListener("click", () => {
+            showIslandDetails(button.dataset.openIsland);
+            islandDetail.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest" });
+          });
+        });
+        document.getElementById("islandDetailClose").addEventListener("click", closeIslandDetails);
+
+        let animationFrame = 0;
+        let visible = false;
+        let lastRenderAt = 0;
+
+        function render(timestamp) {
+          animationFrame = 0;
+          if (!visible || document.hidden) return;
+          animationFrame = window.requestAnimationFrame(render);
+          if (compactDevice && timestamp - lastRenderAt < 32) return;
+          lastRenderAt = timestamp;
+          const delta = Math.min(clock.getDelta(), 0.05);
+          const elapsed = clock.elapsedTime;
+          pointerCurrent.lerp(pointerTarget, 0.035);
+          world.rotation.y += ((reduceMotion ? 0 : pointerCurrent.x * 0.035) - world.rotation.y) * 0.035;
+          world.rotation.x += ((reduceMotion ? 0 : pointerCurrent.y * 0.018) - world.rotation.x) * 0.035;
+
+          for (const [id, group] of islandGroups) {
+            const phase = id === "tone" ? 0 : id === "pinyin" ? 1.8 : 3.3;
+            const bob = reduceMotion ? 0 : Math.sin(elapsed * 0.8 + phase) * 0.018;
+            group.position.y = group.userData.baseY + bob + group.userData.hoverY;
+          }
+
+          for (const bird of birds) {
+            bird.bird.position.x = bird.x + Math.sin(elapsed * 0.22 + bird.phase) * 0.42;
+            bird.bird.position.y = bird.y + Math.sin(elapsed * 0.8 + bird.phase) * 0.07;
+            bird.wings[0].rotation.z = Math.sin(elapsed * 5.5 + bird.phase) * 0.3;
+            bird.wings[1].rotation.z = -Math.sin(elapsed * 5.5 + bird.phase) * 0.3;
+          }
+
+          updatePanda(delta, performance.now());
+          renderer.render(scene, camera);
+          updateHotspotPositions();
+          updatePandaSpeechPosition();
+        }
+
+        function startRender() {
+          if (visible && !document.hidden && !animationFrame) animationFrame = window.requestAnimationFrame(render);
+        }
+
+        function stopRender() {
+          if (animationFrame) window.cancelAnimationFrame(animationFrame);
+          animationFrame = 0;
+        }
+
+        const visibilityObserver = new IntersectionObserver((entries) => {
+          visible = entries.some((entry) => entry.isIntersecting);
+          if (visible) startRender();
+          else stopRender();
+        }, { threshold: 0.02 });
+        visibilityObserver.observe(frame);
+
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden) stopRender();
+          else startRender();
+        });
+
+        const resizeObserver = new ResizeObserver(resize);
+        resizeObserver.observe(frame);
+        window.addEventListener("resize", resize, { passive: true });
+        canvas.addEventListener("webglcontextlost", (event) => {
+          event.preventDefault();
+          stopRender();
+          frame.classList.add("is-fallback");
+        });
+
+        resize();
+      }
+    </script>
+  </body>
+</html>

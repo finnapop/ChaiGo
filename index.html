@@ -249,7 +249,24 @@
       }
 
       .hero__left {
+        position: relative;
+        isolation: isolate;
         padding: 10px 0;
+      }
+
+      .hero__left::before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        width: 320px;
+        height: 320px;
+        top: 50%;
+        left: -200px;
+        background: #fff;
+        border: var(--border);
+        border-radius: 60% 40% 60% 40% / 55% 45% 55% 45%;
+        transform: translateY(-50%) rotate(12deg);
+        pointer-events: none;
       }
 
       .tag-row {
@@ -398,138 +415,73 @@
       /* Hero art */
       .hero-art {
         position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: block;
         border: var(--border);
         border-radius: var(--radius);
-        background: #fff;
-        box-shadow: var(--shadow);
-        padding: 33px 18px;
-        min-height: 420px;
-        overflow: hidden;
-      }
-
-      .hero-art__blob {
-        position: absolute;
-        inset: auto;
-        width: 320px;
-        height: 320px;
-        right: -60px;
-        top: 40px;
-        background: #ffb3f1;
-        border: var(--border);
-        border-radius: 60% 40% 60% 40% / 55% 45% 55% 45%;
-        transform: rotate(12deg);
-      }
-
-      .hero-art__portrait {
-        position: relative;
-        z-index: 2;
-        margin: 0;
-        width: 100%;
-        max-width: 360px;
-        border: var(--border);
-        border-radius: 26px;
-        background: #fff;
-        box-shadow: 5px 5px 0 var(--ink);
-        overflow: hidden;
-      }
-
-      .hero-art__portrait img {
-        width: 100%;
-        height: auto;
-        border-radius: 24px;
-      }
-
-      #avatarHotspot {
-        position: absolute;
-        left: 20%;
-        top: 38%;
-        width: 30%;
-        aspect-ratio: 1;
-        border: 0;
-        padding: 0;
-        border-radius: 50%;
-        background: transparent;
-        cursor: pointer;
-        transition: box-shadow 0.3s ease, transform 0.3s ease;
-      }
-
-      #avatarHotspot.is-active {
-        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.85), 0 0 28px rgba(255, 210, 0, 0.95);
-        transform: scale(1.06);
-      }
-
-      #clickHint {
-        position: absolute;
-        left: 50%;
-        bottom: -28px;
-        transform: translateX(-50%);
-        padding: 4px 8px;
-        border-radius: 999px;
         background: var(--ink);
-        color: #fff;
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 0.12em;
-        opacity: 0;
+        box-shadow: var(--shadow);
+        color: inherit;
+        text-decoration: none;
+        cursor: pointer;
+        width: 100%;
+        aspect-ratio: 1091 / 1442;
+        isolation: isolate;
+        overflow: hidden;
+      }
+
+      .hero-art:focus-visible {
+        outline: 4px solid var(--ink);
+        outline-offset: 5px;
+      }
+
+      .hero-art__scene {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        border-radius: inherit;
+      }
+
+      .hero-art__layer {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: fill;
+        transform: translate3d(
+          calc(var(--parallax-base-x, 0px) + var(--parallax-x, 0px)),
+          calc(var(--parallax-base-y, 0px) + var(--parallax-y, 0px)),
+          0
+        );
+        transform-origin: center;
         pointer-events: none;
-        transition: opacity 0.2s ease, transform 0.2s ease;
-        white-space: nowrap;
+        user-select: none;
+        will-change: transform;
       }
 
-      #clickHint.is-visible {
-        opacity: 1;
-        transform: translateX(-50%) translateY(-4px);
+      .hero-art__layer--background {
+        z-index: 0;
+        inset: -3px;
+        width: calc(100% + 6px);
+        height: calc(100% + 6px);
       }
-
-      #avatarSpeech {
-        position: absolute;
-        z-index: 4;
-        top: 27%;
-        right: 16px;
-        max-width: min(210px, 70%);
-        padding: 12px 14px;
-        border: var(--border);
-        border-radius: 16px;
-        background: #fff;
-        box-shadow: 4px 4px 0 var(--ink);
-        font-size: 14px;
-        font-weight: 700;
+      .hero-art__layer--character {
+        z-index: 1;
+        --parallax-y: 6px;
       }
-
-      #avatarSpeech[hidden] { display: none; }
-
-      .sticker {
-        position: absolute;
-        z-index: 3;
-        border: var(--border);
-        border-radius: 999px;
-        padding: 10px 12px;
-        background: #fff;
-        box-shadow: 4px 4px 0 var(--ink);
-        font-weight: 800;
-        font-size: 13px;
-        white-space: nowrap;
+      .hero-art__layer--foreground {
+        z-index: 2;
+        --parallax-base-x: -6px;
+        --parallax-base-y: 6px;
       }
+      .hero-art__layer--title { z-index: 3; }
 
-      .sticker--a {
-        left: 18px;
-        top: 16px;
-        background: var(--yellow);
-      }
-
-      .sticker--b {
-        right: 16px;
-        top: 14px;
-        background: var(--mint);
-      }
-
-      .sticker--c {
-        left: 18px;
-        bottom: 16px;
-        background: var(--blue);
+      .hero-art__character-image {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: fill;
+        transform-origin: center;
       }
 
       /* Sections */
@@ -1052,11 +1004,6 @@
       .brand__name { display: flex; flex-direction: column; line-height: 1.15; }
       .brand__name small { margin-top: 3px; font-size: 11px; font-weight: 700; }
 
-      #avatarHotspot:focus-visible {
-        outline: 4px solid #fff;
-        box-shadow: 0 0 0 7px var(--ink);
-      }
-
       code {
         border: 2px solid var(--ink);
         border-radius: 10px;
@@ -1097,13 +1044,19 @@
         .learning-grid { grid-template-columns: 1fr; }
         .tag { padding: 7px 10px; font-size: 13px; }
         .section { padding: 48px 0; }
-        .hero-art { padding: 29px 14px; }
-        .sticker { padding: 8px 9px; font-size: 11px; }
       }
 
       @media (min-width: 768px) {
         .section__head { flex-direction: row; align-items: flex-end; justify-content: space-between; }
         .learning-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+
+      @media (max-width: 980px) {
+        .hero__left::before {
+          width: clamp(250px, 68vw, 320px);
+          height: clamp(250px, 68vw, 320px);
+          left: -180px;
+        }
       }
 
       @media (min-width: 981px) {
@@ -1116,8 +1069,11 @@
         .hero { background: linear-gradient(90deg, #ffb3f1 0 55%, #ffd200 55% 100%); }
         .hero__grid { grid-template-columns: 1.15fr 0.85fr; padding: 56px 0; }
         .hero__title { font-size: clamp(42px, 4vw, 66px); }
-        .hero-art__portrait { width: 78%; }
         .learning-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .hero-art__layer { will-change: auto; }
       }
     </style>
     <link rel="stylesheet" href="./floating-vtuber.css" />
@@ -1179,41 +1135,27 @@
       <section id="home" class="hero">
         <div class="container hero__grid">
           <div class="hero__left">
-            <div class="tag-row" aria-label="台湾華語、VTuber、ゲームで学習">
-              <span class="tag tag--mint">台湾華語</span>
-              <span class="tag tag--yellow">VTUBER</span>
-              <span class="tag tag--pink">ゲーム</span>
-              <span class="tag tag--blue">PLAY &amp; LEARN</span>
-            </div>
-
             <h1 class="hero__title">
               <span class="hero__title-accent">一緒に中国語を学ぼう！</span>
             </h1>
             <p class="hero__lead">遊んで・話して・続けられる、新しい華語学習体験！</p>
             <p class="hero__support">VTuberの華語娘チャイ語娘と、ゲームや会話を通して台湾華語を楽しく学ぼう。</p>
             <div class="hero__cta">
-              <a class="btn btn--dark" href="#features">始める！ <span aria-hidden="true">→</span></a>
+              <a class="btn btn--dark" href="https://scheduler.zoom.us/22-terf3f/chaigo" target="_blank" rel="noopener noreferrer">レッスン予約 <span aria-hidden="true">→</span></a>
             </div>
           </div>
 
           <div class="hero__right">
-            <div class="hero-art">
-              <div class="hero-art__blob" aria-hidden="true"></div>
-              <div class="hero-art__portrait">
-                <img src="./2026A.png" alt="ヘッドセットを着けた華語娘のキービジュアル" />
-                <button
-                  id="avatarHotspot"
-                  type="button"
-                  aria-label="チャイ語娘のあいさつを聞く"
-                >
-                  <span id="clickHint" aria-hidden="true">TAP</span>
-                </button>
+            <a class="hero-art" href="https://scheduler.zoom.us/22-terf3f/chaigo" target="_blank" rel="noopener noreferrer" aria-label="レッスンを予約する（新しいタブで開きます）">
+              <div class="hero-art__scene" role="group" aria-label="華語娘がマイクとパソコンの前で中国語を教えるキービジュアル">
+                <img class="hero-art__layer hero-art__layer--background" src="./img/bg01.png" data-parallax="2" alt="" aria-hidden="true" />
+                <div class="hero-art__layer hero-art__layer--character" data-parallax="6" data-parallax-x="both" data-parallax-y="bounded-down" data-rest-y="6" aria-hidden="true">
+                  <img class="hero-art__character-image" src="./img/bg02.png" alt="" />
+                </div>
+                <img class="hero-art__layer hero-art__layer--foreground" src="./img/bg03.png" data-parallax="6" data-parallax-x="right-to-origin" data-parallax-y="up-to-origin" alt="" aria-hidden="true" />
+                <img class="hero-art__layer hero-art__layer--title" src="./img/bg04.png" data-parallax="5" alt="" aria-hidden="true" />
               </div>
-              <div id="avatarSpeech" role="status" aria-live="polite" hidden></div>
-              <div class="sticker sticker--a">你好！台湾華語</div>
-              <div class="sticker sticker--b">💬 AI CHAT</div>
-              <div class="sticker sticker--c">🎮 PLAY</div>
-            </div>
+            </a>
           </div>
         </div>
       </section>
@@ -1349,40 +1291,76 @@
         if (event.key === "Escape") closeMenu();
       });
 
-      const hotspot = document.getElementById("avatarHotspot");
-      const clickHint = document.getElementById("clickHint");
-      const speech = document.getElementById("avatarSpeech");
-      const greeting = "你好！今天也一起練習台灣華語吧！";
+      const heroArt = document.querySelector(".hero-art");
+      const heroScene = heroArt?.querySelector(".hero-art__scene");
+      const parallaxItems = heroScene
+        ? [...heroScene.querySelectorAll("[data-parallax]")].map((element) => ({
+            element,
+            distance: Number(element.dataset.parallax) || 0,
+            xMode: element.dataset.parallaxX || "both",
+            yMode: element.dataset.parallaxY || "both",
+            x: 0,
+            y: Number(element.dataset.restY) || 0,
+          }))
+        : [];
+      const reduceHeroMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      function speak(text) {
-        if (!("speechSynthesis" in window)) return;
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = "zh-TW";
-        utterance.rate = 0.92;
-        utterance.pitch = 1.08;
-        window.speechSynthesis.speak(utterance);
+      if (heroArt && heroScene && parallaxItems.length && !reduceHeroMotion) {
+        let targetX = 0;
+        let targetY = 0;
+        let currentX = 0;
+        let currentY = 0;
+        let pointerActive = false;
+        let animationFrame = 0;
+        const animationStart = window.performance.now();
+
+        function renderParallax(now) {
+          currentX += (targetX - currentX) * 0.09;
+          currentY += (targetY - currentY) * 0.09;
+          const elapsed = now - animationStart;
+          const floatY = (Math.cos((elapsed / 5500) * Math.PI * 2) + 1) * 3;
+
+          parallaxItems.forEach((item) => {
+            let nextX = 0;
+            let nextY = 0;
+
+            if (pointerActive && item.xMode === "both") nextX = -currentX * item.distance;
+            if (pointerActive && item.xMode === "right-to-origin") nextX = ((1 - currentX) / 2) * item.distance;
+            if (pointerActive && item.yMode === "both") nextY = -currentY * item.distance;
+            if (pointerActive && item.yMode === "up-to-origin") nextY = -((1 - currentY) / 2) * item.distance;
+            if (item.yMode === "bounded-down") {
+              const pointerPosition = pointerActive ? ((currentY + 1) / 2) * item.distance : floatY;
+              const gentleBob = pointerActive ? Math.sin((elapsed / 5500) * Math.PI * 2) * 0.5 : 0;
+              nextY = Math.max(0, Math.min(item.distance, pointerPosition + gentleBob));
+            }
+
+            item.x += (nextX - item.x) * 0.09;
+            item.y += (nextY - item.y) * 0.09;
+            item.element.style.setProperty("--parallax-x", `${item.x}px`);
+            item.element.style.setProperty("--parallax-y", `${item.y}px`);
+          });
+
+          animationFrame = window.requestAnimationFrame(renderParallax);
+        }
+
+        heroArt.addEventListener("pointermove", (event) => {
+          if (event.pointerType !== "mouse") return;
+          const bounds = heroArt.getBoundingClientRect();
+          targetX = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / bounds.width) * 2 - 1));
+          targetY = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / bounds.height) * 2 - 1));
+          pointerActive = true;
+          if (!animationFrame) animationFrame = window.requestAnimationFrame(renderParallax);
+        });
+
+        heroArt.addEventListener("pointerleave", () => {
+          targetX = 0;
+          targetY = 0;
+          pointerActive = false;
+          if (!animationFrame) animationFrame = window.requestAnimationFrame(renderParallax);
+        });
+
+        animationFrame = window.requestAnimationFrame(renderParallax);
       }
-
-      function showHint() {
-        hotspot.classList.add("is-active");
-        clickHint.classList.add("is-visible");
-      }
-
-      function hideHint() {
-        hotspot.classList.remove("is-active");
-        clickHint.classList.remove("is-visible");
-      }
-
-      hotspot.addEventListener("mouseenter", showHint);
-      hotspot.addEventListener("mouseleave", hideHint);
-      hotspot.addEventListener("focus", showHint);
-      hotspot.addEventListener("blur", hideHint);
-      hotspot.addEventListener("click", () => {
-        speech.hidden = false;
-        speech.textContent = greeting;
-        speak(greeting);
-      });
     </script>
   </body>
 </html>
