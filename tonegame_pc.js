@@ -2,7 +2,10 @@ const gameData = window.ChaiGoToneGameData;
 const learningService = window.ChaiGoMockLearningService;
 if (!gameData || !learningService) {
   const status = document.getElementById("record-status");
-  if (status) status.textContent = "ゲームのスクリプトを読み込めませんでした。ページを再読み込みしてください。";
+  if (status) {
+    status.hidden = false;
+    status.textContent = "ゲームのスクリプトを読み込めませんでした。ページを再読み込みしてください。";
+  }
   const startButton = document.getElementById("start-game");
   if (startButton) startButton.disabled = true;
   throw new Error("Tone game data or learning service failed to load.");
@@ -13,7 +16,6 @@ const LEVEL_BY_ID = new Map(LEVELS.map((level) => [level.id, level]));
 const {
   MOCK_PLAYER,
   completeSession,
-  getLearningStats,
   getPlayer,
   saveAnswer,
   startSession,
@@ -22,7 +24,7 @@ const {
 const elements = Object.fromEntries(
   [
     "home-screen", "ready-content", "game-content", "result-content",
-    "record-status", "current-user-name", "start-game", "start-game-label", "setup-message",
+    "record-status", "start-game", "start-game-label", "setup-message",
     "menuToggle", "primaryNav",
     "game-level-label", "session-label", "question-progress", "progress-fill", "play-audio", "audio-error",
     "audio-instruction", "answer-prompt",
@@ -126,6 +128,7 @@ function setView(view) {
 
 function setRecordStatus(message, kind = "ready") {
   elements["record-status"].textContent = message;
+  elements["record-status"].hidden = false;
   elements["record-status"].classList.toggle("is-error", kind === "error");
   elements["record-status"].classList.toggle("is-ready", kind === "ready");
 }
@@ -142,25 +145,14 @@ function setSetupLocked(locked) {
   if (locked) elements["setup-message"].textContent = "";
 }
 
-function updateSetupPlayer(player) {
-  elements["current-user-name"].textContent = player.nickname;
-  document.querySelectorAll(".user-name").forEach((node) => { node.textContent = player.nickname; });
-}
-
 async function initialize() {
   setSetupLocked(false);
   updateStartGameLabel();
   try {
-    const player = await getPlayer();
-    updateSetupPlayer(player);
-    const stats = await getLearningStats();
-    setRecordStatus(
-      `Mock Mode · 固定テスト ID ${MOCK_PLAYER.player_id} · 声調ゲーム ${stats.play_count} 回（サーバー／DB未接続）`,
-      "ready",
-    );
+    await getPlayer();
     elements["start-game"].disabled = false;
   } catch (error) {
-    setRecordStatus(`Mock Mode の準備に失敗しました：${error.message}`, "error");
+    setRecordStatus(`ゲームの準備に失敗しました：${error.message}`, "error");
     elements["start-game"].disabled = true;
   }
 }
@@ -255,7 +247,7 @@ async function startGame() {
     showQuestion();
     setPhase("playing");
   } catch (error) {
-    setRecordStatus(`Mock Mode の開始記録を保存できませんでした：${error.message}`, "error");
+    setRecordStatus(`開始記録を保存できませんでした：${error.message}`, "error");
     elements["setup-message"].textContent = "記録を保存できなかったため、ゲームは開始していません。もう一度お試しください。";
     setSetupLocked(false);
   } finally {
@@ -461,7 +453,7 @@ function renderResult(correctCount) {
   const game = state.game;
   const totalQuestions = game.questions.length;
   const accuracy = Math.round((correctCount / totalQuestions) * 100);
-  elements["result-greeting"].textContent = `${MOCK_PLAYER.nickname}さん、おつかれさま！`;
+  elements["result-greeting"].textContent = "おつかれさま！";
   elements["result-score"].innerHTML = `${correctCount} <small>/ ${totalQuestions}</small>`;
   elements["result-accuracy"].innerHTML = `${accuracy}<small>%</small>`;
   elements["result-correct"].innerHTML = `${correctCount} <small>/ ${totalQuestions}</small>`;
@@ -503,15 +495,6 @@ async function persistCompletion() {
     elements["retry-complete"].hidden = true;
     // Results use the browser-only Mock Mode adapter and are stored in localStorage, not on the server.
     elements["complete-status"].textContent = "✓ 結果已儲存";
-    try {
-      const stats = await getLearningStats();
-      setRecordStatus(
-        `Mock Mode · 固定テスト ID ${MOCK_PLAYER.player_id} · このブラウザーに保存済み ${stats.play_count} 回（サーバー／DB未接続）`,
-        "ready",
-      );
-    } catch {
-      // The completed session has already been confirmed in localStorage.
-    }
   } catch (error) {
     elements["complete-status"].textContent = `結果を保存できませんでした：${error.message}`;
     elements["retry-complete"].hidden = false;

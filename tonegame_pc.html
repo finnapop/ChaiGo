@@ -23,7 +23,7 @@
     <script defer src="./tonegame_pc.js"></script>
     <script defer src="./floating-vtuber.js"></script>
   </head>
-  <body>
+  <body class="tonegame-page">
     <header class="topbar">
       <div class="container topbar__inner">
         <a class="brand" href="./index.html#home" aria-label="チャイ語娘 ChaiGo! ホーム">
@@ -49,12 +49,6 @@
           <a href="https://scheduler.zoom.us/22-terf3f/chaigo" target="_blank" rel="noopener noreferrer">レッスン予約</a>
         </nav>
 
-        <div class="topbar__account" role="group" aria-label="アカウント">
-          <div class="topbar__user" role="status" aria-label="テストプレイヤー ChaiGo User">
-            <span class="avatar-mark" aria-hidden="true"><img src="./avatar.png" alt="" /></span>
-            <span class="user-name">ChaiGo User</span>
-          </div>
-        </div>
       </div>
     </header>
 
@@ -66,11 +60,8 @@
               <p class="section__eyebrow">READY?</p>
               <h2>チャレンジの準備</h2>
             </div>
-              <p>固定テストプレイヤーで遊べるレベルを選んでください。</p>
           </div>
-          <p class="record-status" id="record-status" role="status" aria-live="polite">
-            Mock Mode · テスト用の学習記録をこのブラウザーの localStorage に保存します（サーバー保存ではありません）。
-          </p>
+          <p class="record-status" id="record-status" role="status" aria-live="polite" hidden></p>
 
           <div class="setup-grid">
             <div class="setup-cell setup-cell--player">
@@ -78,17 +69,10 @@
               <div class="panel__heading">
                 <span class="panel__icon" aria-hidden="true">🎮</span>
                 <div>
-                  <p class="panel__eyebrow">PLAYER</p>
-                  <h3 id="setup-title">プレイヤー</h3>
+                  <p class="panel__eyebrow">LEVEL</p>
+                  <h3 id="setup-title">レベルを選ぶ</h3>
                 </div>
               </div>
-              <div class="current-player">
-                <span class="avatar-mark" aria-hidden="true"><img src="./avatar.png" alt="" /></span>
-                <span><strong id="current-user-name">ChaiGo User</strong><small>テストプレイヤー · chaigo-test-user-001</small></span>
-              </div>
-              <p class="field-note">すべてのテストプレイで同じプレイヤー ID を使います。</p>
-
-              <h3 class="level-heading">レベルを選ぶ</h3>
               <div class="level-list" id="level-list" aria-label="レベル選択">
                 <button class="level-card is-selected" type="button" data-level="1" aria-pressed="true">
                   <span class="level-card__number">LV1</span>

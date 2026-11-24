@@ -378,35 +378,6 @@
         box-shadow: none;
       }
 
-      .hero-islands-help {
-        display: flex;
-        width: fit-content;
-        max-width: 100%;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        margin: 14px auto 0;
-        padding: 8px 12px;
-        border: 2px solid var(--ink);
-        border-radius: 999px;
-        background: #fff;
-        box-shadow: 3px 3px 0 var(--ink);
-        font-size: 12px;
-        font-weight: 900;
-        line-height: 1.35;
-        text-align: center;
-      }
-
-      .hero-islands-help::before {
-        flex: 0 0 9px;
-        width: 9px;
-        height: 9px;
-        border: 2px solid var(--ink);
-        border-radius: 50%;
-        background: #45f08a;
-        content: "";
-      }
-
       .btn--dark {
         background: var(--ink);
         color: #fff;
@@ -826,6 +797,71 @@
         gap: 16px;
       }
 
+      .learn-way__eyebrow {
+        display: flex;
+        width: fit-content;
+        margin-bottom: 12px;
+      }
+
+      .learn-way__copy {
+        max-width: 52ch;
+        margin: 0 0 5px;
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .learn-way__copy:last-child { margin-bottom: 0; }
+
+      .learning-island-card {
+        display: flex;
+        min-width: 0;
+        min-height: 190px;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 18px;
+        border: var(--border);
+        border-radius: 20px;
+        background: #fff;
+        box-shadow: 5px 5px 0 var(--ink);
+        color: var(--ink);
+      }
+
+      .learning-island-card:nth-child(1) { background: #fff3fb; }
+      .learning-island-card:nth-child(2) { background: #fffbea; }
+      .learning-island-card:nth-child(3) { background: #effff9; }
+      .learning-island-card:nth-child(4) { background: #fff0e8; }
+
+      .learning-island-card__icon {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        margin-bottom: 10px;
+        place-items: center;
+        border: 2px solid var(--ink);
+        border-radius: 13px;
+        background: var(--pink);
+        box-shadow: 3px 3px 0 var(--ink);
+        font-size: 22px;
+      }
+
+      .learning-island-card:nth-child(2) .learning-island-card__icon { background: var(--yellow); }
+      .learning-island-card:nth-child(3) .learning-island-card__icon { background: var(--mint); }
+      .learning-island-card:nth-child(4) .learning-island-card__icon { background: #ffad80; }
+      .learning-island-card h3 { margin: 0; font-size: 19px; line-height: 1.2; }
+      .learning-island-card__english { margin: 3px 0 7px; font-size: 11px; font-weight: 900; letter-spacing: .08em; }
+      .learning-island-card p { margin: 0 0 14px; font-size: 13px; font-weight: 600; }
+      .learning-island-card__link {
+        margin-top: auto;
+        font-size: 13px;
+        font-weight: 900;
+        text-decoration: underline;
+      }
+      .learning-island-card__link:hover { text-decoration: none; }
+      .learning-island-card__link:focus-visible {
+        outline: 4px solid var(--blue);
+        outline-offset: 3px;
+      }
+
       .lesson-card {
         border: var(--border);
         border-radius: var(--radius);
@@ -1115,13 +1151,13 @@
         .menu-toggle { display: none; }
         .hero { background: linear-gradient(90deg, #ffb3f1 0 55%, #ffd200 55% 100%); }
         .hero__grid {
-          width: min(1280px, calc(100% - 40px));
-          grid-template-columns: minmax(0, calc(55vw - max(20px, 50vw - 640px))) minmax(0, 1fr);
+          width: min(1180px, calc(100% - 40px));
+          grid-template-columns: minmax(0, calc(55vw - max(20px, 50vw - 590px))) minmax(0, 1fr);
           padding: 56px 0;
           align-items: start;
         }
         .hero__title { font-size: clamp(31.5px, 3vw, 49.5px); }
-        .learning-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .learning-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -1195,7 +1231,6 @@
               loading="eager"
               allow="fullscreen"
             ></iframe>
-            <p class="hero-islands-help">左ドラッグ：左右回転・上下俯仰　右ドラッグ：位置移動　ホイール：拡大・縮小</p>
           </div>
 
           <div class="hero__right">
@@ -1220,60 +1255,45 @@
         <div class="container">
           <div class="section__head" id="records">
             <div>
-              <span class="tag tag--pink">LEARN YOUR WAY</span>
+              <span class="tag tag--pink learn-way__eyebrow">LEARN YOUR WAY</span>
               <h2>遊んで、話して、身につけよう</h2>
-              <p class="hero__lead">遊んで・話して・続けられる、新しい華語学習体験！</p>
-              <p class="hero__support">VTuberの華語娘チャイ語娘と、ゲームや会話を通して台湾華語を楽しく学ぼう。</p>
+              <p class="learn-way__copy">チャイ語娘と一緒に、今日の「できた！」を増やそう。</p>
+              <p class="learn-way__copy">ゲームや会話を通して、台湾華語を楽しく学ぼう！</p>
             </div>
-            <p>チャイ語娘と一緒に、今日の「できた！」を増やそう。</p>
           </div>
 
           <div class="learning-grid">
-            <a
-              class="feature-tile feature-tile--link feature-tile--tone"
-              id="tone-game"
-              href="./tonegame_pc.html"
-              aria-label="声調ゲームをプレイ"
-            >
-              <span class="feature-tile__icon" aria-hidden="true">🎧</span>
-              <span class="feature-tile__copy">
-                <span class="feature-tile__eyebrow">TONE GAME</span>
-                <span class="feature-tile__title">声調ゲーム</span>
-                <span class="feature-tile__description">聞いて選んで、正しい声調をマスター！</span>
-              </span>
-              <span class="feature-tile__arrow" aria-hidden="true">→</span>
-            </a>
+            <article class="learning-island-card">
+              <span class="learning-island-card__icon" aria-hidden="true">♪</span>
+              <h3>聲調島</h3>
+              <span class="learning-island-card__english">TONE ISLAND</span>
+              <p>聽辨四聲、跟讀發音，挑戰聲調遊戲。</p>
+              <a class="learning-island-card__link" href="./islands-five.html?island=tone#islandDetail">查看島嶼內容 →</a>
+            </article>
 
-            <a
-              class="feature-tile feature-tile--link feature-tile--pinyin"
-              id="pinyin-game"
-              href="./pinyingame_pc.html"
-              aria-label="ピンインゲームをプレイ"
-            >
-              <span class="feature-tile__icon" aria-hidden="true">🔤</span>
-              <span class="feature-tile__copy">
-                <span class="feature-tile__eyebrow">PINYIN GAME</span>
-                <span class="feature-tile__title">ピンインゲーム</span>
-                <span class="feature-tile__description">漢字を見て、ピンインを入力しよう！</span>
-              </span>
-              <span class="feature-tile__arrow" aria-hidden="true">→</span>
-            </a>
+            <article class="learning-island-card">
+              <span class="learning-island-card__icon" aria-hidden="true">🔤</span>
+              <h3>拼音島</h3>
+              <span class="learning-island-card__english">PINYIN ISLAND</span>
+              <p>從聲母、韻母開始，練習看字拼讀。</p>
+              <a class="learning-island-card__link" href="./islands-five.html?island=pinyin#islandDetail">查看島嶼內容 →</a>
+            </article>
 
-            <a
-              class="feature-tile feature-tile--link feature-tile--chat"
-              id="chat"
-              href="https://aituber-kit-dhzs.vercel.app/"
-              target="_blank"
-              rel="noopener"
-            >
-              <span class="feature-tile__icon" aria-hidden="true">💬</span>
-              <span class="feature-tile__copy">
-                <span class="feature-tile__eyebrow">AI CHAT</span>
-                <span class="feature-tile__title">AIチャット</span>
-                <span class="feature-tile__description">チャイ語娘と中国語で話そう！</span>
-              </span>
-              <span class="feature-tile__arrow" aria-hidden="true">↗</span>
-            </a>
+            <article class="learning-island-card">
+              <span class="learning-island-card__icon" aria-hidden="true">💬</span>
+              <h3>對話島</h3>
+              <span class="learning-island-card__english">CHAT ISLAND</span>
+              <p>和華語娘練習日常中文與口語表達。</p>
+              <a class="learning-island-card__link" href="./islands-five.html?island=conversation#islandDetail">查看島嶼內容 →</a>
+            </article>
+
+            <article class="learning-island-card">
+              <span class="learning-island-card__icon" aria-hidden="true">🧋</span>
+              <h3>情境島</h3>
+              <span class="learning-island-card__english">SCENARIO ISLAND</span>
+              <p>夜市點餐、購物、問路與搭車情境。</p>
+              <a class="learning-island-card__link" href="./islands-five.html?island=situational#islandDetail">查看島嶼內容 →</a>
+            </article>
           </div>
         </div>
       </section>
@@ -1354,6 +1374,26 @@
       const heroTitle = document.querySelector(".hero__title");
       const heroScene = heroArt?.querySelector(".hero-art__scene");
 
+      function positionHeroControlsHint() {
+        if (!heroIslandFrame) return;
+        try {
+          const frameWindow = heroIslandFrame.contentWindow;
+          const controlsHint = heroIslandFrame.contentDocument?.querySelector(".world-controls-hint");
+          const controlsButton = heroIslandFrame.contentDocument?.querySelector(".world-controls-hint__button");
+          if (!controlsHint || !controlsButton || !frameWindow) return;
+          const compact = frameWindow.matchMedia("(max-width: 760px)").matches;
+          controlsHint.style.position = "static";
+          controlsHint.style.transform = "none";
+          controlsButton.style.position = "absolute";
+          controlsButton.style.left = "auto";
+          controlsButton.style.right = compact ? "10px" : "14px";
+          controlsButton.style.bottom = compact ? "45px" : "49px";
+          controlsButton.style.zIndex = "7";
+        } catch {
+          // The island frame is same-origin; wait for its load event if it is not ready yet.
+        }
+      }
+
       function syncHeroIslandHeight() {
         if (!heroArt || !heroIslandFrame || !heroTitle) return;
         if (window.matchMedia("(min-width: 981px)").matches) {
@@ -1374,7 +1414,12 @@
 
       if (heroArt && heroIslandFrame) {
         syncHeroIslandHeight();
-        window.addEventListener("resize", syncHeroIslandHeight);
+        positionHeroControlsHint();
+        heroIslandFrame.addEventListener("load", positionHeroControlsHint);
+        window.addEventListener("resize", () => {
+          syncHeroIslandHeight();
+          positionHeroControlsHint();
+        });
         heroArtResizeObserver?.observe(heroArt);
         heroArtResizeObserver?.observe(heroTitle);
       }

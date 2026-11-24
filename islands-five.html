@@ -188,34 +188,66 @@
       .world-frame::before { top: 14%; left: 8%; width: 102px; height: 28px; transform: rotate(-12deg); }
       .world-frame::after { right: 7%; bottom: 18%; width: 136px; height: 33px; transform: rotate(10deg); }
 
-      .world-frame__topline {
-        position: relative;
-        z-index: 2;
-        display: flex;
-        width: fit-content;
-        max-width: 100%;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        margin: 14px auto 0;
-        padding: 8px 12px;
-        border: 2px solid var(--ink);
-        border-radius: 999px;
-        background: #fff;
-        box-shadow: 3px 3px 0 var(--ink);
-        font-size: 12px;
-        font-weight: 900;
-        letter-spacing: .08em;
-        pointer-events: none;
+      .world-controls-hint {
+        position: absolute;
+        bottom: 29px;
+        left: 50%;
+        z-index: 7;
+        transform: translateX(-50%);
       }
 
-      .world-frame__topline::before {
-        width: 9px;
-        height: 9px;
+      .world-controls-hint__button {
+        display: flex;
+        max-width: min(460px, calc(100vw - 32px));
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+        padding: 8px 12px;
         border: 2px solid var(--ink);
-        border-radius: 50%;
-        background: #45f08a;
-        content: "";
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 3px 3px 0 var(--ink);
+        color: var(--ink);
+        font: inherit;
+        font-size: 12px;
+        font-weight: 900;
+        line-height: 1.4;
+        text-align: left;
+        cursor: pointer;
+        transition: max-width 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+      }
+
+      .world-controls-hint__button:hover,
+      .world-controls-hint__button:focus-visible,
+      .world-controls-hint__button[aria-expanded="true"] {
+        box-shadow: 5px 5px 0 var(--ink);
+        transform: translate(-1px, -1px);
+      }
+
+      .world-controls-hint__label { white-space: nowrap; }
+      .world-controls-hint__details { display: none; max-width: 100%; font-weight: 700; }
+      .world-controls-hint__button:hover .world-controls-hint__details,
+      .world-controls-hint__button:focus-visible .world-controls-hint__details,
+      .world-controls-hint__button[aria-expanded="true"] .world-controls-hint__details { display: block; }
+      .world-controls-hint__button:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+
+      .island-hover-tooltip {
+        position: fixed;
+        z-index: 1000;
+        width: max-content;
+        max-width: min(280px, calc(100vw - 24px));
+        max-height: min(45vh, 240px);
+        overflow: auto;
+        padding: 10px 12px;
+        border: 2px solid var(--ink);
+        border-radius: 12px;
+        background: var(--yellow);
+        box-shadow: 3px 3px 0 var(--ink);
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1.4;
+        text-align: left;
+        pointer-events: auto;
       }
 
       #islandWorld {
@@ -263,43 +295,9 @@
         transform: translate(-50%, calc(-100% - 4px));
       }
 
-      .island-hotspot__title { font-size: 16px; font-weight: 900; white-space: nowrap; }
+      .island-hotspot__title { font-size: 20px; font-weight: 900; white-space: nowrap; }
       .island-hotspot__subtitle { font-size: 10px; font-weight: 800; opacity: .76; }
-      .island-hotspot__detail {
-        position: absolute;
-        bottom: calc(100% + 12px);
-        left: 50%;
-        display: none;
-        width: max-content;
-        max-width: min(250px, 70vw);
-        padding: 10px 12px;
-        border: 2px solid var(--ink);
-        border-radius: 12px;
-        background: var(--yellow);
-        box-shadow: 3px 3px 0 var(--ink);
-        font-size: 12px;
-        font-weight: 800;
-        line-height: 1.4;
-        text-align: left;
-        white-space: normal;
-        transform: translateX(-50%);
-      }
-
-      .island-hotspot__detail::after {
-        position: absolute;
-        bottom: -8px;
-        left: calc(50% - 6px);
-        width: 12px;
-        height: 12px;
-        border-right: 2px solid var(--ink);
-        border-bottom: 2px solid var(--ink);
-        background: var(--yellow);
-        content: "";
-        transform: rotate(45deg);
-      }
-
-      .island-hotspot:hover .island-hotspot__detail,
-      .island-hotspot:focus-visible .island-hotspot__detail { display: block; }
+      .island-hotspot__detail { display: none; }
 
       .world-message {
         position: absolute;
@@ -511,7 +509,8 @@
         .intro__copy { max-width: 36ch; }
         .world-section { padding-bottom: 44px; }
         .world-frame { min-height: 590px; border-radius: 22px; }
-        .world-frame__topline { margin-top: 12px; padding: 6px 9px; font-size: 10px; }
+        .world-controls-hint { right: auto; bottom: 25px; left: 50%; }
+        .world-controls-hint__button { max-width: calc(100vw - 48px); padding: 7px 9px; font-size: 11px; }
         .island-hotspots { display: none; }
         .island-list { display: grid; grid-template-columns: 1fr; gap: 12px; }
         .island-card { min-height: 0; display: grid; grid-template-columns: 48px 1fr auto; align-items: center; column-gap: 12px; padding: 13px; }
@@ -579,10 +578,6 @@
 
       html[data-embed="hero"] .world-frame::before,
       html[data-embed="hero"] .world-frame::after { display: none; }
-
-      html[data-embed="hero"] .world-frame__topline {
-        display: none;
-      }
 
       html[data-embed="hero"] .island-detail {
         position: absolute;
@@ -689,8 +684,13 @@
           </nav>
           <div class="panda-speech" id="pandaSpeech" role="status" aria-live="polite" hidden></div>
           <p class="world-message" id="worldMessage" role="status">3Dシーンを表示できませんでした。下の島カードから学習先を選べます。</p>
+          <div class="world-controls-hint">
+            <button class="world-controls-hint__button" id="worldControlsHint" type="button" aria-expanded="false" aria-label="操作説明を表示">
+              <span class="world-controls-hint__label">操作說明</span>
+              <span class="world-controls-hint__details">左ドラッグ：左右回転・上下俯仰　右ドラッグ：位置移動　ホイール：拡大・縮小</span>
+            </button>
+          </div>
         </div>
-        <div class="world-frame__topline">左ドラッグ：左右回転・上下俯仰　右ドラッグ：位置移動　ホイール：拡大・縮小</div>
 
         <section class="island-detail" id="islandDetail" aria-live="polite" hidden>
           <div class="island-detail__content">
@@ -707,7 +707,7 @@
 
         <div class="island-list" aria-label="島と學習內容">
           <article class="island-card">
-            <span class="island-card__icon" aria-hidden="true">🎧</span>
+            <span class="island-card__icon" aria-hidden="true">♪</span>
             <h2>聲調島</h2>
             <span class="island-card__english">TONE ISLAND</span>
             <p>聽辨四聲、跟讀發音，挑戰聲調遊戲。</p>
@@ -725,15 +725,15 @@
           <article class="island-card">
             <span class="island-card__icon" aria-hidden="true">💬</span>
             <h2>對話島</h2>
-            <span class="island-card__english">CONVERSATION ISLAND</span>
-            <p>和 AI 導師練習日常中文與口語表達。</p>
+            <span class="island-card__english">CHAT ISLAND</span>
+            <p>和華語娘練習日常中文與口語表達。</p>
             <button class="island-card__select" type="button" data-open-island="conversation">查看島嶼內容 →</button>
             <a class="island-card__fallback-link" href="https://aituber-kit-dhzs.vercel.app/" target="_blank" rel="noopener noreferrer">開始 AI 對話 ↗</a>
           </article>
           <article class="island-card">
             <span class="island-card__icon" aria-hidden="true">🧋</span>
             <h2>情境島</h2>
-            <span class="island-card__english">SITUATIONAL ISLAND</span>
+            <span class="island-card__english">SCENARIO ISLAND</span>
             <p>夜市點餐、購物、問路與搭車情境。</p>
             <button class="island-card__select" type="button" data-open-island="situational">查看島嶼內容 →</button>
             <a class="island-card__fallback-link" href="https://aituber-kit-dhzs.vercel.app/" target="_blank" rel="noopener noreferrer">開始情境練習 ↗</a>
@@ -816,7 +816,7 @@
         {
           id: "situational",
           name: "情境島 · Scene",
-          english: "SCENE ISLAND",
+          english: "SCENARIO ISLAND",
           description: "夜市やお店を巡り、注文・買い物・道案内・乗車などの生活場面に挑戦しましょう。",
           topics: ["夜市で注文", "買い物・道案内", "乗車・日常会話"],
           position: [-1.9, -2.25, 4.0],
@@ -2102,6 +2102,76 @@
           updateHotspotPositions();
         }, { passive: false });
 
+        const islandHoverTooltip = document.createElement("div");
+        islandHoverTooltip.className = "island-hover-tooltip";
+        islandHoverTooltip.id = "islandHoverTooltip";
+        islandHoverTooltip.setAttribute("role", "tooltip");
+        islandHoverTooltip.hidden = true;
+        document.body.append(islandHoverTooltip);
+
+        let activeTooltipButton = null;
+        let tooltipHideTimer = 0;
+
+        function positionIslandHoverTooltip() {
+          if (islandHoverTooltip.hidden || !activeTooltipButton) return;
+          const anchor = activeTooltipButton.getBoundingClientRect();
+          islandHoverTooltip.style.visibility = "hidden";
+          islandHoverTooltip.style.left = "0px";
+          islandHoverTooltip.style.top = "0px";
+          const tooltipBounds = islandHoverTooltip.getBoundingClientRect();
+          const edge = 10;
+          const gap = 10;
+          const maxLeft = Math.max(edge, window.innerWidth - tooltipBounds.width - edge);
+          const left = THREE.MathUtils.clamp(
+            anchor.left + anchor.width / 2 - tooltipBounds.width / 2,
+            edge,
+            maxLeft,
+          );
+          const above = anchor.top - tooltipBounds.height - gap;
+          const below = anchor.bottom + gap;
+          const maxTop = Math.max(edge, window.innerHeight - tooltipBounds.height - edge);
+          const top = above >= edge ? above : THREE.MathUtils.clamp(below, edge, maxTop);
+          islandHoverTooltip.style.left = `${left}px`;
+          islandHoverTooltip.style.top = `${top}px`;
+          islandHoverTooltip.style.visibility = "visible";
+        }
+
+        function showIslandHoverTooltip(button) {
+          const detail = button.querySelector(".island-hotspot__detail");
+          if (!detail) return;
+          window.clearTimeout(tooltipHideTimer);
+          activeTooltipButton = button;
+          button.setAttribute("aria-describedby", islandHoverTooltip.id);
+          islandHoverTooltip.textContent = detail.textContent.trim();
+          islandHoverTooltip.style.visibility = "hidden";
+          islandHoverTooltip.hidden = false;
+          requestAnimationFrame(positionIslandHoverTooltip);
+        }
+
+        function hideIslandHoverTooltip(button = activeTooltipButton) {
+          window.clearTimeout(tooltipHideTimer);
+          if (!button || button !== activeTooltipButton) return;
+          button.removeAttribute("aria-describedby");
+          activeTooltipButton = null;
+          islandHoverTooltip.hidden = true;
+          islandHoverTooltip.style.visibility = "";
+        }
+
+        function scheduleIslandHoverTooltipHide(button) {
+          window.clearTimeout(tooltipHideTimer);
+          tooltipHideTimer = window.setTimeout(() => {
+            if (button.matches(":hover, :focus-visible") || islandHoverTooltip.matches(":hover")) return;
+            hideIslandHoverTooltip(button);
+          }, 180);
+        }
+
+        islandHoverTooltip.addEventListener("pointerenter", () => window.clearTimeout(tooltipHideTimer));
+        islandHoverTooltip.addEventListener("pointerleave", () => {
+          if (activeTooltipButton) scheduleIslandHoverTooltipHide(activeTooltipButton);
+        });
+        window.addEventListener("resize", positionIslandHoverTooltip);
+        window.addEventListener("scroll", positionIslandHoverTooltip, true);
+
         function setHoveredIsland(id) {
           for (const [islandId, group] of islandGroups) {
             group.userData.hoverY = islandId === id ? (reduceMotion ? 0 : 0.22) : 0;
@@ -2113,6 +2183,7 @@
         function showIslandDetails(id) {
           const island = islandData.find((item) => item.id === id);
           if (!island) return;
+          hideIslandHoverTooltip();
           document.getElementById("islandDetailEyebrow").textContent = island.english;
           document.getElementById("islandDetailTitle").textContent = island.name;
           document.getElementById("islandDetailCopy").textContent = island.description;
@@ -2266,13 +2337,21 @@
         });
 
         hotspotLayer.querySelectorAll(".island-hotspot").forEach((button) => {
-          button.addEventListener("pointerenter", () => setHoveredIsland(button.dataset.island));
+          button.addEventListener("pointerenter", () => {
+            setHoveredIsland(button.dataset.island);
+            showIslandHoverTooltip(button);
+          });
           button.addEventListener("pointerleave", () => {
             if (!button.classList.contains("is-selected")) setHoveredIsland(null);
+            scheduleIslandHoverTooltipHide(button);
           });
-          button.addEventListener("focus", () => setHoveredIsland(button.dataset.island));
+          button.addEventListener("focus", () => {
+            setHoveredIsland(button.dataset.island);
+            showIslandHoverTooltip(button);
+          });
           button.addEventListener("blur", () => {
             if (!button.classList.contains("is-selected")) setHoveredIsland(null);
+            scheduleIslandHoverTooltipHide(button);
           });
           button.addEventListener("click", () => showIslandDetails(button.dataset.island));
         });
@@ -2284,6 +2363,23 @@
           });
         });
         document.getElementById("islandDetailClose").addEventListener("click", closeIslandDetails);
+
+        const controlsHintButton = document.getElementById("worldControlsHint");
+        controlsHintButton.addEventListener("click", (event) => {
+          if (event.detail !== 0 && window.matchMedia("(hover: hover)").matches) return;
+          const expanded = controlsHintButton.getAttribute("aria-expanded") === "true";
+          controlsHintButton.setAttribute("aria-expanded", String(!expanded));
+          controlsHintButton.setAttribute("aria-label", !expanded ? "操作説明を閉じる" : "操作説明を表示");
+        });
+
+        const requestedIsland = new URLSearchParams(window.location.search).get("island");
+        if (islandData.some((island) => island.id === requestedIsland)) {
+          showIslandDetails(requestedIsland);
+          requestAnimationFrame(() => islandDetail.scrollIntoView({
+            behavior: reduceMotion ? "auto" : "smooth",
+            block: "center",
+          }));
+        }
 
         let animationFrame = 0;
         let visible = false;
