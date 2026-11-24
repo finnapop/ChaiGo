@@ -49,12 +49,6 @@
           <a href="https://scheduler.zoom.us/22-terf3f/chaigo" target="_blank" rel="noopener noreferrer">レッスン予約</a>
         </nav>
 
-        <div class="topbar__account" role="group" aria-label="アカウント">
-          <div class="topbar__user" role="status" aria-label="テストプレイヤー ChaiGo User">
-            <span class="avatar-mark" aria-hidden="true"><img src="./avatar.png" alt="" /></span>
-            <span class="user-name">ChaiGo User</span>
-          </div>
-        </div>
       </div>
     </header>
 
@@ -66,11 +60,8 @@
               <p class="section__eyebrow">READY?</p>
               <h1>ピンインチャレンジ</h1>
             </div>
-            <p>漢字や言葉を見て、正しいピンインと声調を入力してください。</p>
           </div>
-          <p class="record-status" id="record-status" role="status" aria-live="polite">
-            LV1 は全 12 題、LV2 と LV3 はそれぞれ全 4 題から毎回ランダムに 3 題出題します。回答は数字または声調記号で入力でき、結果は学習記録に保存されます。
-          </p>
+          <p class="record-status" id="record-status" role="status" aria-live="polite" hidden></p>
 
           <div class="setup-grid">
             <div class="setup-cell setup-cell--player">
@@ -78,17 +69,11 @@
                 <div class="panel__heading">
                   <span class="panel__icon" aria-hidden="true">🎮</span>
                   <div>
-                    <p class="panel__eyebrow">PLAYER</p>
-                    <h2 id="setup-title">プレイヤー</h2>
+                    <p class="panel__eyebrow">LEVEL</p>
+                    <h3 id="setup-title">レベルを選ぶ</h3>
                   </div>
                 </div>
-                <div class="current-player">
-                  <span class="avatar-mark" aria-hidden="true"><img src="./avatar.png" alt="" /></span>
-                  <span><strong>ChaiGo User</strong><small>テストプレイヤー</small></span>
-                </div>
                 <p class="field-note">1ラウンドは 3 問。正解すると 1 点です。</p>
-
-                <h3 class="level-heading">レベルを選ぶ</h3>
                 <div class="level-list" id="level-list" aria-label="レベル選択">
                   <button class="level-card is-selected" type="button" data-level="1" aria-pressed="true">
                     <span class="level-card__number">LV1</span>

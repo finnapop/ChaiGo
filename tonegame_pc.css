@@ -273,42 +273,6 @@ img { display: block; max-width: 100%; }
 .footer__inner p { margin: 0; font-size: 12px; font-weight: 700; opacity: .75; }
 .footer-brand img { width: auto; max-width: 155px; height: 38px; object-fit: contain; }
 
-/* Keep the companion away from the game controls on the tone-game page. */
-.tonegame-page .floating-vtuber {
-  right: auto;
-  left: calc(env(safe-area-inset-left, 0px) + clamp(12px, 2vw, 28px));
-  flex-direction: row-reverse;
-}
-
-.tonegame-page .floating-vtuber__bubble::before,
-.tonegame-page .floating-vtuber__bubble::after {
-  right: auto;
-  left: -14px;
-  transform: scaleX(-1);
-}
-
-.tonegame-page .floating-vtuber__bubble::after { left: -9px; }
-
-.tonegame-page .floating-vtuber__character img {
-  animation-name: tonegame-vtuber-bob-mirrored;
-}
-
-@keyframes tonegame-vtuber-bob-mirrored {
-  0%, 100% { transform: scaleX(-1) translateY(0); }
-  50% { transform: scaleX(-1) translateY(-4px); }
-}
-
-@media (max-width: 680px) {
-  .tonegame-page .floating-vtuber {
-    right: auto;
-    left: calc(env(safe-area-inset-left, 0px) + 10px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tonegame-page .floating-vtuber__character img { animation: none; }
-}
-
 @media (max-width: 900px) {
   .hero { background: #ffb3f1; }
   .setup-grid { grid-template-columns: 1fr; width: 100vw; margin-inline: calc(50% - 50vw); }

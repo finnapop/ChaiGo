@@ -4,7 +4,10 @@ if (!learningService) {
   const startButton = document.getElementById("start-game");
   if (startButton) startButton.disabled = true;
   const status = document.getElementById("record-status");
-  if (status) status.textContent = "学習記録のスクリプトを読み込めませんでした。ページを再読み込みしてください。";
+  if (status) {
+    status.hidden = false;
+    status.textContent = "学習記録のスクリプトを読み込めませんでした。ページを再読み込みしてください。";
+  }
   throw new Error("Pinyin learning service failed to load.");
 }
 
@@ -528,7 +531,7 @@ async function showResult() {
   const accuracy = Math.round((state.score / totalQuestions) * 100);
   elements["progress-track"].setAttribute("aria-valuenow", String(totalQuestions));
   elements["progress-fill"].style.width = "100%";
-  elements["result-greeting"].textContent = "ChaiGo User さん、おつかれさま！";
+  elements["result-greeting"].textContent = "おつかれさま！";
   elements["result-score"].innerHTML = `${state.score} <small>/ ${totalQuestions}</small>`;
   elements["result-accuracy"].innerHTML = `${accuracy}<small>%</small>`;
   elements["result-correct"].innerHTML = `${state.score} <small>/ ${totalQuestions}</small>`;

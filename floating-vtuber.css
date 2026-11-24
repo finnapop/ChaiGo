@@ -1,13 +1,14 @@
 .floating-vtuber {
   --fvt-ink: #111;
-  --fvt-pink: #fff1fa;
+  --fvt-pink: rgb(255 241 250 / 50%);
   --fvt-yellow: #ffd200;
   position: fixed;
   z-index: 30;
   right: calc(env(safe-area-inset-right, 0px) + clamp(12px, 2vw, 28px));
   bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(12px, 2vh, 24px));
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
   gap: 0;
   width: max-content;
   max-width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 24px);
@@ -19,7 +20,7 @@
   position: relative;
   flex: 0 1 auto;
   width: clamp(175px, 18vw, 230px);
-  margin-top: 8px;
+  margin: 0 0 12px;
   pointer-events: auto;
 }
 
@@ -47,7 +48,7 @@
 }
 
 .floating-vtuber__bubble:hover {
-  background: #fff;
+  background: rgb(255 255 255 / 50%);
   transform: translate(-1px, -1px);
   text-decoration: none;
 }
@@ -60,11 +61,13 @@
 .floating-vtuber__bubble::before,
 .floating-vtuber__bubble::after {
   position: absolute;
-  top: 28px;
-  right: -14px;
-  width: 15px;
-  height: 18px;
-  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  top: calc(100% + 1px);
+  right: auto;
+  left: 50%;
+  width: 20px;
+  height: 14px;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform: translateX(-50%);
   content: "";
 }
 
@@ -73,14 +76,14 @@
 }
 
 .floating-vtuber__bubble::after {
-  right: -9px;
+  top: calc(100% + 3px);
   width: 12px;
-  height: 13px;
-  background: var(--fvt-pink);
+  height: 9px;
+  background: var(--fvt-ink);
 }
 
 .floating-vtuber__bubble:hover::after {
-  background: #fff;
+  background: var(--fvt-ink);
 }
 
 .floating-vtuber__message {
@@ -126,11 +129,11 @@
 .floating-vtuber__character {
   display: block;
   flex: 0 0 auto;
-  height: clamp(240px, 24vw, 300px);
+  height: clamp(144px, 14.4vw, 180px);
   width: auto;
-  max-width: 40vw;
-  align-self: flex-end;
-  margin-left: clamp(-3px, calc(0.4vw - 3px), 5px);
+  max-width: 24vw;
+  align-self: center;
+  margin-left: 0;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -185,7 +188,8 @@
   }
 
   .floating-vtuber__character {
-    height: clamp(180px, 26vw, 230px);
+    height: clamp(108px, 15.6vw, 138px);
+    max-width: 24vw;
   }
 }
 
@@ -198,7 +202,7 @@
 
   .floating-vtuber__bubble-wrap {
     width: clamp(118px, 42vw, 160px);
-    margin-top: 5px;
+    margin: 0 0 10px;
   }
 
   .floating-vtuber__bubble {
@@ -210,18 +214,8 @@
     font-size: clamp(12px, 3.6vw, 14px);
   }
 
-  .floating-vtuber__bubble::before,
   .floating-vtuber__bubble::after {
-    top: 22px;
-    right: -11px;
-    width: 12px;
-    height: 15px;
-  }
-
-  .floating-vtuber__bubble::after {
-    right: -7px;
-    width: 10px;
-    height: 11px;
+    top: calc(100% + 2.5px);
   }
 
   .floating-vtuber__close {
@@ -233,14 +227,14 @@
   }
 
   .floating-vtuber__character {
-    height: clamp(82px, 25vw, 108px);
-    max-width: 36vw;
+    height: clamp(49px, 15vw, 65px);
+    max-width: 21.6vw;
   }
 }
 
 @media (max-height: 520px) and (max-width: 900px) {
   .floating-vtuber__character {
-    height: min(23vh, 116px);
+    height: min(13.8vh, 70px);
   }
 }
 

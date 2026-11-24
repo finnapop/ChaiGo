@@ -742,9 +742,9 @@
       /* About + Contact */
       .about {
         display: grid;
-        grid-template-columns: 1.1fr 0.9fr;
+        grid-template-columns: 1fr;
         gap: 16px;
-        align-items: start;
+        align-items: stretch;
       }
 
       .about__box {
@@ -758,6 +758,18 @@
       .about__lead {
         font-size: 18px;
         font-weight: 800;
+      }
+
+      .about__line-button {
+        display: inline-flex;
+        width: fit-content;
+        margin-top: 4px;
+      }
+
+      .about__line-button img {
+        display: block;
+        width: auto;
+        height: 36px;
       }
 
       .contact {
@@ -775,6 +787,27 @@
       .contact p {
         margin: 0 0 12px;
         font-weight: 650;
+      }
+
+      .contact--line {
+        display: grid;
+        justify-items: center;
+        align-content: center;
+        gap: 10px;
+        text-align: center;
+      }
+
+      .contact--line h3,
+      .contact--line p { margin: 0; }
+
+      .contact__qr {
+        display: block;
+        width: min(100%, 176px);
+        height: auto;
+        border: 2px solid var(--ink);
+        border-radius: 12px;
+        background: #fff;
+        padding: 7px;
       }
 
       .contact__row {
@@ -1129,6 +1162,7 @@
       @media (min-width: 768px) {
         .section__head { flex-direction: row; align-items: flex-end; justify-content: space-between; }
         .learning-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .about { grid-template-columns: minmax(0, 1.1fr) minmax(240px, 0.9fr); }
       }
 
       @media (max-width: 980px) {
@@ -1300,12 +1334,23 @@
 
       <section id="about" class="section">
         <div class="container">
-          <div class="about__box">
-            <div class="project__top"><span class="badge">ABOUT CHAIGO!</span></div>
-            <h2>チャイ語娘 ChaiGo! とは？</h2>
-            <p class="about__lead">
-              VTuberの「チャイ語娘（ChaiGo!）」と一緒に、ゲームや会話を通して楽しく中国語を学べるプラットフォームです。
-            </p>
+          <div class="about">
+            <div class="about__box">
+              <div class="project__top"><span class="badge">ABOUT CHAIGO! LET'S BE FRIENDS!</span></div>
+              <h2>チャイ語娘とLINEでつながろう！</h2>
+              <p class="about__lead">
+                LINEでチャイ語娘と友だちになって、いつでも気軽に<strong>中国語</strong>を楽しもう！ゲームや会話を通して、毎日の「できた！」を増やそう！
+              </p>
+              <a class="about__line-button" href="https://lin.ee/6ZJv5Cn" target="_blank" rel="noopener noreferrer" aria-label="LINEでチャイ語娘を友だち追加">
+                <img src="https://scdn.line-apps.com/n/line_add_friends/btn/ja.png" alt="友だち追加" height="36" border="0" loading="lazy" />
+              </a>
+            </div>
+            <aside class="contact contact--line">
+              <h3>QRコードからも友だち追加</h3>
+              <a href="https://lin.ee/6ZJv5Cn" target="_blank" rel="noopener noreferrer" aria-label="LINEでチャイ語娘を友だち追加">
+                <img class="contact__qr" src="https://qr-official.line.me/gs/M_508bigao_GW.png?oat_content=qr" alt="チャイ語娘公式LINEの友だち追加QRコード" loading="lazy" />
+              </a>
+            </aside>
           </div>
         </div>
       </section>
