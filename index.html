@@ -748,6 +748,10 @@
       }
 
       .about__box {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(176px, 220px);
+        align-items: center;
+        gap: clamp(20px, 4vw, 48px);
         border: var(--border);
         border-radius: var(--radius);
         background: #fff;
@@ -763,8 +767,9 @@
       .about__line-button {
         display: inline-flex;
         width: fit-content;
-        margin-top: 4px;
       }
+
+      .about__copy .project__top { flex-wrap: wrap; }
 
       .about__line-button img {
         display: block;
@@ -789,7 +794,7 @@
         font-weight: 650;
       }
 
-      .contact--line {
+      .about__qr-panel {
         display: grid;
         justify-items: center;
         align-content: center;
@@ -797,10 +802,10 @@
         text-align: center;
       }
 
-      .contact--line h3,
-      .contact--line p { margin: 0; }
+      .about__qr-panel h3,
+      .about__qr-panel p { margin: 0; }
 
-      .contact__qr {
+      .about__qr {
         display: block;
         width: min(100%, 176px);
         height: auto;
@@ -1162,7 +1167,10 @@
       @media (min-width: 768px) {
         .section__head { flex-direction: row; align-items: flex-end; justify-content: space-between; }
         .learning-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .about { grid-template-columns: minmax(0, 1.1fr) minmax(240px, 0.9fr); }
+      }
+
+      @media (max-width: 767px) {
+        .about__box { grid-template-columns: 1fr; }
       }
 
       @media (max-width: 980px) {
@@ -1336,21 +1344,24 @@
         <div class="container">
           <div class="about">
             <div class="about__box">
-              <div class="project__top"><span class="badge">ABOUT CHAIGO! LET'S BE FRIENDS!</span></div>
-              <h2>チャイ語娘とLINEでつながろう！</h2>
-              <p class="about__lead">
-                LINEでチャイ語娘と友だちになって、いつでも気軽に<strong>中国語</strong>を楽しもう！ゲームや会話を通して、毎日の「できた！」を増やそう！
-              </p>
-              <a class="about__line-button" href="https://lin.ee/6ZJv5Cn" target="_blank" rel="noopener noreferrer" aria-label="LINEでチャイ語娘を友だち追加">
-                <img src="https://scdn.line-apps.com/n/line_add_friends/btn/ja.png" alt="友だち追加" height="36" border="0" loading="lazy" />
-              </a>
+              <div class="about__copy">
+                <div class="project__top">
+                  <span class="badge">LET'S BE FRIENDS!</span>
+                  <a class="about__line-button" href="https://lin.ee/6ZJv5Cn" target="_blank" rel="noopener noreferrer" aria-label="LINEでチャイ語娘を友だち追加">
+                    <img src="https://scdn.line-apps.com/n/line_add_friends/btn/ja.png" alt="友だち追加" height="36" border="0" loading="lazy" />
+                  </a>
+                </div>
+                <h2>チャイ語娘とLINEでつながろう！</h2>
+                <p class="about__lead">
+                  LINEでチャイ語娘と友だちになって、いつでも気軽に<strong>中国語</strong>を楽しもう！ゲームや会話を通して、毎日の「できた！」を増やそう！
+                </p>
+              </div>
+              <aside class="about__qr-panel">
+                <a href="https://lin.ee/6ZJv5Cn" target="_blank" rel="noopener noreferrer" aria-label="LINEでチャイ語娘を友だち追加">
+                  <img class="about__qr" src="https://qr-official.line.me/gs/M_508bigao_GW.png?oat_content=qr" alt="チャイ語娘公式LINEの友だち追加QRコード" loading="lazy" />
+                </a>
+              </aside>
             </div>
-            <aside class="contact contact--line">
-              <h3>QRコードからも友だち追加</h3>
-              <a href="https://lin.ee/6ZJv5Cn" target="_blank" rel="noopener noreferrer" aria-label="LINEでチャイ語娘を友だち追加">
-                <img class="contact__qr" src="https://qr-official.line.me/gs/M_508bigao_GW.png?oat_content=qr" alt="チャイ語娘公式LINEの友だち追加QRコード" loading="lazy" />
-              </a>
-            </aside>
           </div>
         </div>
       </section>
